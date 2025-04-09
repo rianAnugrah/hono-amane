@@ -17,6 +17,8 @@ function PageShell({ children, pageContext }: { children: React.ReactNode; pageC
             <Logo />
             <Link href="/">Welcome</Link>
             <Link href="/about">About</Link>
+            <Link href="/asset">Asset</Link>
+            <a href="/login">Login</a>
             <Link href="/star-wars">Data Fetching</Link>
           </Sidebar>
           <Content>{children}</Content>

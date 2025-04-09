@@ -72,81 +72,93 @@ export default function AssetCreatePage() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Create New Asset</h1>
+      <h1 className="text-4xl font-bold mb-8">Create New Asset</h1>
       
       {message && (
-        <div className={`mb-4 p-2 ${message.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+        <div className={`alert mb-4 ${message.includes('Error') ? 'alert-error' : 'alert-success'}`}>
           {message}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block">Project Code</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Project Code</span>
+          </label>
           <input
             type="text"
             name="projectCode"
             value={formData.projectCode}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
             required
           />
         </div>
 
-        <div>
-          <label className="block">Asset No</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Asset No</span>
+          </label>
           <input
             type="text"
             name="assetNo"
             value={formData.assetNo}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
             required
           />
         </div>
 
-        <div>
-          <label className="block">Line No</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Line No</span>
+          </label>
           <input
             type="text"
             name="lineNo"
             value={formData.lineNo}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
             required
           />
         </div>
 
-        <div>
-          <label className="block">Asset Name</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Asset Name</span>
+          </label>
           <input
             type="text"
             name="assetName"
             value={formData.assetName}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
             required
           />
         </div>
 
-        <div>
-          <label className="block">Location Description</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Location Description</span>
+          </label>
           <input
             type="text"
             name="locationDesc"
             value={formData.locationDesc}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
           />
         </div>
 
-        <div>
-          <label className="block">Condition</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Condition</span>
+          </label>
           <select
             name="condition"
             value={formData.condition}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="select select-bordered w-full"
           >
             <option value="Good">Good</option>
             <option value="Fair">Fair</option>
@@ -154,109 +166,127 @@ export default function AssetCreatePage() {
           </select>
         </div>
 
-        <div>
-          <label className="block">PIS Date</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">PIS Date</span>
+          </label>
           <input
             type="datetime-local"
             name="pisDate"
             value={formData.pisDate.slice(0, 16)}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
           />
         </div>
 
-        <div>
-          <label className="block">Transaction Date</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Transaction Date</span>
+          </label>
           <input
             type="datetime-local"
             name="transDate"
             value={formData.transDate.slice(0, 16)}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
           />
         </div>
 
-        <div>
-          <label className="block">Category Code</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Category Code</span>
+          </label>
           <input
             type="text"
             name="categoryCode"
             value={formData.categoryCode}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
             required
           />
         </div>
 
-        <div>
-          <label className="block">Adjusted Depreciation</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Adjusted Depreciation</span>
+          </label>
           <input
             type="number"
             name="adjustedDepre"
             value={formData.adjustedDepre}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
           />
         </div>
 
-        <div>
-          <label className="block">Acquisition Value (IDR)</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Acquisition Value (IDR)</span>
+          </label>
           <input
             type="number"
             name="acqValueIdr"
             value={formData.acqValueIdr}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
           />
         </div>
 
-        <div>
-          <label className="block">Acquisition Value</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Acquisition Value</span>
+          </label>
           <input
             type="number"
             name="acqValue"
             value={formData.acqValue}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
           />
         </div>
 
-        <div>
-          <label className="block">Accumulated Depreciation</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Accumulated Depreciation</span>
+          </label>
           <input
             type="number"
             name="accumDepre"
             value={formData.accumDepre}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
           />
         </div>
 
-        <div>
-          <label className="block">YTD Depreciation</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">YTD Depreciation</span>
+          </label>
           <input
             type="number"
             name="ytdDepre"
             value={formData.ytdDepre}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
           />
         </div>
 
-        <div>
-          <label className="block">Book Value</label>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Book Value</span>
+          </label>
           <input
             type="number"
             name="bookValue"
             value={formData.bookValue}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="input input-bordered w-full"
           />
         </div>
 
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="btn btn-primary w-full"
         >
           Create Asset
         </button>

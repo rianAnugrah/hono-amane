@@ -1,6 +1,6 @@
 export { Page }
 
-import { useData } from '../../../renderer/useData'
+import { useData } from '../../../../renderer/useData'
 import type { Data } from './+data.shared'
 
 function Page() {

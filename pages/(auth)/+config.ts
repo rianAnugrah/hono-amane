@@ -3,8 +3,8 @@ import vikeReact from "vike-react/config";
 // https://vike.dev/config
 export default {
   // https://vike.dev/clientRouting
-  //extends: vikeReact,
-  clientRouting: true,
+  extends: vikeReact,
+  clientRouting: false,
   // https://vike.dev/meta
   meta: {
     // Define new setting 'title'

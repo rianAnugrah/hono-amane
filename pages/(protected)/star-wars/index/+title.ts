@@ -1,0 +1,1 @@
+export const title = 'Star WARS | My App'
