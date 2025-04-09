@@ -3,6 +3,7 @@ import { serve } from "@hono/node-server"
 import { renderPage } from 'vike/server'
 import { serveStatic } from '@hono/node-server/serve-static'
 import { compress } from 'hono/compress'
+import assetRoutes from './routes/assets'
 
 const isProduction = process.env.NODE_ENV === 'production'
 const port = Number(process.env.PORT) || 3000
@@ -15,6 +16,11 @@ if (isProduction) {
     root: `./dist/client/`,
   }))
 }
+
+// API routes
+app.route('/api/assets', assetRoutes);
+
+
 app.get("*", async (c, next) => {
   const pageContextInit = {
     urlOriginal: c.req.url
