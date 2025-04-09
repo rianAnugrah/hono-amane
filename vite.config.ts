@@ -3,11 +3,13 @@ import vike from 'vike/plugin'
 import devServer from "@hono/vite-dev-server"
 import { UserConfig } from 'vite'
 import fs from 'fs'
+import tailwindcss from '@tailwindcss/vite'
 
 const config: UserConfig = {
   plugins: [
     react(),
     vike(),
+    tailwindcss(),
     devServer({
       entry: "./server/index.ts",
       exclude: [
