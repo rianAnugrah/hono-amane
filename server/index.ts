@@ -4,6 +4,7 @@ import { renderPage } from 'vike/server'
 import { serveStatic } from '@hono/node-server/serve-static'
 import { compress } from 'hono/compress'
 import assetRoutes from './routes/assets'
+import authRoutes from './routes/auth'
 
 const isProduction = process.env.NODE_ENV === 'production'
 const port = Number(process.env.PORT) || 3000
@@ -19,6 +20,7 @@ if (isProduction) {
 
 // API routes
 app.route('/api/assets', assetRoutes);
+app.route('/api/login', authRoutes);
 
 
 app.get("*", async (c, next) => {
