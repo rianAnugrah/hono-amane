@@ -23,11 +23,11 @@ function Page() {
   }, []); // Empty dependency array means this runs once on mount
 
   return (
-    <div className="flex flex-col items-center w-full gap-4">
+    <div className="flex flex-col items-center w-full gap-4 text-white">
       <Logo />
-      <h1 className="text-2xl font-bold">Asset Mangement</h1>
+      <h1 className="text-2xl font-bold">Asset Management</h1>
      
-      <a href={loginUrl} className="btn bg-[#2F2F2F] text-white border-black">
+      <a href={loginUrl} className="btn bg-[#2F2F2F] text-white border-black shadow-none">
         <svg
           aria-label="Microsoft logo"
           width="16"

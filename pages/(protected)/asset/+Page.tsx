@@ -43,7 +43,7 @@ export default function AssetsTablePage() {
 
   if (error) {
     return (
-      <div className="container mx-auto p-4">
+      <div className=" mx-auto p-4">
         <p className="text-red-500">Error: {error}</p>
         <button
           onClick={fetchAssets}
@@ -56,7 +56,7 @@ export default function AssetsTablePage() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="flex flex-col w-full mx-auto p-4">
       <h1 className="text-4xl font-bold mb-8">Assets List</h1>
 
       <div className="overflow-x-auto">
