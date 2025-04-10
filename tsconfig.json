@@ -17,6 +17,9 @@
       "DOM.Iterable",
       "ESNext"
     ],
+    "paths": {
+      "@/*": ["./*"]
+    },
     "types": ["vite/client"],
     "jsx": "preserve",
     "jsxImportSource": "react"

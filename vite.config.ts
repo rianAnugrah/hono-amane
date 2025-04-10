@@ -4,6 +4,7 @@ import devServer from "@hono/vite-dev-server"
 import { UserConfig } from 'vite'
 import fs from 'fs'
 import tailwindcss from '@tailwindcss/vite'
+import path from 'path'
 
 const config: UserConfig = {
   plugins: [
@@ -11,7 +12,7 @@ const config: UserConfig = {
     vike(),
     tailwindcss(),
     devServer({
-      entry: "./server/index.ts",
+      entry: "server/index.ts",
       exclude: [
         /^\/@.+$/,
         /.*\.(ts|tsx|vue)($|\?)/,
@@ -30,6 +31,11 @@ const config: UserConfig = {
     https: {
       key: fs.readFileSync('server/server.key'),
       cert: fs.readFileSync('server/server.crt')
+    }
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './')
     }
   }
 }

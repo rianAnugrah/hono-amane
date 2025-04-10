@@ -1,10 +1,11 @@
-export { Layout }
-import '../../renderer/PageShell.css'
- 
+export { Layout };
+import "../../renderer/PageShell.css";
+
 // children includes <Page/>
 function Layout({ children }) {
-  return <div className='w-full h-[100svh] bg-red-500'>
-   <p>Login LAYOUT</p>
-    <div>{children}</div>
-  </div>
+  return (
+    <div className="h-screen w-full bg-gradient-to-b from-[#26140E] to-[#8C4A34] flex items-center justify-center">
+      <div>{children}</div>
+    </div>
+  );
 }
