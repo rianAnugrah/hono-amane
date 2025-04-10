@@ -1,3 +1,4 @@
+import DashboardCharts from "@/components/blocks/dashboard-charts";
 import {
   Archive,
   BookCopy,
@@ -42,14 +43,14 @@ export function Page() {
         </button>
       </div>
 
-      <h3 className="font-bold text-left mt-8 mb-4 text-2xl text-gray-500">
+      <h3 className="font-bold text-left mt-8 mb-4 text-2xl text-gray-800">
         Overview
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-4 w-full  gap-4">
         <DashboardItem
           title="Assets"
-          value={234}
+          value={2348}
           href="/asset"
           buttonLabel="View all asset"
           icon={<Archive />}
@@ -72,13 +73,15 @@ export function Page() {
         />
 
         <DashboardItem
-          title="Total Acquisition value" 
-          value="Rp 3,2 B"
+          title="Total Acquisition value"
+          value="Rp 271 B"
           href="/report"
           buttonLabel="Generate report"
           icon={<DollarSign />}
         />
       </div>
+
+      <DashboardCharts />
     </div>
   );
 }
@@ -103,7 +106,7 @@ function DashboardItem({
         <p className="font-bold text-5xl text-gray-700 z-10">{value}</p>
         {icon ? (
           React.cloneElement(icon, {
-            className: `absolute z-0 top-0 -right-5 -rotate-12 text-gray-100 w-[8rem] h-[8rem] group-hover:text-orange-200 group-hover:scale-110 group-hover:-rotate-25 ${
+            className: `absolute z-0 transition-all ease-out duration-200  top-0 -right-5 -rotate-12 text-gray-100 w-[8rem] h-[8rem] group-hover:text-orange-200 group-hover:scale-110 group-hover:-rotate-25 ${
               icon.props.className || ""
             }`,
           })
@@ -112,7 +115,9 @@ function DashboardItem({
         )}
       </div>
 
-      <a className="btn btn-primary btn-ghost" href={href}>{buttonLabel}</a>
+      <a className="btn btn-primary btn-ghost" href={href}>
+        {buttonLabel}
+      </a>
     </div>
   );
 }

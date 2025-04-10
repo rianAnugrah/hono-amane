@@ -1,9 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 
-import { Archive, BookCopy, CircleCheckBig, Cog, CogIcon, FileCheck2, HomeIcon, LogOut, MapPin, MenuIcon, Pin, Scan, Settings, User2 } from "lucide-react";
+import {
+  Archive,
+  BookCopy,
+  CircleCheckBig,
+  Cog,
+  CogIcon,
+  FileCheck2,
+  HomeIcon,
+  LogOut,
+  MapPin,
+  MenuIcon,
+  Pin,
+  Scan,
+  Settings,
+  User2,
+} from "lucide-react";
 import { Link } from "@/renderer/Link";
+import { usePageContext } from "@/renderer/usePageContext";
 import Logo from "@/components/svg/logo";
 
 export default function Navbar() {
@@ -132,7 +148,7 @@ function MobileNavbar() {
 
 function DesktopNav() {
   return (
-    <nav className="hidden  md:flex flex-col  h-[100svh] gap-0 w-[5rem] pl-4 pb-4">
+    <nav className="hidden  md:flex flex-col  h-[100svh] gap-1 w-[5rem] pl-4 pb-4">
       <div className="h-[4rem] flex items-center justify-center">
         {/* <div className="w-[2rem] h-[2rem]">
           <Logo />
@@ -142,7 +158,11 @@ function DesktopNav() {
       <DesktopLink href="/asset" icon={<Archive />} label="Asset" />
       <DesktopLink href="/category" icon={<BookCopy />} label="Category" />
       <DesktopLink href="/location" icon={<MapPin />} label="Location" />
-      <DesktopLink href="/condition" icon={<CircleCheckBig />} label="Condition" />
+      <DesktopLink
+        href="/condition"
+        icon={<CircleCheckBig />}
+        label="Condition"
+      />
       <DesktopLink href="/report" icon={<FileCheck2 />} label="Report" />
       <DesktopLink href="/user" icon={<User2 />} label="User" />
       <DesktopLink href="/setting" icon={<Settings />} label="Setting" />
@@ -161,12 +181,25 @@ function DesktopLink({
   icon?: React.ReactNode;
   label?: string;
 }) {
+  const pageContext = usePageContext();
+  const { urlPathname } = pageContext;
+
+  const isActive =
+    href === "/" ? urlPathname === href : urlPathname.startsWith(href);
+
   return (
     <Link
       href={href}
-      className="text-xl flex flex-col items-center gap-1  text-gray-300 hover:bg-orange-200 hover:text-orange-600 w-full justify-center py-2 rounded-lg"
+      className={`text-xl flex flex-col group items-center gap-1 ${
+        isActive ? "bg-white text-orange-600" : "text-gray-300"
+      } hover:bg-orange-200 hover:text-orange-600  w-full justify-center py-2 rounded-lg`}
     >
-      {icon}
+      {icon &&
+        React.cloneElement(icon, {
+          className: `group-hover:scale-110 transition-all duration-300 ${
+            icon.props.className || ""
+          }`,
+        })}
       <span className="text-xs">{label}</span>
     </Link>
   );
