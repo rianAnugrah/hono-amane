@@ -15,6 +15,7 @@ import {
   MenuIcon,
   Pin,
   Scan,
+  ScanQrCode,
   Settings,
   User2,
 } from "lucide-react";
@@ -55,9 +56,9 @@ function MobileNavbar() {
             </Link>
             <Link
               href="/qr-scanner"
-              className="text-xl bg-orange-600 shadow relative -top-5 p-3 rounded-lg flex flex-col items-center gap-1  text-white"
+              className="text-xl bg-orange-600 shadow relative -top-5 p-4 rounded-full flex flex-col items-center gap-1  text-white"
             >
-              <Scan className="w-10 h-10" />
+              <ScanQrCode className="w-10 h-10" />
               {/* <span className="text-xs">Scan</span> */}
             </Link>
 
@@ -166,6 +167,15 @@ function DesktopNav() {
       <DesktopLink href="/report" icon={<FileCheck2 />} label="Report" />
       <DesktopLink href="/user" icon={<User2 />} label="User" />
       <DesktopLink href="/setting" icon={<Settings />} label="Setting" />
+      <div className="flex w-full items-center justify-center py-4">
+        <Link
+          href="/qr-scanner"
+          className=" bg-orange-600 p-4 rounded-full shadow  text-white"
+        >
+          <ScanQrCode className="w-10 h-10" />
+          {/* <span className="text-xs">Scan</span> */}
+        </Link>
+      </div>
       <div className="flex flex-grow"></div>
       <DesktopLink href="/login" icon={<LogOut />} label="Logout" />
     </nav>

@@ -43,19 +43,20 @@ const salesData = [
 ];
 
 const userTypeData = [
-  { name: "Admin", value: 300 },
-  { name: "Editor", value: 500 },
-  { name: "Viewer", value: 200 },
+  { name: "Good", value: 300 },
+  { name: "Fair", value: 50 },
+  { name: "Broken", value: 500 },
+  { name: "N/A", value: 200 },
 ];
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
+const COLORS = ["#FF4D4D", "#4CAF50", "#2196F3", "#9C27B0"];
 
 export default function DashboardCharts() {
   return (
     <div className="my-6 grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Line Chart */}
       <div className="bg-white p-4 rounded-2xl shadow-md md:col-span-2">
-        <h2 className="text-xl font-bold mb-2">Asset by Category</h2>
+        <h2 className="text-xl font-bold mb-6">Asset by Category</h2>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={trafficData}>
             <Bar dataKey="visitors" fill="#ada5e9" />
@@ -69,7 +70,7 @@ export default function DashboardCharts() {
 
       {/* Bar Chart */}
       <div className="bg-white p-4 rounded-2xl shadow-md">
-        <h2 className="text-xl font-bold mb-2">Asset by Location</h2>
+        <h2 className="text-xl font-bold mb-6">Asset by Location</h2>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart width={400} height={250} data={salesData}>
             <Bar dataKey="sales" fill="#ada5e9" />
@@ -83,7 +84,7 @@ export default function DashboardCharts() {
 
       {/* Pie Chart */}
       <div className="bg-white p-4 rounded-2xl shadow-md col-span-1 ">
-        <h2 className="text-xl font-bold mb-2">Asset by Condition</h2>
+        <h2 className="text-xl font-bold mb-6">Asset by Condition</h2>
         <ResponsiveContainer width="100%" height={250}>
           <PieChart width={400} height={250}>
             <Pie

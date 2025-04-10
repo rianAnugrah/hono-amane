@@ -47,7 +47,7 @@ export function Page() {
         Overview
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 w-full  gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 w-full  gap-4">
         <DashboardItem
           title="Assets"
           value={2348}
@@ -73,8 +73,8 @@ export function Page() {
         />
 
         <DashboardItem
-          title="Total Acquisition value"
-          value="Rp 271 B"
+          title="Total Acquisition value (Rp)"
+          value={<p className=" font-normal"><span className="font-bold">271</span>B</p>}
           href="/report"
           buttonLabel="Generate report"
           icon={<DollarSign />}
@@ -94,13 +94,13 @@ function DashboardItem({
   icon,
 }: {
   title: string;
-  value: string | number;
+  value: string | number |  React.ReactElement;
   href: string;
   buttonLabel: string;
   icon?: React.ReactElement;
 }) {
   return (
-    <div className="w-full group  rounded-xl bg-gray-200 border border-gray-300 p-2 flex flex-col items-end gap-2">
+    <div className="w-full group shadow-md rounded-xl bg-gray-200 border border-gray-300 p-2 flex flex-col items-end gap-2">
       <div className="flex relative flex-col rounded-lg border border-gray-300 overflow-hidden bg-white p-4 w-full">
         <h4 className="text-sm text-gray-500 mb-2 z-10">{title}</h4>
         <p className="font-bold text-5xl text-gray-700 z-10">{value}</p>

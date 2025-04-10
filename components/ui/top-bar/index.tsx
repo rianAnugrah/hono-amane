@@ -6,7 +6,7 @@ export default function TopBar() {
 
 
   return (
-    <nav className=" relative z-50 ">
+    <nav className=" relative z-20 ">
       <div className="w-full mx-auto px-4 ">
         <div className="flex justify-between h-16 items-center">
           <div className="flex gap-2 items-center">
