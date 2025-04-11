@@ -1,1 +1,1 @@
-export const title = 'Star WARS | My App'
+export const title = 'Asset list | HCML'

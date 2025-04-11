@@ -1,4 +1,5 @@
 import DashboardCharts from "@/components/blocks/dashboard-charts";
+import { Link } from "@/renderer/Link";
 import {
   Archive,
   BookCopy,
@@ -13,41 +14,41 @@ import React from "react";
 export function Page() {
   return (
     <div className="w-full flex flex-col p-4 ">
-      <div className="grid grid-cols-1 md:grid-cols-3 w-full gap-4">
-        <a
+      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 w-full gap-4">
+        <Link
           href="/asset/create"
-          className="relative hover:bg-orange-200 bg-white items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-gray-600 gap-2"
+          className="relative shadow-md group bg-[#fdfdfd] items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-black gap-2"
         >
-          {/* <img
-            src="/img/scan-asset.jpg"
+          <img
+            src="/img/add-new-asset.jpg"
             alt="Scan Asset"
-            className="h-[10rem] absolute top-0 right-0 z-0"
-          /> */}
-          <div className="z-10 w-[20rem] flex flex-col">
+            className="h-[10rem] absolute top-0 right-0 z-0 opacity-100 group-hover:opacity-70 group-hover:scale-125 group-hover:-rotate-12 transition-all"
+          />
+          <div className="z-10 w-[20rem] flex flex-col group-hover:text-gray-600 transition-all">
             <PlusCircle className="w-[2rem] h-[2rem] mb-2" />
             <p className="text-xl font-bold  text-left">Add new asset</p>
             <p className="text-sm text-left">Register new asset</p>
           </div>
-        </a>
-        <button className="relative bg-[#ada5e9] items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-gray-100 gap-2">
+        </Link>
+        <Link href="/qr-scanner" className="relative shadow-md cursor-pointer bg-[#ada5e9] group items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-white gap-2 transition-all">
           <img
             src="/img/scan-asset.jpg"
             alt="Scan Asset"
-            className="h-[10rem] absolute top-0 right-0 z-0"
+           className="h-[10rem] absolute top-0 right-0 z-0 opacity-100 group-hover:opacity-70 group-hover:scale-125 group-hover:-rotate-12 transition-all"
           />
-          <div className="z-10 w-[20rem] flex flex-col">
+          <div className="z-10 w-[20rem] flex flex-col group-hover:text-gray-200 transition-all">
             <ScanQrCode className="w-[2rem] h-[2rem] mb-2" />
             <p className="text-xl font-bold  text-left">Scan asset</p>
             <p className="text-sm text-left">View and search asset detail</p>
           </div>
-        </button>
+        </Link>
       </div>
 
       <h3 className="font-bold text-left mt-8 mb-4 text-2xl text-gray-800">
         Overview
       </h3>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 w-full  gap-4">
+      <div className="grid grid-cols-2 xl:grid-cols-4 w-full  gap-4">
         <DashboardItem
           title="Assets"
           value={2348}

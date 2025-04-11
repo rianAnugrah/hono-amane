@@ -8,6 +8,7 @@ import {
   CircleCheckBig,
   Cog,
   CogIcon,
+  Database,
   FileCheck2,
   HomeIcon,
   LogOut,
@@ -21,7 +22,6 @@ import {
 } from "lucide-react";
 import { Link } from "@/renderer/Link";
 import { usePageContext } from "@/renderer/usePageContext";
-import Logo from "@/components/svg/logo";
 
 export default function Navbar() {
   return (
@@ -63,7 +63,7 @@ function MobileNavbar() {
             </Link>
 
             <Link
-              href="/qr-scanner"
+              href="/setting"
               className="text-xl flex flex-col items-center gap-1  text-white"
             >
               <Settings />
@@ -149,12 +149,8 @@ function MobileNavbar() {
 
 function DesktopNav() {
   return (
-    <nav className="hidden  md:flex flex-col  h-[100svh] gap-1 w-[5rem] pl-4 pb-4">
-      <div className="h-[4rem] flex items-center justify-center">
-        {/* <div className="w-[2rem] h-[2rem]">
-          <Logo />
-        </div> */}
-      </div>
+    <nav className="hidden  md:flex flex-col  h-[100svh] gap-1 w-[10rem] pl-4 pb-4">
+      <div className="h-[3.75rem] flex items-center justify-center"></div>
       <DesktopLink href="/" icon={<HomeIcon />} label="Home" />
       <DesktopLink href="/asset" icon={<Archive />} label="Asset" />
       <DesktopLink href="/category" icon={<BookCopy />} label="Category" />
@@ -170,10 +166,12 @@ function DesktopNav() {
       <div className="flex w-full items-center justify-center py-4">
         <Link
           href="/qr-scanner"
-          className=" bg-orange-600 p-4 rounded-full shadow  text-white"
+          className=" bg-orange-600 group hover:bg-orange-200 hover:text-orange-600 py-2 px-4 transition-all duration-300 flex flex-row items-center justify-start gap-1 rounded shadow relative w-full   text-white"
         >
-          <ScanQrCode className="w-10 h-10" />
-          {/* <span className="text-xs">Scan</span> */}
+          <ScanQrCode className="w-[1rem] h-[1rem] group-hover:scale-[1.2] transition-all duration-300" />
+          <span className="text-xs font-bold">
+            Scan QR
+          </span>
         </Link>
       </div>
       <div className="flex flex-grow"></div>
@@ -200,13 +198,13 @@ function DesktopLink({
   return (
     <Link
       href={href}
-      className={`text-xl flex flex-col group items-center gap-1 ${
-        isActive ? "bg-white text-orange-600" : "text-gray-300"
-      } hover:bg-orange-200 hover:text-orange-600  w-full justify-center py-2 rounded-lg`}
+      className={`text-xl flex  flex-row group items-center gap-1 transition-all duration-500 ${
+        isActive ? "bg-gray-100 text-orange-600 w-[12rem]" : "text-gray-300 w-[9rem]"
+      } hover:bg-gray-100 hover:text-orange-600   justify-start py-2 px-4 rounded-full `}
     >
       {icon &&
         React.cloneElement(icon, {
-          className: `group-hover:scale-110 transition-all duration-300 ${
+          className: `group-hover:scale-[1.2] transition-all duration-300 w-[1rem] h-[1rem]  ${
             icon.props.className || ""
           }`,
         })}
