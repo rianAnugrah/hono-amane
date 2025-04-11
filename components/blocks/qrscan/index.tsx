@@ -3,12 +3,14 @@ import QrScanner from "qr-scanner";
 import {
   Ban,
   CameraIcon,
+  Delete,
   Power,
   PowerOff,
   RefreshCcw,
   StopCircle,
   SwitchCamera,
   Upload,
+  X,
 } from "lucide-react";
 
 const QrScannerComponent = () => {
@@ -309,12 +311,18 @@ const QrScannerComponent = () => {
                 className={`p-1 text-sm text-left rounded-md flex items-center justify-center relative ${
                   currentCameraIndex === index
                     ? "bg-blue-100 border border-blue-500"
-                    : "bg-gray-100 border hover:bg-gray-200"
+                    : "bg-gray-100 border hover:bg-gray-200 text-gray-300 border-gray-300"
                 }`}
                 disabled={isLoading || currentCameraIndex === index}
               >
                 <CameraIcon className="w-10 h-10" />
-                <p className="absolute top-1/2 left-1/2 -translate-y-1/2 leading-4 -translate-x-1/2 bg-black rounded-full w-4 h-4  text-xs text-center  text-white font-bold">
+                <p
+                  className={`absolute top-1/2 left-1/2 -translate-y-1/2 leading-4 -translate-x-1/2  rounded-full w-4 h-4  text-xs text-center  text-white font-bold ${
+                    currentCameraIndex === index
+                      ? "bg-blue-600"
+                      : " bg-gray-500"
+                  }`}
+                >
                   {index}
                 </p>
 
@@ -334,34 +342,46 @@ const QrScannerComponent = () => {
         )}
       </div>
 
-      <div className="w-full flex items-center justify-center">
+      <div className="w-full flex items-center justify-center divide-x divide-gray-300 ">
         {cameras.length > 1 && (
           <ButtonComponent
             onClick={switchCamera}
             icon={<SwitchCamera />}
-            label="Switch Camera"
+            label="Switch"
             disabled={isLoading}
+            color="blue"
           />
         )}
         <ButtonComponent
           onClick={refreshCameras}
-          icon={isLoading ? <RefreshCcw className="animate-spin" /> : <RefreshCcw />}
-          label={isLoading ? "Loading..." : "Refresh Camera"}
+          icon={
+            isLoading ? <RefreshCcw className="animate-spin" /> : <RefreshCcw />
+          }
+          label={isLoading ? "Loading..." : "Refresh"}
           disabled={isLoading}
+          color="gray"
         />
         {!cameraOn ? (
           <ButtonComponent
-            onClick={permissionState === "denied" ? requestCameraPermission : startCamera}
-            icon={isLoading ? <RefreshCcw className="animate-spin" /> : <Power />}
-            label={isLoading ? "Loading..." : "Enable Camera"}
+            onClick={
+              permissionState === "denied"
+                ? requestCameraPermission
+                : startCamera
+            }
+            icon={
+              isLoading ? <RefreshCcw className="animate-spin" /> : <Power />
+            }
+            label={isLoading ? "Loading..." : "Enable"}
             disabled={isLoading}
+            color="red"
           />
         ) : (
           <ButtonComponent
             onClick={stopCamera}
             icon={<PowerOff />}
-            label="Stop Camera"
+            label="Stop"
             disabled={isLoading}
+            color="red"
           />
         )}
         <input
@@ -374,20 +394,28 @@ const QrScannerComponent = () => {
         <ButtonComponent
           onClick={() => fileInputRef.current?.click()}
           icon={<Upload />}
-          label="Upload QR Image"
+          label="Upload"
           color="green"
         />
       </div>
 
       {result && (
-        <div className="mt-6 text-center">
-          <h3 className="text-lg font-semibold">Hasil:</h3>
-          <p className="text-gray-800 break-all">{result}</p>
+        <div className="flex flex-row w-full gap-2 items-center justify-center mt-6">
+          <input
+            type="text"
+            value={result}
+            className=" border rounded flex  h-[2rem] items-center text-gray-800 break-all px-2 flex-grow text-xs overflow-hidden"
+          ></input>
+
           <button
-            onClick={() => setResult("")}
-            className="border-y last:border-r first:border-l first:rounded-l-lg last:rounded-r-lg flex flex-col w-[5rem] transition disabled:bg-gray-200 disabled:text-gray-500 h-[5rem] items-center gap-2 justify-start py-2"
+            onClick={() => {
+              setResult("");
+              window.location.reload();
+            }}
+            className="bg-red-600 h-[2rem] text-white p-1 px-3 rounded cursor-pointer hover:bg-red-500 flex flex-row text-xs items-center gap-1"
           >
-            Clear
+            <X className="w-auto h-3" />
+            <p>Reset</p>
           </button>
         </div>
       )}
@@ -412,19 +440,19 @@ const ButtonComponent = ({
   color = "gray", // Default color
 }: ButtonComponentProps & { color?: "gray" | "red" | "green" | "blue" }) => {
   const colorClasses = {
-    gray: "hover:bg-gray-100",
-    red: "hover:bg-red-100 text-red-600",
-    green: "bg-green-700 text-white hover:bg-green-100 text-green-600", 
-    blue: "hover:bg-blue-100 text-blue-600"
+    gray: "border-gray-400 bg-gray-100 hover:bg-gray-200 text-gray-600",
+    red: "border-gray-400 bg-red-100 hover:bg-red-200 text-red-600",
+    green: "border-gray-400 bg-green-100 hover:bg-green-200  text-green-600",
+    blue: "border-gray-400 bg-blue-100 hover:bg-blue-200 text-blue-600",
   };
 
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`border-y last:border-r first:border-l first:rounded-l-lg last:rounded-r-lg flex flex-col w-[6rem] px-4 transition disabled:bg-gray-200 disabled:text-gray-500 h-[5rem] items-center gap-2 justify-start py-2 ${colorClasses[color]} ${className}`}
+      className={`cursor-pointer border-y last:border-r first:border-l first:rounded-l-lg last:rounded-r-lg flex flex-col md:flex-row w-[6rem] md:w-auto  px-4 transition disabled:bg-gray-200 disabled:text-gray-500 h-auto md:h-[2rem] items-center gap-2 justify-start py-2 ${colorClasses[color]} ${className}`}
     >
-      {icon}
+      <div className="w-8 md:w-4 h-8 md:h-4  flex items-center justify-center">{icon}</div>
       <p className="text-xs">{label}</p>
     </button>
   );

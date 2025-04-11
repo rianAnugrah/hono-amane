@@ -40,45 +40,25 @@ function MobileNavbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex justify-between items-center w-full">
-            <Link
-              href="/"
-              className="text-xl flex flex-col items-center gap-1  text-white"
-            >
-              <HomeIcon />
-              <span className="text-xs">Home</span>
-            </Link>
-            <Link
-              href="/asset"
-              className="text-xl flex flex-col items-center gap-1  text-white"
-            >
-              <Archive />
-              <span className="text-xs">Asset</span>
-            </Link>
-            <Link
+            <MobileLink href="/" icon={<HomeIcon />} label="Home" />
+            <MobileLink href="/asset" icon={<Archive />} label="Asset" />
+
+            <a
               href="/qr-scanner"
-              className="text-xl bg-orange-600 shadow relative -top-5 p-4 rounded-full flex flex-col items-center gap-1  text-white"
+              className="text-xl bg-orange-600 p-1 shadow rounded flex flex-col items-center gap-1 text-white active:scale-95 transition-all duration-100"
             >
               <ScanQrCode className="w-10 h-10" />
               {/* <span className="text-xs">Scan</span> */}
-            </Link>
+            </a>
+            <MobileLink href="/location" icon={<MapPin />} label="Location" />
 
-            <Link
-              href="/setting"
-              className="text-xl flex flex-col items-center gap-1  text-white"
+            <button
+              onClick={() => setMenuOpen(true)}
+              className={`text-xl flex flex-col items-center gap-1  text-white active:scale-95 transition-all group`}
             >
-              <Settings />
-              <span className="text-xs">Setting</span>
-            </Link>
-            <div className="">
-              <button
-                onClick={() => setMenuOpen(true)}
-                className="text-xl flex flex-col items-center gap-1  text-white focus:outline-none"
-                aria-label="Open menu"
-              >
-                <MenuIcon />
-                <span className="text-xs">Menu</span>
-              </button>
-            </div>
+              <MenuIcon className="group-hover:scale-[1.2] transition-all duration-300 w-[1rem] h-[1rem]" />
+              <span className="text-xs">Menu</span>
+            </button>
           </div>
         </div>
       </div>
@@ -169,9 +149,7 @@ function DesktopNav() {
           className=" bg-orange-600 group hover:bg-orange-200 hover:text-orange-600 py-2 px-4 transition-all duration-300 flex flex-row items-center justify-start gap-1 rounded shadow relative w-full   text-white"
         >
           <ScanQrCode className="w-[1rem] h-[1rem] group-hover:scale-[1.2] transition-all duration-300" />
-          <span className="text-xs font-bold">
-            Scan QR
-          </span>
+          <span className="text-xs font-bold">Scan QR</span>
         </Link>
       </div>
       <div className="flex flex-grow"></div>
@@ -199,8 +177,43 @@ function DesktopLink({
     <Link
       href={href}
       className={`text-xl flex  flex-row group items-center gap-1 transition-all duration-500 ${
-        isActive ? "bg-gray-100 text-orange-600 w-[12rem]" : "text-gray-300 w-[9rem]"
+        isActive
+          ? "bg-gray-100 text-orange-600 w-[12rem]"
+          : "text-gray-300 w-[9rem]"
       } hover:bg-gray-100 hover:text-orange-600   justify-start py-2 px-4 rounded-full `}
+    >
+      {icon &&
+        React.cloneElement(icon, {
+          className: `group-hover:scale-[1.2] transition-all duration-300 w-[1rem] h-[1rem]  ${
+            icon.props.className || ""
+          }`,
+        })}
+      <span className="text-xs">{label}</span>
+    </Link>
+  );
+}
+
+function MobileLink({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon?: React.ReactNode;
+  label?: string;
+}) {
+  const pageContext = usePageContext();
+  const { urlPathname } = pageContext;
+
+  const isActive =
+    href === "/" ? urlPathname === href : urlPathname.startsWith(href);
+
+  return (
+    <Link
+      href={href}
+      className={`text-xl flex flex-col items-center gap-1  active:scale-95 transition-all group w-[3rem] h-[3rem] justify-center rounded ${
+        isActive ? "bg-gray-200 text-orange-500" : "bg-transparent  text-white"
+      }  `}
     >
       {icon &&
         React.cloneElement(icon, {
