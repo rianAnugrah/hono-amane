@@ -104,7 +104,7 @@ function DashboardItem({
     <div className="w-full group shadow-md rounded-xl bg-gray-200 border border-gray-300 p-2 flex flex-col items-end gap-2">
       <div className="flex relative flex-col rounded-lg border border-gray-300 overflow-hidden bg-white p-4 w-full">
         <h4 className="text-sm text-gray-500 mb-2 z-10">{title}</h4>
-        <p className="font-bold text-5xl text-gray-700 z-10">{value}</p>
+        <div className="font-bold text-5xl text-gray-700 z-10">{value}</div>
         {icon ? (
           React.cloneElement(icon, {
             className: `absolute z-0 transition-all ease-out duration-200  top-0 -right-5 -rotate-12 text-gray-100 w-[8rem] h-[8rem] group-hover:text-orange-200 group-hover:scale-110 group-hover:-rotate-25 ${

@@ -1,25 +1,25 @@
 // config/env.ts
 
-// Optional: Install dotenv if you want to load from .env file
-//import * as dotenv from 'dotenv';
-
-// Load environment variables from .env file (if you're using one)
-//dotenv.config();
-
 // Define an interface for your environment variables
 interface Env {
   APP_SECRET: string;
   API_HOST: string;
-  NODE_ENV?: string;  // Optional: common env variable
-  PORT?: string;      // Optional: common env variable
+  APP_PORT?: string;
+  VITE_URL?: string;
+  APP_DOMAIN?: string;
+  APP_CRONTIME?: string;
+  DATABASE_URL?: string;
 }
 
 // Create a safely typed env object
 const env: Env = {
-  APP_SECRET: process.env.APP_SECRET || '',
-  API_HOST: process.env.API_HOST || 'http://localhost:3000', // Default value
-  NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: process.env.PORT || '3000',
+  APP_SECRET: import.meta.env.APP_SECRET || '45tereyhdfst6785ergdfy574wsfgty654es3543trwrtgrer',
+  API_HOST: import.meta.env.VITE_API_HOST || 'https://api-data.hcml.co.id/',
+  APP_PORT: import.meta.env.VITE_APP_PORT || '3012',
+  VITE_URL: import.meta.env.VITE_URL || 'https://dev.hcml.co.id',
+  APP_DOMAIN: import.meta.env.VITE_APP_DOMAIN || '.hcml.co.id',
+  APP_CRONTIME: import.meta.env.VITE_APP_CRONTIME || '"* 12 * * *"',
+  DATABASE_URL: import.meta.env.VITE_DATABASE_URL || 'postgresql://postgres:Jakarta@123@localhost:5432/amane?schema=public',
 };
 
 // Validate required variables

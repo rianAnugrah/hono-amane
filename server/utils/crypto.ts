@@ -1,3 +1,4 @@
+// crypto.ts
 import { env } from "../../config/env"
 import { crypt } from "@tawasukha/crypt"
 import { urlcrypt } from "@tawasukha/urlcrypt"
@@ -17,6 +18,8 @@ export const crypto = crypt({
   output: "base64url",
   secret: env.APP_SECRET.slice(0, 16),
 })
+
+
 export const urlCrypto = urlcrypt({
   pattern: `${env.API_HOST}api/azure/:action`,
   secret: env.APP_SECRET.slice(0, 16),

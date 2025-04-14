@@ -1,51 +1,54 @@
-import { Hono } from 'hono'
-import { serve } from "@hono/node-server"
-import { renderPage } from 'vike/server'
-import { serveStatic } from '@hono/node-server/serve-static'
-import { compress } from 'hono/compress'
-import assetRoutes from './routes/assets'
-import authRoutes from './routes/auth'
+import { Hono } from "hono";
+import { serve } from "@hono/node-server";
+import { renderPage } from "vike/server";
+import { serveStatic } from "@hono/node-server/serve-static";
+import { compress } from "hono/compress";
+import assetRoutes from "./routes/assets";
+import authRoutes from "./routes/auth";
+import { env } from "../config/env";
 
-const isProduction = process.env.NODE_ENV === 'production'
-const port = Number(process.env.PORT) || 3000
+const isProduction = process.env.NODE_ENV === "production";
+const port = Number(env.APP_PORT);
 
-const app = new Hono()
-app.use(compress())
+const app = new Hono();
+app.use(compress());
 
 if (isProduction) {
-  app.use("/*", serveStatic({
-    root: `./dist/client/`,
-  }))
+  app.use(
+    "/*",
+    serveStatic({
+      root: `./dist/client/`,
+    })
+  );
 }
 
 // API routes
-app.route('/api/assets', assetRoutes);
-app.route('/api/login', authRoutes);
-
+app.route("/api/assets", assetRoutes);
+app.route("/api/login", authRoutes);
 
 app.get("*", async (c, next) => {
   const pageContextInit = {
-    urlOriginal: c.req.url
-  }
-  const pageContext = await renderPage(pageContextInit)
-  const { httpResponse } = pageContext
+    urlOriginal: c.req.url,
+  };
+  const pageContext = await renderPage(pageContextInit);
+  const { httpResponse } = pageContext;
   if (!httpResponse) {
-    return next()
+    return next();
   } else {
-    const { body, statusCode, headers } = httpResponse
-    headers.forEach(([name, value]) => c.header(name, value))
-    c.status(statusCode)
+    const { body, statusCode, headers } = httpResponse;
+    headers.forEach(([name, value]) => c.header(name, value));
+    c.status(statusCode);
 
-    return c.body(body)
+    return c.body(body);
   }
-})
+});
 
 if (isProduction) {
   console.log(`Server listening on http://localhost:${port}`);
   serve({
-      fetch: app.fetch,
-      port: port
+    fetch: app.fetch,
+    port: port,
   });
 }
 
-export default app
+export default app;

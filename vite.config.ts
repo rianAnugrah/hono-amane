@@ -27,7 +27,7 @@ const config: UserConfig = {
   ],
   server: {
     host: '0.0.0.0', // This allows access from any hostname that points to your machine
-    port: 3000,      // Sets the port to 3000
+    port: 3012,      // Sets the port to 3000
     https: {
       key: fs.readFileSync('server/server.key'),
       cert: fs.readFileSync('server/server.crt')
