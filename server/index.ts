@@ -24,7 +24,7 @@ if (isProduction) {
 
 // API routes
 app.route("/api/assets", assetRoutes);
-app.route("/api/login", authRoutes);
+app.route("/api/auth", authRoutes);
 
 app.get("*", async (c, next) => {
   const pageContextInit = {

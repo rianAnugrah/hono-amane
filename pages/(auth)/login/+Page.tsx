@@ -5,7 +5,7 @@ export { Page };
 
 function Page() {
   const [loginUrl, setLoginUrl] = useState("");
-  const url_login = `/api/login`;
+  const url_login = `/api/auth/login`;
 
   useEffect(() => {
     async function fetchLoginUrl() {

@@ -1,12 +1,12 @@
-export { Counter }
+import { useCounterStore } from "@/stores/counter"
 
-import { useState } from 'react'
 
-function Counter() {
-  const [count, setCount] = useState(0)
+export default function Counter() {
+  const { count, increment } = useCounterStore()
   return (
-    <button type="button" onClick={() => setCount((count) => count + 1)}>
-      Counter {count}
-    </button>
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={increment}>Tambah</button>
+    </div>
   )
 }

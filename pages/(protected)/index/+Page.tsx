@@ -30,11 +30,14 @@ export function Page() {
             <p className="text-sm text-left">Register new asset</p>
           </div>
         </Link>
-        <Link href="/qr-scanner" className="relative shadow-md cursor-pointer bg-[#ada5e9] group items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-white gap-2 transition-all">
+        <Link
+          href="/qr-scanner"
+          className="relative shadow-md cursor-pointer bg-[#ada5e9] group items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-white gap-2 transition-all"
+        >
           <img
             src="/img/scan-asset.jpg"
             alt="Scan Asset"
-           className="h-[10rem] absolute top-0 right-0 z-0 opacity-100 group-hover:opacity-70 group-hover:scale-125 group-hover:-rotate-12 transition-all"
+            className="h-[10rem] absolute top-0 right-0 z-0 opacity-100 group-hover:opacity-70 group-hover:scale-125 group-hover:-rotate-12 transition-all"
           />
           <div className="z-10 w-[20rem] flex flex-col group-hover:text-gray-200 transition-all">
             <ScanQrCode className="w-[2rem] h-[2rem] mb-2" />
@@ -75,7 +78,11 @@ export function Page() {
 
         <DashboardItem
           title="Total Acquisition value (Rp)"
-          value={<p className=" font-normal"><span className="font-bold">271</span>B</p>}
+          value={
+            <p className=" font-normal">
+              <span className="font-bold">271</span>B
+            </p>
+          }
           href="/report"
           buttonLabel="Generate report"
           icon={<DollarSign />}
@@ -95,7 +102,7 @@ function DashboardItem({
   icon,
 }: {
   title: string;
-  value: string | number |  React.ReactElement;
+  value: string | number | React.ReactElement;
   href: string;
   buttonLabel: string;
   icon?: React.ReactElement;

@@ -11,6 +11,7 @@ import Navbar from "@/components/ui/navigation";
 import TopBar from "@/components/ui/top-bar";
 import autoAnimate from "@formkit/auto-animate";
 import { crypto } from "@/server/utils/crypto";
+import { useUserStore } from "@/stores/store-user-login";
 
 function PageShell({
   children,
@@ -20,6 +21,8 @@ function PageShell({
   pageContext: PageContext;
 }) {
   const parent = useRef(null);
+
+  const { email, name, isAuth, set_user } = useUserStore();
 
   useEffect(() => {
     parent.current && autoAnimate(parent.current);
@@ -33,12 +36,31 @@ function PageShell({
       ? hcmlSessionCookie.split("=")[1]
       : null;
     console.log("hcmlSession cookie value:", hcmlSessionValue);
-    checkCredential(hcmlSessionValue);
+    checkCredential(hcmlSessionValue as string);
   }, [parent]);
 
-  const checkCredential = (token: string) => {
-    const test = crypto.decrypt(token);
-    console.log("DECRYPTED", test);
+  const checkCredential = async (token: string) => {
+    if (!token) return;
+
+    try {
+      const response = await fetch("/api/auth/decrypt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to check credential");
+      }
+
+      const data = await response.json();
+      set_user(data);
+      console.log("Credential check response:", data);
+    } catch (error) {
+      console.error("Error checking credential:", error);
+    }
   };
 
   return (

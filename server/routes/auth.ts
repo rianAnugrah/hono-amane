@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { urlCrypto } from "../utils/crypto";
+import { crypto, urlCrypto } from "../utils/crypto";
 import { env } from "@/config/env";
 import {
   getCookie,
@@ -11,7 +11,7 @@ import {
 const authRoutes = new Hono();
 
 // Create Asset - Changed endpoint to more appropriate route (optional)
-authRoutes.get("/", async (c) => {
+authRoutes.get("/login", async (c) => {
   const api_data_host = env.API_HOST;
   const endpoint = "api/azure/auth?redirect=";
   const redirect_url = `${env.VITE_URL}:${env.APP_PORT}`;
@@ -35,6 +35,19 @@ authRoutes.get("/", async (c) => {
       },
       500
     );
+  }
+});
+
+authRoutes.post("/decrypt", async (c) => {
+  try {
+    const body = await c.req.json();
+
+    const descrypted = crypto.decrypt(body.token);
+
+    return c.json(JSON.parse(descrypted), 201);
+  } catch (error) {
+    console.error("Error creating asset:", error);
+    return c.json({ error: "Failed to create asset" }, 500);
   }
 });
 
