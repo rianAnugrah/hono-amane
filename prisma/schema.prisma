@@ -33,8 +33,11 @@ model UserVersion {
 
 model Asset {
   id              String    @id @default(uuid())
+  version         Int       @default(1) // versioning
+  parentId        String?             // for linking to original asset, if needed
+  isLatest        Boolean   @default(true) // for querying latest version
   projectCode     String
-  assetNo         String    @unique
+  assetNo         String
   lineNo          String
   assetName       String
   remark          String?
@@ -55,5 +58,7 @@ model Asset {
   taggingYear     String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
-}
+  deletedAt       DateTime? // soft delete
 
+  @@index([assetNo, isLatest]) // useful for querying latest version by assetNo
+}

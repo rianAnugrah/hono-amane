@@ -6,6 +6,9 @@ const assetRoutes = new Hono();
 
 interface Asset {
   id: string;
+  version: number;
+  isLatest: boolean;
+  parentId?: string | null;
   projectCode: string;
   assetNo: string;
   lineNo: string;
@@ -28,12 +31,18 @@ interface Asset {
   taggingYear?: string | null;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date | null;
 }
 
-// GET all assets
+// GET all latest and not-deleted assets
 assetRoutes.get('/', async (c) => {
   try {
-    const assets: Asset[] = await prisma.asset.findMany();
+    const assets: Asset[] = await prisma.asset.findMany({
+      where: {
+        deletedAt: null,
+        isLatest: true,
+      },
+    });
     return c.json(assets);
   } catch (error) {
     console.error('Error fetching assets:', error);
@@ -41,11 +50,15 @@ assetRoutes.get('/', async (c) => {
   }
 });
 
-// GET single asset
+// GET single asset (latest, not deleted)
 assetRoutes.get('/:id', async (c) => {
   try {
-    const asset: Asset | null = await prisma.asset.findUnique({
-      where: { id: c.req.param('id') },
+    const asset: Asset | null = await prisma.asset.findFirst({
+      where: {
+        id: c.req.param('id'),
+        deletedAt: null,
+        isLatest: true,
+      },
     });
     if (!asset) return c.json({ error: 'Asset not found' }, 404);
     return c.json(asset);
@@ -61,6 +74,8 @@ assetRoutes.post('/', async (c) => {
     const body: Asset = await c.req.json();
     const asset: Asset = await prisma.asset.create({
       data: {
+        version: 1,
+        isLatest: true,
         projectCode: body.projectCode,
         assetNo: body.assetNo,
         lineNo: body.lineNo,
@@ -90,49 +105,77 @@ assetRoutes.post('/', async (c) => {
   }
 });
 
-// UPDATE asset
+// UPDATE asset (creates new version)
 assetRoutes.put('/:id', async (c) => {
   try {
+    const id = c.req.param('id');
     const body: Partial<Asset> = await c.req.json();
-    const asset: Asset = await prisma.asset.update({
-      where: { id: c.req.param('id') },
+
+    const old = await prisma.asset.findUnique({ where: { id } });
+    if (!old || old.deletedAt || !old.isLatest) {
+      return c.json({ error: 'Asset not found or already versioned' }, 404);
+    }
+
+    // Mark previous version as not latest
+    await prisma.asset.update({
+      where: { id: old.id },
+      data: { isLatest: false },
+    });
+
+    // Create new version
+    const newAsset = await prisma.asset.create({
       data: {
-        projectCode: body.projectCode,
-        assetNo: body.assetNo,
-        lineNo: body.lineNo,
-        assetName: body.assetName,
-        remark: body.remark,
-        locationDesc: body.locationDesc,
-        detailsLocation: body.detailsLocation,
-        condition: body.condition,
-        pisDate: body.pisDate ? new Date(body.pisDate) : undefined,
-        transDate: body.transDate ? new Date(body.transDate) : undefined,
-        categoryCode: body.categoryCode,
-        afeNo: body.afeNo,
-        adjustedDepre: body.adjustedDepre ? parseFloat(String(body.adjustedDepre)) : undefined,
-        poNo: body.poNo,
-        acqValueIdr: body.acqValueIdr ? parseFloat(String(body.acqValueIdr)) : undefined,
-        acqValue: body.acqValue ? parseFloat(String(body.acqValue)) : undefined,
-        accumDepre: body.accumDepre ? parseFloat(String(body.accumDepre)) : undefined,
-        ytdDepre: body.ytdDepre ? parseFloat(String(body.ytdDepre)) : undefined,
-        bookValue: body.bookValue ? parseFloat(String(body.bookValue)) : undefined,
-        taggingYear: body.taggingYear,
+        ...old,
+        id: undefined,
+        version: old.version + 1,
+        parentId: old.parentId || old.id,
+        isLatest: true,
+        projectCode: body.projectCode ?? old.projectCode,
+        assetNo: body.assetNo ?? old.assetNo,
+        lineNo: body.lineNo ?? old.lineNo,
+        assetName: body.assetName ?? old.assetName,
+        remark: body.remark ?? old.remark,
+        locationDesc: body.locationDesc ?? old.locationDesc,
+        detailsLocation: body.detailsLocation ?? old.detailsLocation,
+        condition: body.condition ?? old.condition,
+        pisDate: body.pisDate ? new Date(body.pisDate) : old.pisDate,
+        transDate: body.transDate ? new Date(body.transDate) : old.transDate,
+        categoryCode: body.categoryCode ?? old.categoryCode,
+        afeNo: body.afeNo ?? old.afeNo,
+        adjustedDepre: body.adjustedDepre ?? old.adjustedDepre,
+        poNo: body.poNo ?? old.poNo,
+        acqValueIdr: body.acqValueIdr ?? old.acqValueIdr,
+        acqValue: body.acqValue ?? old.acqValue,
+        accumDepre: body.accumDepre ?? old.accumDepre,
+        ytdDepre: body.ytdDepre ?? old.ytdDepre,
+        bookValue: body.bookValue ?? old.bookValue,
+        taggingYear: body.taggingYear ?? old.taggingYear,
       },
     });
-    return c.json(asset);
+
+    return c.json(newAsset);
   } catch (error) {
     console.error('Error updating asset:', error);
     return c.json({ error: 'Failed to update asset' }, 500);
   }
 });
 
-// DELETE asset
+// SOFT DELETE asset
 assetRoutes.delete('/:id', async (c) => {
   try {
-    await prisma.asset.delete({
-      where: { id: c.req.param('id') },
+    const id = c.req.param('id');
+    const asset = await prisma.asset.findUnique({ where: { id } });
+
+    if (!asset || asset.deletedAt) {
+      return c.json({ error: 'Asset not found or already deleted' }, 404);
+    }
+
+    await prisma.asset.update({
+      where: { id },
+      data: { deletedAt: new Date() },
     });
-    return c.json({ message: 'Asset deleted' });
+
+    return c.json({ message: 'Asset soft-deleted' });
   } catch (error) {
     console.error('Error deleting asset:', error);
     return c.json({ error: 'Failed to delete asset' }, 500);

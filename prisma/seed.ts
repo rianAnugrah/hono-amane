@@ -1,11 +1,9 @@
-// prisma/seed.ts
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 function parseFloatSafe(val: string): number {
   const num = parseFloat(val.replace(/,/g, "").trim());
   return isNaN(num) ? 0 : num;
-  return num;
 }
 
 function parseDateSafe(dateStr: string): Date {
@@ -10136,23 +10134,26 @@ async function main() {
 
   for (const asset of assets) {
     try {
-      // Check if the asset already exists using the unique assetNo field
-      const existingAsset = await prisma.asset.findUnique({
+      // Check if a latest version of the asset already exists
+      const existingAsset = await prisma.asset.findFirst({
         where: {
           assetNo: asset.ASSET_NO,
+          isLatest: true,
         },
       });
 
       if (existingAsset) {
         console.log(
-          `Skipping asset ${asset.ASSET_NO}-${asset.LINE_NO}: Already exists`
+          `Skipping asset ${asset.ASSET_NO}-${asset.LINE_NO}: Already exists (version ${existingAsset.version})`
         );
-        continue; // Skip this iteration if asset already exists
+        continue;
       }
 
-      // If not existing, create the asset
+      // Create the first version of this asset
       await prisma.asset.create({
         data: {
+          version: 1,
+          isLatest: true,
           projectCode: asset.PROJECT_CODE,
           assetNo: asset.ASSET_NO,
           lineNo: asset.LINE_NO,
@@ -10175,8 +10176,9 @@ async function main() {
           taggingYear: asset.TAGGING_YEAR || null,
         },
       });
+
       console.log(`Created asset ${asset.ASSET_NO}-${asset.LINE_NO}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error(
         `Error processing asset ${asset.ASSET_NO}-${asset.LINE_NO}:`,
         error.message
