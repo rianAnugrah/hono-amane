@@ -34,16 +34,49 @@ interface Asset {
   deletedAt?: Date | null;
 }
 
-// GET all latest and not-deleted assets
+// GET all assets with search, filter, sort, and pagination
 assetRoutes.get('/', async (c) => {
   try {
+    const page = parseInt(c.req.query('page') || '1', 10);
+    const pageSize = parseInt(c.req.query('pageSize') || '10', 10);
+    const search = c.req.query('search') || '';
+    const filterCondition = c.req.query('condition') || '';
+    const sortBy = c.req.query('sortBy') || 'createdAt';
+    const sortOrder = c.req.query('sortOrder') || 'desc';
+
+    // Build query for filtering and searching
+    const whereConditions = {
+      deletedAt: null,
+      isLatest: true,
+      assetName: {
+        contains: search, // Search in asset name
+        mode: 'insensitive', // Case-insensitive search
+      },
+      condition: filterCondition ? { equals: filterCondition } : undefined,
+    };
+
     const assets: Asset[] = await prisma.asset.findMany({
-      where: {
-        deletedAt: null,
-        isLatest: true,
+      where: whereConditions,
+      skip: (page - 1) * pageSize, // Pagination: skip the previous pages
+      take: pageSize, // Limit the number of assets per page
+      orderBy: {
+        [sortBy]: sortOrder, // Sort by specified column (e.g., createdAt, assetNo)
       },
     });
-    return c.json(assets);
+
+    const totalAssets = await prisma.asset.count({
+      where: whereConditions,
+    });
+
+    return c.json({
+      assets,
+      pagination: {
+        page,
+        pageSize,
+        total: totalAssets,
+        totalPages: Math.ceil(totalAssets / pageSize),
+      },
+    });
   } catch (error) {
     console.error('Error fetching assets:', error);
     return c.json({ error: 'Failed to fetch assets' }, 500);
