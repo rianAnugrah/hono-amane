@@ -1,7 +1,10 @@
-import { render } from "vike/abort";
+import { navigate } from "vike/client/router";
+import { useUserStore } from "@/stores/store-user-login";
 
-// This guard() hook protects all pages /pages/admin/**/+Page.js
+export async function guard(pageContext) {
+  const state = useUserStore.getState();
 
-export async function guard(pageContext: any) {
-  console.log("CONTEXT", pageContext?.someGlobalValue);
+  if (!state.isAuth && typeof window !== "undefined") {
+    await navigate("/login");
+  }
 }

@@ -1,0 +1,43 @@
+// prisma/seed.ts
+
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
+async function main() {
+  await prisma.users.createMany({
+    data: [
+      {
+        email: 'admin@example.com',
+        name: 'Admin User',
+        role: 'admin',
+        placement: 'HQ',
+        password: 'hashed_password_1', // Replace with hashed password
+      },
+      {
+        email: 'user1@example.com',
+        name: 'Alice',
+        role: 'employee',
+        placement: 'Branch A',
+        password: 'hashed_password_2',
+      },
+      {
+        email: 'user2@example.com',
+        name: 'Bob',
+        role: 'employee',
+        placement: 'Branch B',
+        password: 'hashed_password_3',
+      },
+    ],
+  });
+
+  console.log('Seed data created');
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

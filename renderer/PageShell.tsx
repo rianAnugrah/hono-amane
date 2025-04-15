@@ -10,8 +10,8 @@ import "./PageShell.css";
 import Navbar from "@/components/ui/navigation";
 import TopBar from "@/components/ui/top-bar";
 import autoAnimate from "@formkit/auto-animate";
-import { crypto } from "@/server/utils/crypto";
 import { useUserStore } from "@/stores/store-user-login";
+
 
 function PageShell({
   children,
@@ -23,6 +23,11 @@ function PageShell({
   const parent = useRef(null);
 
   const { email, name, isAuth, set_user } = useUserStore();
+
+
+  // if (!isAuth) {
+  //   throw redirect("/login");
+  // }
 
   useEffect(() => {
     parent.current && autoAnimate(parent.current);

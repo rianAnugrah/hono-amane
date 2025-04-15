@@ -131,7 +131,7 @@ function DesktopNav() {
   return (
     <nav className="hidden  md:flex flex-col  h-[100svh] gap-1 w-[10rem] pl-4 pb-4">
       <div className="h-[3.75rem] flex items-center justify-center"></div>
-      <DesktopLink href="/" icon={<HomeIcon />} label="Home" />
+      <DesktopLink href="/dashboard" icon={<HomeIcon />} label="Home" />
       <DesktopLink href="/asset" icon={<Archive />} label="Asset" />
       <DesktopLink href="/category" icon={<BookCopy />} label="Category" />
       <DesktopLink href="/location" icon={<MapPin />} label="Location" />
