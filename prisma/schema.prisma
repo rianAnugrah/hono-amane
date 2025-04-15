@@ -16,9 +16,20 @@ model Users {
   password    String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime? // soft delete
+  versions    UserVersion[]
 }
 
+model UserVersion {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String?
+  role      String?
+  placement String?
+  updatedAt DateTime @default(now())
 
+  user Users @relation(fields: [userId], references: [id])
+}
 
 model Asset {
   id              String    @id @default(uuid())
