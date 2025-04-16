@@ -1,23 +1,20 @@
 import type { Config } from "vike/types";
 import vikeReact from "vike-react/config";
-// https://vike.dev/config
+
 export default {
-  // https://vike.dev/clientRouting
-  //extends: vikeReact,
+  extends: vikeReact, // Uncomment this line!
   clientRouting: true,
-  // https://vike.dev/meta
   meta: {
-    // Define new setting 'title'
     title: {
       env: { server: true, client: true },
     },
-    // Define new setting 'description'
     description: {
       env: { server: true },
     },
-    Layout: {
+    guard: {
       env: { server: true, client: true },
     },
+    // Layout is already defined in vike-react, so you don't need to redefine it
   },
   hydrationCanBeAborted: true,
 } satisfies Config;

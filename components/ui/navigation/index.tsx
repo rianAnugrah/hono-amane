@@ -22,6 +22,9 @@ import {
 } from "lucide-react";
 import { Link } from "@/renderer/Link";
 import { usePageContext } from "@/renderer/usePageContext";
+import DesktopLink from "./desktop-link";
+import MobileLink from "./mobile-link";
+import { AnimatePresence , motion } from "framer-motion";
 
 export default function Navbar() {
   return (
@@ -40,7 +43,7 @@ function MobileNavbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex justify-between items-center w-full">
-            <MobileLink href="/" icon={<HomeIcon />} label="Home" />
+            <MobileLink href="/dashboard" icon={<HomeIcon />} label="Home" />
             <MobileLink href="/asset" icon={<Archive />} label="Asset" />
 
             <a
@@ -64,11 +67,11 @@ function MobileNavbar() {
       </div>
 
       {/* Side Drawer Overlay with Animation */}
-      <div>
+      <AnimatePresence>
         {menuOpen && (
           <>
             {/* Overlay */}
-            <div
+            <motion.div
               className="fixed inset-0 bg-black bg-opacity-50 z-40"
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.8 }}
@@ -77,7 +80,7 @@ function MobileNavbar() {
             />
 
             {/* Drawer */}
-            <div
+            <motion.div
               className="fixed right-0 top-0 bottom-0 w-64 bg-white shadow-lg p-6 flex flex-col space-y-4 z-50"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
@@ -119,10 +122,10 @@ function MobileNavbar() {
               >
                 Logout
               </Link>
-            </div>
+            </motion.div>
           </>
         )}
-      </div>
+      </AnimatePresence>
     </nav>
   );
 }
@@ -158,70 +161,4 @@ function DesktopNav() {
   );
 }
 
-function DesktopLink({
-  href,
-  icon,
-  label,
-}: {
-  href: string;
-  icon?: React.ReactNode;
-  label?: string;
-}) {
-  const pageContext = usePageContext();
-  const { urlPathname } = pageContext;
 
-  const isActive =
-    href === "/" ? urlPathname === href : urlPathname.startsWith(href);
-
-  return (
-    <Link
-      href={href}
-      className={`text-xl flex  flex-row group items-center gap-1 transition-all duration-500 ${
-        isActive
-          ? "bg-gray-100 text-orange-600 w-[12rem]"
-          : "text-gray-300 w-[9rem]"
-      } hover:bg-gray-100 hover:text-orange-600   justify-start py-2 px-4 rounded-full `}
-    >
-      {icon &&
-        React.cloneElement(icon, {
-          className: `group-hover:scale-[1.2] transition-all duration-300 w-[1rem] h-[1rem]  ${
-            icon.props.className || ""
-          }`,
-        })}
-      <span className="text-xs">{label}</span>
-    </Link>
-  );
-}
-
-function MobileLink({
-  href,
-  icon,
-  label,
-}: {
-  href: string;
-  icon?: React.ReactNode;
-  label?: string;
-}) {
-  const pageContext = usePageContext();
-  const { urlPathname } = pageContext;
-
-  const isActive =
-    href === "/" ? urlPathname === href : urlPathname.startsWith(href);
-
-  return (
-    <Link
-      href={href}
-      className={`text-xl flex flex-col items-center gap-1  active:scale-95 transition-all group w-[3rem] h-[3rem] justify-center rounded ${
-        isActive ? "bg-gray-200 text-orange-500" : "bg-transparent  text-white"
-      }  `}
-    >
-      {icon &&
-        React.cloneElement(icon, {
-          className: `group-hover:scale-[1.2] transition-all duration-300 w-[1rem] h-[1rem]  ${
-            icon.props.className || ""
-          }`,
-        })}
-      <span className="text-xs">{label}</span>
-    </Link>
-  );
-}
