@@ -28,6 +28,7 @@
     "lucide-react": "^0.487.0",
     "motion-react": "0.15.0-alpha.1",
     "node-fetch": "^3.3.2",
+    "prop-types": "^15.8.1",
     "qr-scanner": "^1.4.2",
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",

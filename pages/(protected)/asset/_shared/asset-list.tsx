@@ -36,7 +36,7 @@ export default function AssetList({
   }, [expandedId]);
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4 p-4">
       {assets.map((asset) => (
         <div
           key={asset.id}

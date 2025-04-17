@@ -101,6 +101,24 @@ assetRoutes.get('/:id', async (c) => {
   }
 });
 
+// GET single asset (latest, not deleted)
+assetRoutes.get('/by-asset-number/:id', async (c) => {
+  try {
+    const asset: Asset | null = await prisma.asset.findFirst({
+      where: {
+        assetNo: c.req.param('id'),
+        deletedAt: null,
+        isLatest: true,
+      },
+    });
+    if (!asset) return c.json({ error: `Asset with asset number ${c.req.param('id')} not found` }, 404);
+    return c.json(asset);
+  } catch (error) {
+    console.error('Error fetching asset:', error);
+    return c.json({ error: 'Failed to fetch asset' }, 500);
+  }
+});
+
 // CREATE asset
 assetRoutes.post('/', async (c) => {
   try {

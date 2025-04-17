@@ -3,10 +3,10 @@ import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import { Asset } from "./types";
 
-import AssetToolbar from "./shared/asset-toolbar";
-import AssetForm from "./shared/asset-form";
-import AssetPagination from "./shared/asset-pagination";
-import AssetList from "./shared/asset-list";
+import AssetToolbar from "./_shared/asset-toolbar";
+import AssetForm from "./_shared/asset-form";
+import AssetPagination from "./_shared/asset-pagination";
+import AssetList from "./_shared/asset-list";
 
 const AssetCrudPage = () => {
   // Form and edit state

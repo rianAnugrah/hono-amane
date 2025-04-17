@@ -36,7 +36,7 @@ export default function AssetToolbar({
   const [showToolbar, setShowToolbar] = useState<boolean>(false);
 
   return (
-    <div className="bg-gray-100 rounded-none shadow-none border-b px-4 pb-4 border-gray-300 mb-0 sticky top-0">
+    <div className="bg-gray-100 z-10 rounded-none shadow-none border-b px-4 pb-4 border-gray-300 mb-0 sticky top-0">
       <div className="flex justify-between items-center  gap-2 pt-4">
         <h1 className="text-lg font-bold text-gray-900 flex-grow">Asset</h1>
         <button
@@ -77,7 +77,7 @@ export default function AssetToolbar({
                 <InputSelect
                   onChange={handleConditionChange}
                   options={[
-                    { value: "", label: "All Condition" },
+                    { value: "", label: "All" },
                     { value: "Good", label: "Good" },
                     { value: "Broken", label: "Broken" },
                   ]}
@@ -88,7 +88,7 @@ export default function AssetToolbar({
                 <InputSelect
                   onChange={handleConditionChange}
                   options={[
-                    { value: "", label: "All Location" },
+                    { value: "", label: "All " },
                     { value: "Good", label: "Good" },
                     { value: "Broken", label: "Broken" },
                   ]}
@@ -99,7 +99,7 @@ export default function AssetToolbar({
                 <InputSelect
                   onChange={handleConditionChange}
                   options={[
-                    { value: "", label: "All Category" },
+                    { value: "", label: "All " },
                     { value: "Good", label: "Good" },
                     { value: "Broken", label: "Broken" },
                   ]}
@@ -110,7 +110,7 @@ export default function AssetToolbar({
                 <InputSelect
                   onChange={handleConditionChange}
                   options={[
-                    { value: "", label: "All Grade" },
+                    { value: "", label: "All " },
                     { value: "Good", label: "Good" },
                     { value: "Broken", label: "Broken" },
                   ]}
