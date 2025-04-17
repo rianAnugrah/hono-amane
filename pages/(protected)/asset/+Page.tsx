@@ -4,9 +4,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Asset } from "./types";
 
 import AssetToolbar from "./_shared/asset-toolbar";
-import AssetForm from "./_shared/asset-form";
+// import AssetForm from "./_shared/asset-form";
 import AssetPagination from "./_shared/asset-pagination";
 import AssetList from "./_shared/asset-list";
+import AssetForm from "@/components/forms/AssetForm";
 
 const AssetCrudPage = () => {
   // Form and edit state

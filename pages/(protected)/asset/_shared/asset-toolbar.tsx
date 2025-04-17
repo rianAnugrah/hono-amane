@@ -38,7 +38,7 @@ export default function AssetToolbar({
   return (
     <div className="bg-gray-100 z-10 rounded-none shadow-none border-b px-4 pb-4 border-gray-300 mb-0 sticky top-0">
       <div className="flex justify-between items-center  gap-2 pt-4">
-        <h1 className="text-lg font-bold text-gray-900 flex-grow">Asset</h1>
+        <h1 className="text-lg font-bold text-gray-900 flex-grow">Asset list</h1>
         <button
           onClick={() => setShowForm(!showForm)}
           className="px-4 flex items-center gap-2 py-2 bg-blue-500 text-white rounded-lg shadow-sm hover:bg-blue-600 active:bg-blue-700 transition-colors duration-200"
@@ -64,14 +64,18 @@ export default function AssetToolbar({
             // style={{ overflow: "hidden" }}
           >
             {/* Search Bar */}
-            <div className=" flex flex-col md:flex-row  gap-4 p-4 mt-4 bg-white border border-gray-200  rounded-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3  gap-4 p-4 mt-4 bg-white border border-gray-200  rounded-2xl">
+              <div className="lg:col-span-2 xl:col-span-1">
+
               <InputText
                 value={search}
                 onChange={handleSearchChange}
                 icon={<Search />}
                 placeholder="Search by name"
-              />
+                
+                />
 
+                </div>
               {/* Filter Controls */}
               <div className="grid grid-cols-1 md:grid-cols-4  gap-4 ">
                 <InputSelect

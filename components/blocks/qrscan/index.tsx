@@ -201,13 +201,13 @@ const QrScannerComponent = () => {
             {isLoading ? <p>Starting Camera...</p> : <p>Press Enable Camera</p>}
           </div>
         )}
-        {error && (
+        {/* {error && (
           <div className="absolute bottom-0 left-0 w-full p-2">
             <p className="text-red-600 text-center bg-red-100 border border-red-600 rounded">
               {error}
             </p>
           </div>
-        )}
+        )} */}
       </div>
 
       <CameraButtons

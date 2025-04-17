@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, FormInput } from "lucide-react";
 
 // Define validation types
 type ValidationStatus = "empty" | "invalid" | "valid" | "untouched";
@@ -80,7 +79,12 @@ export default function AssetForm({
 
   // Validation rules
   const validateField = (name: string, value: string | number | null): ValidationStatus => {
-    if (value === null || value === "") return "empty";
+    // Check for empty or null values first
+    if (value === null || value === "" || value === undefined) return "empty";
+    
+    // Convert value to string for length checks
+    const strValue = String(value).trim();
+    if (strValue === "") return "empty";
     
     switch (name) {
       case "projectCode":
@@ -88,27 +92,35 @@ export default function AssetForm({
       case "lineNo":
       case "categoryCode":
         // Required and should follow format (alphanumeric)
-        return /^[a-zA-Z0-9-]+$/.test(String(value)) ? "valid" : "invalid";
+        return /^[a-zA-Z0-9-]+$/.test(strValue) ? "valid" : "invalid";
       
       case "assetName":
       case "locationDesc":
       case "condition":
         // Required and should be at least 3 characters
-        return String(value).length >= 3 ? "valid" : "invalid";
+        return strValue.length >= 3 ? "valid" : "invalid";
       
       case "acqValue":
       case "acqValueIdr":
       case "bookValue":
       case "accumDepre":
       case "adjustedDepre":
-      case "ytdDepre":
-        // Required and should be a number greater than 0
-        return Number(value) >= 0 ? "valid" : "invalid";
+      case "ytdDepre": {
+        // Required and should be a number greater than or equal to 0
+        const numValue = Number(value);
+        return !isNaN(numValue) && numValue >= 0 ? "valid" : "invalid";
+      }
       
       case "pisDate":
-      case "transDate":
+      case "transDate": {
         // Required and should be a valid date
-        return /^\d{4}-\d{2}-\d{2}$/.test(String(value)) ? "valid" : "invalid";
+        try {
+          const date = new Date(strValue);
+          return !isNaN(date.getTime()) && /^\d{4}-\d{2}-\d{2}$/.test(strValue) ? "valid" : "invalid";
+        } catch {
+          return "invalid";
+        }
+      }
       
       default:
         return "valid";
@@ -117,6 +129,7 @@ export default function AssetForm({
 
   // Get error message for a field
   const getErrorMessage = (name: string, status: ValidationStatus): string => {
+    if (status === "empty") return "This field is required";
     if (status !== "invalid") return "";
     
     switch (name) {
@@ -124,7 +137,7 @@ export default function AssetForm({
       case "assetNo":
       case "lineNo":
       case "categoryCode":
-        return "Only alphanumeric characters allowed";
+        return "Only alphanumeric characters and hyphens allowed";
       
       case "assetName":
       case "locationDesc":
@@ -137,11 +150,11 @@ export default function AssetForm({
       case "accumDepre":
       case "adjustedDepre":
       case "ytdDepre":
-        return "Must be a positive number";
+        return "Must be a valid number greater than or equal to 0";
       
       case "pisDate":
       case "transDate":
-        return "Please enter a valid date";
+        return "Please enter a valid date (YYYY-MM-DD)";
       
       default:
         return "Invalid input";
@@ -151,9 +164,7 @@ export default function AssetForm({
   // Handle field blur
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const { name } = e.target;
-    const newTouchedFields = new Set(touchedFields);
-    newTouchedFields.add(name);
-    setTouchedFields(newTouchedFields);
+    setTouchedFields(prev => new Set(prev).add(name));
     
     // Validate the field
     setValidation(prev => ({
@@ -162,51 +173,47 @@ export default function AssetForm({
     }));
   };
 
+  // Handle field change
+  useEffect(() => {
+    // Validate all touched fields when form changes
+    const newValidation = { ...validation };
+    touchedFields.forEach(fieldName => {
+      newValidation[fieldName] = validateField(fieldName, form[fieldName as keyof AssetFormValues]);
+    });
+    setValidation(newValidation);
+  }, [form, touchedFields]);
+
   // Update section status when validation changes
   useEffect(() => {
-    const updateSectionStatus = () => {
-      // Basic section
-      const basicFields = ["projectCode", "assetNo", "lineNo", "assetName"];
-      const basicComplete = basicFields.every(field => validation[field] === "valid");
-      const basicError = basicFields.some(field => validation[field] === "invalid" && touchedFields.has(field));
-      
-      // Location section
-      const locationFields = ["categoryCode", "locationDesc", "condition"];
-      const locationComplete = locationFields.every(field => validation[field] === "valid");
-      const locationError = locationFields.some(field => validation[field] === "invalid" && touchedFields.has(field));
-      
-      // Financial section
-      const financialFields = ["acqValue", "acqValueIdr", "bookValue"];
-      const financialComplete = financialFields.every(field => validation[field] === "valid");
-      const financialError = financialFields.some(field => validation[field] === "invalid" && touchedFields.has(field));
-      
-      // Depreciation section
-      const depreciationFields = ["accumDepre", "adjustedDepre", "ytdDepre"];
-      const depreciationComplete = depreciationFields.every(field => validation[field] === "valid");
-      const depreciationError = depreciationFields.some(field => validation[field] === "invalid" && touchedFields.has(field));
-      
-      // Dates section
-      const datesFields = ["pisDate", "transDate"];
-      const datesComplete = datesFields.every(field => validation[field] === "valid");
-      const datesError = datesFields.some(field => validation[field] === "invalid" && touchedFields.has(field));
-      
-      setSectionStatus({
-        basic: basicError ? "error" : basicComplete ? "complete" : "incomplete",
-        location: locationError ? "error" : locationComplete ? "complete" : "incomplete",
-        financial: financialError ? "error" : financialComplete ? "complete" : "incomplete",
-        depreciation: depreciationError ? "error" : depreciationComplete ? "complete" : "incomplete",
-        dates: datesError ? "error" : datesComplete ? "complete" : "incomplete",
-      });
+    const sections = {
+      basic: ["projectCode", "assetNo", "lineNo", "assetName"],
+      location: ["categoryCode", "locationDesc", "condition"],
+      financial: ["acqValue", "acqValueIdr", "bookValue"],
+      depreciation: ["accumDepre", "adjustedDepre", "ytdDepre"],
+      dates: ["pisDate", "transDate"]
     };
-    
-    updateSectionStatus();
+
+    const newSectionStatus = Object.entries(sections).reduce((acc, [section, fields]) => {
+      const isComplete = fields.every(field => validation[field] === "valid");
+      const hasError = fields.some(field => 
+        (validation[field] === "invalid" || validation[field] === "empty") && 
+        touchedFields.has(field)
+      );
+      
+      return {
+        ...acc,
+        [section]: hasError ? "error" : isComplete ? "complete" : "incomplete"
+      };
+    }, {} as typeof sectionStatus);
+
+    setSectionStatus(newSectionStatus);
   }, [validation, touchedFields]);
 
   // Helper function to render a form field with validation
-  const renderField = (name: string, label: string, placeholder: string, type: string = "text") => {
+  const renderField = (name: keyof AssetFormValues, label: string, placeholder: string, type: string = "text") => {
     const status = touchedFields.has(name) ? validation[name] : "untouched";
     const isValid = status === "valid";
-    const isInvalid = status === "invalid";
+    const isInvalid = status === "invalid" || status === "empty";
     const errorMessage = getErrorMessage(name, status);
     
     return (
@@ -227,7 +234,7 @@ export default function AssetForm({
                   exit={{ opacity: 0, scale: 0.5 }}
                   className="text-green-500 text-sm flex items-center"
                 >
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   Valid
@@ -240,7 +247,7 @@ export default function AssetForm({
                   exit={{ opacity: 0, scale: 0.5 }}
                   className="text-red-500 text-sm flex items-center"
                 >
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                   </svg>
                   Invalid
@@ -258,9 +265,9 @@ export default function AssetForm({
               ? "border-red-500" 
               : isValid 
                 ? "border-green-500" 
-                : "border-transparent"
+                : "border-gray-300"
           }`}
-          value={form[name] || ""}
+          value={form[name] ?? ""}
           onChange={handleChange}
           onBlur={handleBlur}
         />
@@ -294,7 +301,7 @@ export default function AssetForm({
           animate={{ scale: 1 }}
           transition={{ type: "spring" }}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
           </svg>
         </motion.span>
@@ -307,7 +314,7 @@ export default function AssetForm({
           animate={{ scale: 1 }}
           transition={{ type: "spring" }}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
           </svg>
         </motion.span>
@@ -328,7 +335,6 @@ export default function AssetForm({
             ? "bg-white text-blue-600"
             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
         }`}
-        // whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
         {label}
@@ -416,7 +422,7 @@ export default function AssetForm({
       </motion.div>
       
       {/* Form Sections */}
-      <div className="relative overflow-hidden mb-6 " style={{ minHeight: "calc(100% - 300px)" }}>
+      <div className="relative overflow-hidden mb-6" style={{ minHeight: "calc(100% - 300px)" }}>
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
             key={activeSection}
@@ -434,47 +440,45 @@ export default function AssetForm({
             {/* Basic Info Section */}
             {activeSection === "basic" && (
               <div className="space-y-4">
-                {renderField("projectCode", "Project Code", "Project Code")}
-                {renderField("assetNo", "Asset No", "Asset No")}
-                {renderField("lineNo", "Line No", "Line No")}
-                {renderField("assetName", "Asset Name", "Asset Name")}
+                {renderField("projectCode", "Project Code", "Enter project code")}
+                {renderField("assetNo", "Asset No", "Enter asset number")}
+                {renderField("lineNo", "Line No", "Enter line number")}
+                {renderField("assetName", "Asset Name", "Enter asset name")}
               </div>
             )}
             
             {/* Category & Location Section */}
             {activeSection === "location" && (
               <div className="space-y-4">
-                {renderField("categoryCode", "Category Code", "Category Code")}
-                {renderField("locationDesc", "Location", "Location Description")}
-                {renderField("condition", "Condition", "Condition")}
+                {renderField("categoryCode", "Category Code", "Enter category code")}
+                {renderField("locationDesc", "Location", "Enter location description")}
+                {renderField("condition", "Condition", "Enter asset condition")}
               </div>
             )}
             
             {/* Financial Values Section */}
             {activeSection === "financial" && (
               <div className="space-y-4">
-                {renderField("acqValue", "Acquisition Value", "Acquisition Value", "number")}
-                {renderField("acqValueIdr", "Acquisition Value (IDR)", "Acquisition Value (IDR)", "number")}
-                {renderField("bookValue", "Book Value", "Book Value", "number")}
+                {renderField("acqValue", "Acquisition Value", "Enter acquisition value", "number")}
+                {renderField("acqValueIdr", "Acquisition Value (IDR)", "Enter IDR value", "number")}
+                {renderField("bookValue", "Book Value", "Enter book value", "number")}
               </div>
             )}
             
             {/* Depreciation Section */}
             {activeSection === "depreciation" && (
               <div className="space-y-4">
-                {renderField("accumDepre", "Accumulated Depreciation", "Accumulated Depreciation", "number")}
-                {renderField("adjustedDepre", "Adjusted Depreciation", "Adjusted Depreciation", "number")}
-                {renderField("ytdDepre", "YTD Depreciation", "YTD Depreciation", "number")}
-                {renderField("pisDate", "PIS Date", "PIS Date", "date")}
-                {renderField("transDate", "Transaction Date", "Transaction Date", "date")}
+                {renderField("accumDepre", "Accumulated Depreciation", "Enter accumulated depreciation", "number")}
+                {renderField("adjustedDepre", "Adjusted Depreciation", "Enter adjusted depreciation", "number")}
+                {renderField("ytdDepre", "YTD Depreciation", "Enter YTD depreciation", "number")}
               </div>
             )}
             
             {/* Dates Section */}
             {activeSection === "dates" && (
               <div className="space-y-4">
-                {renderField("pisDate", "PIS Date", "PIS Date", "date")}
-                {renderField("transDate", "Transaction Date", "Transaction Date", "date")}
+                {renderField("pisDate", "PIS Date", "YYYY-MM-DD", "date")}
+                {renderField("transDate", "Transaction Date", "YYYY-MM-DD", "date")}
               </div>
             )}
           </motion.div>
@@ -530,7 +534,6 @@ export default function AssetForm({
             <motion.button
               onClick={() => navigateSection(false)}
               className="flex-1 bg-gray-200 text-gray-700 px-4 py-3 rounded-xl font-medium active:bg-gray-300"
-              whileHover={{ scale: 1 }}
               whileTap={{ scale: 0.95 }}
             >
               Previous
@@ -541,7 +544,6 @@ export default function AssetForm({
             <motion.button
               onClick={() => navigateSection(true)}
               className="flex-1 bg-gray-200 text-gray-700 px-4 py-3 rounded-xl font-medium active:bg-gray-300"
-              whileHover={{ scale: 1 }}
               whileTap={{ scale: 0.95 }}
             >
               Next
@@ -559,7 +561,6 @@ export default function AssetForm({
                   ? "bg-blue-500 text-white hover:bg-blue-600" 
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
-              whileHover={isFormValid() ? { scale: 1 } : {}}
               whileTap={isFormValid() ? { scale: 0.95 } : {}}
             >
               {editingId ? "Update" : "Create"} Asset
@@ -569,7 +570,6 @@ export default function AssetForm({
           <motion.button
             onClick={handleCancel}
             className="flex-1 bg-gray-200 text-gray-700 px-4 py-3 rounded-xl font-medium"
-            // whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             Cancel
