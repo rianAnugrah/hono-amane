@@ -1,9 +1,9 @@
-// pages/users/+Page.tsx
 import { Link } from "@/renderer/Link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { UserFilterToolbar } from "@/pages/(protected)/user/_shared/user-filter-toolbar";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Menu, X } from "lucide-react";
+import UserFormModal from "./_shared/user-form-modal";
 
 type User = {
   id: string;
@@ -23,6 +23,7 @@ export default function Page() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({});
   const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sidebar state
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -65,134 +66,70 @@ export default function Page() {
     fetchUsers();
   };
 
+  const handleCancel = () => {
+    setForm({ email: "", password: "" });
+    setEditingId(null);
+    setIsModalOpen(false);
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
-    <div className="p-0 w-full mx-auto">
-      <AnimatePresence>
-        {isModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white rounded-2xl shadow-2xl"
-            >
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-center mb-6">
-                  {editingId ? "Edit User" : "New User"}
-                </h2>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-4">
-                    <div>
-                      <input
-                        className="w-full px-4 py-3 bg-gray-100 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Email"
-                        value={form.email}
-                        onChange={(e) =>
-                          setForm({ ...form, email: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <input
-                        className="w-full px-4 py-3 bg-gray-100 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Password"
-                        type="password"
-                        value={form.password}
-                        onChange={(e) =>
-                          setForm({ ...form, password: e.target.value })
-                        }
-                        required={!editingId}
-                      />
-                    </div>
-
-                    <div>
-                      <input
-                        className="w-full px-4 py-3 bg-gray-100 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Name"
-                        value={form.name || ""}
-                        onChange={(e) =>
-                          setForm({ ...form, name: e.target.value })
-                        }
-                      />
-                    </div>
-
-                    <div>
-                      <input
-                        className="w-full px-4 py-3 bg-gray-100 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Role"
-                        value={form.role || ""}
-                        onChange={(e) =>
-                          setForm({ ...form, role: e.target.value })
-                        }
-                      />
-                    </div>
-
-                    <div>
-                      <input
-                        className="w-full px-4 py-3 bg-gray-100 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Placement"
-                        value={form.placement || ""}
-                        onChange={(e) =>
-                          setForm({ ...form, placement: e.target.value })
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex space-x-3 pt-4">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setForm({ email: "", password: "" });
-                        setEditingId(null);
-                        setIsModalOpen(false);
-                      }}
-                      className="flex-1 px-4 py-3 text-blue-600 font-medium rounded-xl hover:bg-gray-100 transition-colors duration-200"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="flex-1 px-4 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors duration-200"
-                    >
-                      {editingId ? "Save" : "Create"}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          </motion.div>
+    <div className="flex min-h-screen w-full overflow-hidden">
+      {/* Sidebar */}
+      <motion.div
+        className="sticky top-0 h-screen bg-gray-100 flex-shrink-0 overflow-y-auto"
+        initial={{ width: 256 }}
+        animate={{ width: isSidebarOpen ? 256 : 0, opacity: isSidebarOpen ? 1 : 0 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+      >
+        {isSidebarOpen && (
+          <div className="p-4">
+            <UserFilterToolbar onChange={setFilters} />
+          </div>
         )}
-      </AnimatePresence>
-      <div className="flex justify-between items-center  gap-0 p-4">
-        <h1 className="text-2xl font-bold mb-4">Users</h1>
+      </motion.div>
 
-        <button
-          onClick={() => {
-            setForm({ email: "", password: "" });
-            setIsModalOpen(true);
-          }}
-          className="px-4 flex items-center gap-2 py-2 bg-blue-500 text-white rounded-lg shadow-sm hover:bg-blue-600 active:bg-blue-700 transition-colors duration-200"
-        >
-          <PlusCircle />
-          Add User
-        </button>
-      </div>
-      <div className=" top-4 z-10 flex justify-start  border-b border-gray-300 px-4 pb-4">
-        <UserFilterToolbar onChange={setFilters}></UserFilterToolbar>
-      </div>
+      {/* Main Content */}
+      <div className="flex-1 p-4 overflow-y-auto">
+        <div className="flex justify-between items-center gap-4 mb-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={toggleSidebar}
+              className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors duration-150"
+              aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+            >
+              {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+            <h1 className="text-2xl font-bold">Users</h1>
+          </div>
+          <button
+            onClick={() => {
+              setForm({ email: "", password: "" });
+              setIsModalOpen(true);
+            }}
+            className="px-4 flex items-center gap-2 py-2 bg-blue-500 text-white rounded-lg shadow-sm hover:bg-blue-600 active:bg-blue-700 transition-colors duration-200"
+          >
+            <PlusCircle />
+            Add User
+          </button>
+        </div>
 
-      <div className="p-4">
+        <AnimatePresence>
+          {isModalOpen && (
+            <UserFormModal
+              form={form}
+              setForm={setForm}
+              editingId={editingId}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+            />
+          )}
+        </AnimatePresence>
+
         <div className="bg-white shadow-lg rounded-2xl overflow-hidden">
-          {/* Header - Hide on mobile, show labels inline instead */}
           <div className="hidden md:grid md:grid-cols-5 bg-gray-50 px-6 py-4">
             <div className="text-sm font-medium text-gray-500">Email</div>
             <div className="text-sm font-medium text-gray-500">Name</div>

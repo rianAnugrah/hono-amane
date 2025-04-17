@@ -42,7 +42,7 @@ export function UserFilterToolbar({
   };
 
   return (
-    <div className=" w-full  grid grid-cols-1 xl:grid-cols-3 gap-4 p-4 bg-white backdrop-blur border border-gray-200/50 rounded-2xl shadow-sm">
+    <div className=" w-full  grid grid-cols-1  gap-4 p-4 bg-white backdrop-blur border border-gray-200/50 rounded-2xl shadow-sm">
       <InputText
         placeholder="Search name or email"
         value={q}
@@ -50,7 +50,7 @@ export function UserFilterToolbar({
         icon={<Search />}
       />
       {/* Sort Controls */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <InputText
           placeholder="Search by Placement"
           value={placement}
@@ -69,7 +69,7 @@ export function UserFilterToolbar({
         />
       </div>
       {/* Sort Controls */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <InputSelect
           value={sort}
           onChange={(e) => setSort(e.target.value)}

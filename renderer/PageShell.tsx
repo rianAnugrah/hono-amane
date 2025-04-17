@@ -75,7 +75,7 @@ function PageShell({
           <Navbar />
           <div className=" w-full md:w-[calc(100%_-_10rem)]  flex flex-col h-full">
             <TopBar />
-            <div className="flex w-full h-[calc(100svh_-_4rem)] overflow-y-auto   md:px-4 md:pb-4">
+            <div className="flex w-full max-h-[calc(100svh_-_4rem)] overflow-y-auto   md:px-4 md:pb-4">
               <div
                 ref={parent}
                 className="w-full pb-[5rem] bg-gray-100 rounded-2xl overflow-y-auto  border-gray-300 p-0"
