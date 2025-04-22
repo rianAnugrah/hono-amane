@@ -9,6 +9,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { useState } from "react";
+import AssetPrintButton from "./asset-print-button";
 
 export default function AssetToolbar({
   setShowForm,
@@ -39,6 +40,7 @@ export default function AssetToolbar({
     <div className="bg-gray-100 z-10 rounded-none shadow-none border-b px-4 pb-4 border-gray-300 mb-0 sticky top-0">
       <div className="flex justify-between items-center  gap-2 pt-4">
         <h1 className="text-lg font-bold text-gray-900 flex-grow">Asset list</h1>
+        <AssetPrintButton />
         <button
           onClick={() => setShowForm(!showForm)}
           className="px-4 flex items-center gap-2 py-2 bg-blue-500 text-white rounded-lg shadow-sm hover:bg-blue-600 active:bg-blue-700 transition-colors duration-200"
