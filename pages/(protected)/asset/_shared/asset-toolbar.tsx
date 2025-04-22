@@ -12,6 +12,7 @@ import { useState } from "react";
 import AssetPrintButton from "./asset-print-button";
 import { useResponive } from "@/components/hooks/use-responisve";
 import Switch from "@/components/ui/switch";
+import Checkbox from "@/components/ui/checkbox";
 
 export default function AssetToolbar({
   setShowForm,
@@ -38,28 +39,22 @@ export default function AssetToolbar({
   sortOrder: string;
   handleSortOrderChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   toggleSelectAll: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  allSelected:any;
+  allSelected: any;
 }) {
   const isDesktop = useResponive();
   const [showToolbar, setShowToolbar] = useState<boolean>(false);
   const shouldShowToolbar = isDesktop || showToolbar;
 
   return (
-    <div className="bg-gray-100 z-10 rounded-none shadow-none border-b px-4 pb-4 border-gray-300 mb-0 sticky top-0">
+    <div className="bg-gray-100 z-10 rounded-none shadow-none border-b px-4  border-gray-300 mb-0 sticky top-0">
       <div className="flex justify-between items-center  gap-2 pt-4">
         <h1 className="text-lg font-bold text-gray-900 flex-grow">
           Asset list
         </h1>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="px-4 flex items-center gap-2 py-2 bg-blue-500 text-white rounded-lg shadow-sm hover:bg-blue-600 active:bg-blue-700 transition-colors duration-200"
-        >
-          {/* {showForm ? "Hide Form" : "Add New Asset"} */}
-          <PlusCircle /> Add New Asset
-        </button>
+
         <button
           onClick={() => setShowToolbar(!showToolbar)}
-          className="px-4 py-2  text-gray-500 rounded-lg shadow-sm hover:bg-blue-600 active:bg-blue-700 transition-colors duration-200"
+          className="px-4 py-2 md:hidden  text-gray-500 rounded-lg shadow-sm hover:bg-blue-600 active:bg-blue-700 transition-colors duration-200"
         >
           {!showToolbar ? <Filter /> : <FilterX />}
         </button>
@@ -83,13 +78,6 @@ export default function AssetToolbar({
           >
             {/* Search Bar */}
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3  gap-4 p-4 mt-4 bg-white border border-gray-200  rounded-2xl">
-              <div className="flex items-center gap-2 mb-4 relative">
-               
-                 <Switch checked={allSelected} onChange={toggleSelectAll} />
-                <label className="text-sm text-gray-700">
-                  Select all on this page
-                </label>
-              </div>
               <div className="lg:col-span-2 xl:col-span-1">
                 <InputText
                   value={search}
@@ -168,12 +156,35 @@ export default function AssetToolbar({
                   label="Sort order"
                 />
               </div>
-        <AssetPrintButton />
-           
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* TABLE HEADER */}
+
+      <div className="hidden w-full md:grid grid-cols-12 items-center font-bold text-xs">
+        <div className="col-span-4 pr-4 py-2 flex items-center gap-2">
+          <Checkbox checked={allSelected} onChange={toggleSelectAll} />
+          <span>Name</span>
+        </div>
+        <div className="px-4 py-2 flex items-center">Condition</div>
+        <div className="px-4 py-2 flex items-center">Category</div>
+        <div className="px-4 py-2 flex items-center">Location</div>
+        <div className="px-4 py-2 col-span-2 flex items-center">Value</div>
+        <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
+          <AssetPrintButton />
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="btn btn-primary btn-sm"
+          >
+            <PlusCircle /> New Asset
+          </button>
+        </div>
+      </div>
+
+      
+      {/* END OF TABLE HEADER */}
     </div>
   );
 }

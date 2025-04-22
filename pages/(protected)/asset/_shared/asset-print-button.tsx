@@ -1,4 +1,5 @@
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
+import { Printer } from "lucide-react";
 
 export default function AssetPrintButton() {
   // Inside component
@@ -11,16 +12,15 @@ export default function AssetPrintButton() {
   };
   return (
     <>
-      {Object.keys(selectedAssets).length > 0 && (
-        <div className="p-4">
-          <button
-            onClick={handleOpenSelected}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md"
-          >
-            View Selected ({Object.keys(selectedAssets).length})
-          </button>
-        </div>
-      )}
+      <div className="">
+        <button
+          onClick={handleOpenSelected}
+          className="btn btn-neutral btn-sm"
+          disabled={Object.keys(selectedAssets).length <= 0}
+        >
+          <Printer /> ({Object.keys(selectedAssets).length})
+        </button>
+      </div>
     </>
   );
 }

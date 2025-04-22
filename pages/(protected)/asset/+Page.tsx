@@ -23,7 +23,7 @@ const AssetCrudPage = () => {
   const [sortBy, setSortBy] = useState<string>("createdAt");
   const [sortOrder, setSortOrder] = useState<string>("desc");
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(20);
   const [totalAssets, setTotalAssets] = useState<number>(0);
 
   // Fetch assets with filters

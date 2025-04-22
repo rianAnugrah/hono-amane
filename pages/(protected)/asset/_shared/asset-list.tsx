@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { Asset } from "../types";
 import AssetItem from "./asset-item";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
+import Switch from "@/components/ui/switch";
 // import the store
 
 export default function AssetList({
@@ -27,10 +28,6 @@ export default function AssetList({
     setExpandedId(expandedId === id ? null : id);
   };
 
-
-
-
-
   // Simplified scrolling function
   useEffect(() => {
     if (expandedId) {
@@ -48,8 +45,7 @@ export default function AssetList({
   }, [expandedId]);
 
   return (
-    <div className="space-y-4 p-4">
-      
+    <div className="px-4">
       {assets.map((asset) => (
         <div
           key={asset.id}
@@ -60,18 +56,17 @@ export default function AssetList({
               itemRefs.current.delete(asset.id);
             }
           }}
+          className="flex items-center gap-0 border-b border-gray-200 relative py-0 font-bold text-xs"
         >
-          <input
-            type="checkbox"
-            checked={!!selectedAssets[asset.id]}
-            onChange={() => handleCheckboxChange(asset)}
-          />
+         
           <AssetItem
             asset={asset}
             isExpanded={expandedId === asset.id}
             onToggle={handleToggle}
             handleEdit={handleEdit}
             handleDelete={handleDelete}
+            checked={!!selectedAssets[asset.id]}
+            onSelectAsset={() => handleCheckboxChange(asset)}
           />
         </div>
       ))}
