@@ -166,7 +166,7 @@ export default function AssetToolbar({
           />
         </div>
         <div className="px-4 py-2 flex items-center">Condition</div>
-        <div className="px-4 py-2 flex items-center">Category</div>
+        <div className="px-4 py-2 flex items-center">Project Code</div>
         <div className="px-4 py-2 flex items-center">Location</div>
         <div className="px-4 py-2 col-span-2 flex items-center">Value</div>
         <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">

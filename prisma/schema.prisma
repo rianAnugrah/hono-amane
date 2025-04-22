@@ -8,16 +8,16 @@ datasource db {
 }
 
 model Users {
-  id          String    @id @default(uuid())
-  email       String    @unique
-  name        String?
-  role        String?    
-  placement   String?
-  password    String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime? // soft delete
-  versions    UserVersion[]
+  id        String         @id @default(uuid())
+  email     String         @unique
+  name      String?
+  role      String?
+  placement String?
+  password  String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  deletedAt DateTime?      // soft delete
+  versions  UserVersion[]
 }
 
 model UserVersion {
@@ -31,34 +31,61 @@ model UserVersion {
   user Users @relation(fields: [userId], references: [id])
 }
 
+model ProjectCode {
+  id     Int     @id @default(autoincrement())
+  code   String  @unique
+  assets Asset[]
+}
+
+model LocationDesc {
+  id     Int     @id @default(autoincrement())
+  description String @unique
+  assets Asset[]
+}
+
+model DetailsLocation {
+  id     Int     @id @default(autoincrement())
+  description String @unique
+  assets Asset[]
+}
+
 model Asset {
-  id              String    @id @default(uuid())
-  version         Int       @default(1) // versioning
-  parentId        String?             // for linking to original asset, if needed
-  isLatest        Boolean   @default(true) // for querying latest version
-  projectCode     String
-  assetNo         String
-  lineNo          String
-  assetName       String
-  remark          String?
-  locationDesc    String
-  detailsLocation String?
-  condition       String
-  pisDate         DateTime
-  transDate       DateTime
-  categoryCode    String
-  afeNo           String?
-  adjustedDepre   Float
-  poNo            String?
-  acqValueIdr     Float
-  acqValue        Float
-  accumDepre      Float
-  ytdDepre        Float
-  bookValue       Float
-  taggingYear     String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime? // soft delete
+  id                String    @id @default(uuid())
+  version           Int       @default(1) // versioning
+  parentId          String?             // for linking to original asset, if needed
+  isLatest          Boolean   @default(true) // for querying latest version
+
+  projectCode_id    Int
+  projectCode       ProjectCode @relation(fields: [projectCode_id], references: [id])
+
+  assetNo           String
+  lineNo            String
+  assetName         String
+  remark            String?
+
+  locationDesc_id   Int?
+  locationDesc      LocationDesc? @relation(fields: [locationDesc_id], references: [id])
+
+  detailsLocation_id Int?
+  detailsLocation    DetailsLocation? @relation(fields: [detailsLocation_id], references: [id])
+
+  condition         String
+  pisDate           DateTime
+  transDate         DateTime
+  categoryCode      String
+  afeNo             String?
+  adjustedDepre     Float
+  poNo              String?
+  acqValueIdr       Float
+  acqValue          Float
+  accumDepre        Float
+  ytdDepre          Float
+  bookValue         Float
+  taggingYear       String?
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime? // soft delete
 
   @@index([assetNo, isLatest]) // useful for querying latest version by assetNo
 }

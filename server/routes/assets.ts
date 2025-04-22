@@ -1,5 +1,5 @@
-import { Hono } from 'hono';
-import { PrismaClient } from '@prisma/client';
+import { Hono } from "hono";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const assetRoutes = new Hono();
@@ -35,14 +35,14 @@ interface Asset {
 }
 
 // GET all assets with search, filter, sort, and pagination
-assetRoutes.get('/', async (c) => {
+assetRoutes.get("/", async (c) => {
   try {
-    const page = parseInt(c.req.query('page') || '1', 10);
-    const pageSize = parseInt(c.req.query('pageSize') || '10', 10);
-    const search = c.req.query('search') || '';
-    const filterCondition = c.req.query('condition') || '';
-    const sortBy = c.req.query('sortBy') || 'createdAt';
-    const sortOrder = c.req.query('sortOrder') || 'desc';
+    const page = parseInt(c.req.query("page") || "1", 10);
+    const pageSize = parseInt(c.req.query("pageSize") || "10", 10);
+    const search = c.req.query("search") || "";
+    const filterCondition = c.req.query("condition") || "";
+    const sortBy = c.req.query("sortBy") || "createdAt";
+    const sortOrder = c.req.query("sortOrder") || "desc";
 
     // Build query for filtering and searching
     const whereConditions = {
@@ -50,7 +50,7 @@ assetRoutes.get('/', async (c) => {
       isLatest: true,
       assetName: {
         contains: search, // Search in asset name
-        mode: 'insensitive', // Case-insensitive search
+        mode: "insensitive", // Case-insensitive search
       },
       condition: filterCondition ? { equals: filterCondition } : undefined,
     };
@@ -61,6 +61,11 @@ assetRoutes.get('/', async (c) => {
       take: pageSize, // Limit the number of assets per page
       orderBy: {
         [sortBy]: sortOrder, // Sort by specified column (e.g., createdAt, assetNo)
+      },
+      include: {
+        projectCode: true,
+        locationDesc: true,
+        detailsLocation: true,
       },
     });
 
@@ -78,49 +83,53 @@ assetRoutes.get('/', async (c) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching assets:', error);
-    return c.json({ error: 'Failed to fetch assets' }, 500);
+    console.error("Error fetching assets:", error);
+    return c.json({ error: "Failed to fetch assets" }, 500);
   }
 });
 
 // GET single asset (latest, not deleted)
-assetRoutes.get('/:id', async (c) => {
+assetRoutes.get("/:id", async (c) => {
   try {
     const asset: Asset | null = await prisma.asset.findFirst({
       where: {
-        id: c.req.param('id'),
+        id: c.req.param("id"),
         deletedAt: null,
         isLatest: true,
       },
     });
-    if (!asset) return c.json({ error: 'Asset not found' }, 404);
+    if (!asset) return c.json({ error: "Asset not found" }, 404);
     return c.json(asset);
   } catch (error) {
-    console.error('Error fetching asset:', error);
-    return c.json({ error: 'Failed to fetch asset' }, 500);
+    console.error("Error fetching asset:", error);
+    return c.json({ error: "Failed to fetch asset" }, 500);
   }
 });
 
 // GET single asset (latest, not deleted)
-assetRoutes.get('/by-asset-number/:id', async (c) => {
+assetRoutes.get("/by-asset-number/:id", async (c) => {
   try {
     const asset: Asset | null = await prisma.asset.findFirst({
       where: {
-        assetNo: c.req.param('id'),
+        assetNo: c.req.param("id"),
         deletedAt: null,
         isLatest: true,
       },
     });
-    if (!asset) return c.json({ error: `Asset with asset number ${c.req.param('id')} not found` }, 404);
+    if (!asset)
+      return c.json(
+        { error: `Asset with asset number ${c.req.param("id")} not found` },
+        404
+      );
     return c.json(asset);
   } catch (error) {
-    console.error('Error fetching asset:', error);
-    return c.json({ error: 'Failed to fetch asset' }, 500);
+    console.error("Error fetching asset:", error);
+    return c.json({ error: "Failed to fetch asset" }, 500);
   }
 });
 
 // CREATE asset
-assetRoutes.post('/', async (c) => {
+assetRoutes.post("/", async (c) => {
   try {
     const body: Asset = await c.req.json();
     const asset: Asset = await prisma.asset.create({
@@ -151,20 +160,20 @@ assetRoutes.post('/', async (c) => {
     });
     return c.json(asset, 201);
   } catch (error) {
-    console.error('Error creating asset:', error);
-    return c.json({ error: 'Failed to create asset' }, 500);
+    console.error("Error creating asset:", error);
+    return c.json({ error: "Failed to create asset" }, 500);
   }
 });
 
 // UPDATE asset (creates new version)
-assetRoutes.put('/:id', async (c) => {
+assetRoutes.put("/:id", async (c) => {
   try {
-    const id = c.req.param('id');
+    const id = c.req.param("id");
     const body: Partial<Asset> = await c.req.json();
 
     const old = await prisma.asset.findUnique({ where: { id } });
     if (!old || old.deletedAt || !old.isLatest) {
-      return c.json({ error: 'Asset not found or already versioned' }, 404);
+      return c.json({ error: "Asset not found or already versioned" }, 404);
     }
 
     // Mark previous version as not latest
@@ -206,19 +215,19 @@ assetRoutes.put('/:id', async (c) => {
 
     return c.json(newAsset);
   } catch (error) {
-    console.error('Error updating asset:', error);
-    return c.json({ error: 'Failed to update asset' }, 500);
+    console.error("Error updating asset:", error);
+    return c.json({ error: "Failed to update asset" }, 500);
   }
 });
 
 // SOFT DELETE asset
-assetRoutes.delete('/:id', async (c) => {
+assetRoutes.delete("/:id", async (c) => {
   try {
-    const id = c.req.param('id');
+    const id = c.req.param("id");
     const asset = await prisma.asset.findUnique({ where: { id } });
 
     if (!asset || asset.deletedAt) {
-      return c.json({ error: 'Asset not found or already deleted' }, 404);
+      return c.json({ error: "Asset not found or already deleted" }, 404);
     }
 
     await prisma.asset.update({
@@ -226,10 +235,10 @@ assetRoutes.delete('/:id', async (c) => {
       data: { deletedAt: new Date() },
     });
 
-    return c.json({ message: 'Asset soft-deleted' });
+    return c.json({ message: "Asset soft-deleted" });
   } catch (error) {
-    console.error('Error deleting asset:', error);
-    return c.json({ error: 'Failed to delete asset' }, 500);
+    console.error("Error deleting asset:", error);
+    return c.json({ error: "Failed to delete asset" }, 500);
   }
 });
 

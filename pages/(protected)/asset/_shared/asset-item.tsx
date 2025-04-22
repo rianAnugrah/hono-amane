@@ -61,9 +61,9 @@ export default function AssetItem({
               {asset.condition}
             </span>
           </div>
-          <div className="px-4 py-2 flex items-center">{asset.projectCode}</div>
+          <div className="px-4 py-2 flex items-center">{asset.projectCode?.code}</div>
           <div className="px-4 py-2 flex items-center">
-            {asset.locationDesc}
+            {asset.locationDesc?.description}
           </div>
           <div className="px-4 py-2 col-span-2 flex items-center">
             {formatIDR(asset.acqValueIdr)}

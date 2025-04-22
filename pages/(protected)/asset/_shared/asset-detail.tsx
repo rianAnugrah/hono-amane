@@ -85,11 +85,11 @@ export default function AssetDetail({
                     </span>
                   }
                 />
-                <DetailItem label="Project Code" value={asset.projectCode} />
+                <DetailItem label="Project Code" value={asset.projectCode?.code} />
                 <DetailItem label="Line No" value={asset.lineNo} />
                 <DetailItem label="Category Code" value={asset.categoryCode} />
-                <DetailItem label="Location" value={asset.locationDesc} />
-                <DetailItem label="Area" value={asset.detailsLocation} />
+                <DetailItem label="Location" value={asset.locationDesc?.description} />
+                <DetailItem label="Area" value={asset.detailsLocation?.description} />
                 <DetailItem
                   label="PIS Date"
                   value={formatDate(asset.pisDate)}
