@@ -77,17 +77,10 @@ export default function AssetToolbar({
             className="p-0"
           >
             {/* Search Bar */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3  gap-4 p-4 mt-4 bg-white border border-gray-200  rounded-2xl">
-              <div className="lg:col-span-2 xl:col-span-1">
-                <InputText
-                  value={search}
-                  onChange={handleSearchChange}
-                  icon={<Search />}
-                  placeholder="Search by name"
-                />
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-6  gap-4  my-4   rounded-2xl">
+             
               {/* Filter Controls */}
-              <div className="grid grid-cols-1 md:grid-cols-4  gap-4 ">
+            
                 <InputSelect
                   onChange={handleConditionChange}
                   options={[
@@ -131,10 +124,9 @@ export default function AssetToolbar({
                   value={condition}
                   label="Grade"
                 />
-              </div>
+             
 
-              {/* Sort Controls */}
-              <div className="grid grid-cols-2  gap-4 ">
+            
                 <InputSelect
                   onChange={handleSortByChange}
                   options={[
@@ -155,7 +147,7 @@ export default function AssetToolbar({
                   value={sortOrder}
                   label="Sort order"
                 />
-              </div>
+            
             </div>
           </motion.div>
         )}
@@ -166,7 +158,12 @@ export default function AssetToolbar({
       <div className="hidden w-full md:grid grid-cols-12 items-center font-bold text-xs">
         <div className="col-span-4 pr-4 py-2 flex items-center gap-2">
           <Checkbox checked={allSelected} onChange={toggleSelectAll} />
-          <span>Name</span>
+          <InputText
+            value={search}
+            onChange={handleSearchChange}
+            icon={<Search />}
+            placeholder="Search by name"
+          />
         </div>
         <div className="px-4 py-2 flex items-center">Condition</div>
         <div className="px-4 py-2 flex items-center">Category</div>
@@ -183,7 +180,6 @@ export default function AssetToolbar({
         </div>
       </div>
 
-      
       {/* END OF TABLE HEADER */}
     </div>
   );
