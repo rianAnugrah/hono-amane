@@ -21,25 +21,22 @@ const SelectedAssetsPage = () => {
   }, []);
 
   const handlePrint = async () => {
-   
-    
     try {
-     
-      
       if (assets.length === 0) {
-        alert("No assets are selected for printing. Please select at least one asset.");
+        alert(
+          "No assets are selected for printing. Please select at least one asset."
+        );
         return;
       }
 
       // Create a new window for printing
-      const printWindow = window.open('', '_blank');
+      const printWindow = window.open("", "_blank");
       if (!printWindow) {
         alert("Please allow popups to print");
         return;
       }
 
       console.log("SELECTED_ASSETS COUNT:", assets.length);
-     
 
       // Create formatted content for printing
       const printContent = `
@@ -153,8 +150,14 @@ const SelectedAssetsPage = () => {
               <div>Total Assets: ${assets.length}</div>
             </div>
             
-            ${assets.map((asset, index) => `
-              ${index > 0 && index % 3 === 0 ? '<div class="pagebreak"></div>' : ''}
+            ${assets
+              .map(
+                (asset, index) => `
+              ${
+                index > 0 && index % 3 === 0
+                  ? '<div class="pagebreak"></div>'
+                  : ""
+              }
               <div class="asset-card">
                 <div class="asset-header">
                   <div class="asset-name">${asset.assetName}</div>
@@ -200,34 +203,46 @@ const SelectedAssetsPage = () => {
                   </div>
                   <div class="meta-item">
                     <span class="meta-label">PIS Date</span>
-                    <span class="meta-value">${new Intl.DateTimeFormat("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "2-digit",
-                    }).format(new Date(asset.pisDate || new Date()))}</span>
+                    <span class="meta-value">${new Intl.DateTimeFormat(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "short",
+                        day: "2-digit",
+                      }
+                    ).format(new Date(asset.pisDate || new Date()))}</span>
                   </div>
                   <div class="meta-item">
                     <span class="meta-label">Trans Date</span>
-                    <span class="meta-value">${new Intl.DateTimeFormat("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "2-digit",
-                    }).format(new Date(asset.transDate || new Date()))}</span>
+                    <span class="meta-value">${new Intl.DateTimeFormat(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "short",
+                        day: "2-digit",
+                      }
+                    ).format(new Date(asset.transDate || new Date()))}</span>
                   </div>
                   <div class="meta-item">
                     <span class="meta-label">Acq. Value IDR</span>
-                    <span class="meta-value highlight">${new Intl.NumberFormat("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                      minimumFractionDigits: 0,
-                    }).format(asset.acqValueIdr)}</span>
+                    <span class="meta-value highlight">${new Intl.NumberFormat(
+                      "id-ID",
+                      {
+                        style: "currency",
+                        currency: "IDR",
+                        minimumFractionDigits: 0,
+                      }
+                    ).format(asset.acqValueIdr)}</span>
                   </div>
                   <div class="meta-item">
                     <span class="meta-label">Acq. Value USD</span>
-                    <span class="meta-value highlight">${new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }).format(asset.acqValue)}</span>
+                    <span class="meta-value highlight">${new Intl.NumberFormat(
+                      "en-US",
+                      {
+                        style: "currency",
+                        currency: "USD",
+                      }
+                    ).format(asset.acqValue)}</span>
                   </div>
                   <div class="meta-item">
                     <span class="meta-label">Book Value</span>
@@ -245,47 +260,75 @@ const SelectedAssetsPage = () => {
                     <span class="meta-label">Adjusted Depre.</span>
                     <span class="meta-value">${asset.adjustedDepre.toLocaleString()}</span>
                   </div>
-                  ${asset.afeNo ? `
+                  ${
+                    asset.afeNo
+                      ? `
                   <div class="meta-item">
                     <span class="meta-label">AFE No</span>
                     <span class="meta-value">${asset.afeNo}</span>
                   </div>
-                  ` : ''}
-                  ${asset.poNo ? `
+                  `
+                      : ""
+                  }
+                  ${
+                    asset.poNo
+                      ? `
                   <div class="meta-item">
                     <span class="meta-label">PO No</span>
                     <span class="meta-value">${asset.poNo}</span>
                   </div>
-                  ` : ''}
+                  `
+                      : ""
+                  }
                 </div>
-                ${asset.remark ? `
+                ${
+                  asset.remark
+                    ? `
                   <div class="meta-item">
                     <span class="meta-label">Remark</span>
                     <span class="meta-value">${asset.remark}</span>
                   </div>
-                ` : ''}
+                `
+                    : ""
+                }
               </div>
-            `).join('')}
-            <script>
-              // Generate QR codes for each asset
-              window.onload = function() {
-                ${assets.map((asset, index) => `
-                  new QRCode(document.getElementById("qrcode-${index}"), {
-                    text: "assetNo:${asset.assetNo}",
-                    width: 80,
-                    height: 80,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: 4
-                  });
-                `).join('')}
-                
-                // Auto-trigger print when content is loaded
-                setTimeout(function() {
-                  window.print();
-                }, 1000);
-              }
-            </script>
+            `
+              )
+              .join("")}
+           <script>
+  function loadScript(src, callback) {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = callback;
+    document.head.appendChild(script);
+  }
+
+  function generateQRCodes() {
+    ${assets
+      .map(
+        (asset, index) => `
+      new QRCode(document.getElementById("qrcode-${index}"), {
+        text: "${asset.assetNo}",
+        width: 80,
+        height: 80,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    `
+      )
+      .join("")}
+
+    setTimeout(function () {
+      window.print();
+    }, 500);
+  }
+
+  window.onload = function () {
+    loadScript("https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js", generateQRCodes);
+  };
+</script>
+
           </body>
         </html>
       `;
