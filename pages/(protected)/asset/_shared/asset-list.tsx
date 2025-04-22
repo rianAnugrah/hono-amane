@@ -74,9 +74,6 @@ export default function AssetList({
       return;
     }
 
-    console.log("SELECTED_ASSET" , selectedAssets);
-    console.log("SELECTED_ID" , selectedIds);
-
     // Create formatted content for printing
     const printContent = `
       <!DOCTYPE html>
@@ -317,8 +314,8 @@ export default function AssetList({
   }, [expandedId]);
 
   // Check if all assets on current page are selected
-  const areAllSelected = assets.length > 0 && 
-    assets.every(asset => selectedAssets.has(asset.id));
+  // const areAllSelected = assets.length > 0 && 
+  //   assets.every(asset => selectedAssets.has(asset.id));
 
   return (
     <div className="space-y-6">
@@ -333,7 +330,7 @@ export default function AssetList({
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
-              checked={areAllSelected}
+              //checked={areAllSelected}
               onChange={handleSelectAll}
               className="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
             />
