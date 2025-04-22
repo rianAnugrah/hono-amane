@@ -3,6 +3,8 @@ import { QRCodeCanvas } from "qrcode.react";
 import { Asset } from "../types";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@/renderer/Link";
+import { useAssetSelectionStore } from '@/stores/asset-selection-store';
+
 
 export default function AssetItem({
   asset,
@@ -17,6 +19,9 @@ export default function AssetItem({
   handleEdit: (asset: Asset) => void;
   handleDelete: (id: string) => void;
 }) {
+  const { isSelected, toggleAsset } = useAssetSelectionStore();
+  const selected = isSelected(asset.id);
+
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return "N/A";
     return new Intl.DateTimeFormat("en-US", {
@@ -41,19 +46,45 @@ export default function AssetItem({
     }).format(value);
   };
 
+  const handleSelectClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleAsset(asset.id);
+  };
+
   return (
     <motion.div
       layout
       key={asset.id}
-      className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden backdrop-blur-lg transition-all duration-300 hover:shadow-lg hover:border-gray-200"
+      className={`bg-white rounded-2xl shadow-sm overflow-hidden backdrop-blur-lg transition-all duration-300 hover:shadow-lg ${
+        selected 
+          ? 'border-2 border-blue-500 ring-2 ring-blue-200' 
+          : 'border border-gray-100 hover:border-gray-200'
+      }`}
     >
       <div className="p-6">
         <div className="flex flex-col gap-4">
-          {/* Asset Header Section */}
+          {/* Asset Header Section with Selection Checkbox */}
           <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-medium text-gray-900 tracking-tight">
-              {asset.assetName}
-            </h3>
+            <div className="flex items-center gap-3">
+              <div 
+                className="flex-shrink-0 cursor-pointer"
+                onClick={handleSelectClick}
+              >
+                <input
+                  type="checkbox"
+                  checked={selected}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    toggleAsset(asset.id);
+                  }}
+                  className="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+              <h3 className="text-2xl font-medium text-gray-900 tracking-tight">
+                {asset.assetName}
+              </h3>
+            </div>
             <button
               onClick={() => onToggle(asset.id)}
               className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors focus:outline-none"
