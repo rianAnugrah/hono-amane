@@ -9,10 +9,12 @@ export default function AssetList({
   assets,
   handleEdit,
   handleDelete,
+  handleCheckboxChange,
 }: {
   assets: Asset[];
   handleEdit: (asset: Asset) => void;
   handleDelete: (id: string) => void;
+  handleCheckboxChange: (asset: Asset) => void;
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const itemRefs = useRef<Map<string, HTMLElement>>(new Map());
@@ -28,21 +30,6 @@ export default function AssetList({
 
 
 
-  const handleCheckboxChange = (asset: Asset) => {
-    if (selectedAssets[asset.id]) {
-      deselectAsset(asset.id);
-    } else {
-      selectAsset(asset);
-    }
-  };
-
-  const toggleSelectAll = () => {
-    if (allSelected) {
-      assets.forEach((asset) => deselectAsset(asset.id));
-    } else {
-      assets.forEach((asset) => selectAsset(asset));
-    }
-  };
 
   // Simplified scrolling function
   useEffect(() => {
@@ -62,14 +49,7 @@ export default function AssetList({
 
   return (
     <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2 mb-4">
-        <input
-          type="checkbox"
-          checked={allSelected}
-          onChange={toggleSelectAll}
-        />
-        <label className="text-sm text-gray-700">Select all on this page</label>
-      </div>
+      
       {assets.map((asset) => (
         <div
           key={asset.id}

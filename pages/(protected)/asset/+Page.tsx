@@ -8,6 +8,7 @@ import AssetToolbar from "./_shared/asset-toolbar";
 import AssetPagination from "./_shared/asset-pagination";
 import AssetList from "./_shared/asset-list";
 import AssetForm from "@/components/forms/AssetForm";
+import { useAssetSelectionStore } from "@/stores/store-asset-selection";
 
 const AssetCrudPage = () => {
   // Form and edit state
@@ -109,6 +110,31 @@ const AssetCrudPage = () => {
     setShowForm(false);
   };
 
+
+    // Inside the component
+    const { selectedAssets, selectAsset, deselectAsset } =
+    useAssetSelectionStore();
+  const allSelected = assets.every((asset) => selectedAssets[asset.id]);
+
+
+
+  const handleCheckboxChange = (asset: Asset) => {
+    if (selectedAssets[asset.id]) {
+      deselectAsset(asset.id);
+    } else {
+      selectAsset(asset);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      assets.forEach((asset) => deselectAsset(asset.id));
+    } else {
+      assets.forEach((asset) => selectAsset(asset));
+    }
+  };
+
+
   return (
     <div className="">
       {/* Asset Form */}
@@ -142,6 +168,8 @@ const AssetCrudPage = () => {
         handleSortByChange={handleSortByChange}
         sortOrder={sortOrder}
         handleSortOrderChange={handleSortOrderChange}
+        toggleSelectAll={toggleSelectAll}
+        allSelected={allSelected}
       />
 
       {/* Assets List - Card View */}
@@ -150,6 +178,8 @@ const AssetCrudPage = () => {
           assets={assets}
           handleEdit={handleEdit}
           handleDelete={handleDelete}
+          handleCheckboxChange={handleCheckboxChange}
+          toggleSelectAll={toggleSelectAll}
         />
       </div>
 

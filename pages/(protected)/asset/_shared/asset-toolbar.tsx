@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import AssetPrintButton from "./asset-print-button";
+import { useResponive } from "@/components/hooks/use-responisve";
 
 export default function AssetToolbar({
   setShowForm,
@@ -22,6 +23,8 @@ export default function AssetToolbar({
   handleSortByChange,
   sortOrder,
   handleSortOrderChange,
+  toggleSelectAll,
+  allSelected,
 }: {
   setShowForm: (showForm: boolean) => void;
   showForm: boolean;
@@ -33,13 +36,19 @@ export default function AssetToolbar({
   handleSortByChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   sortOrder: string;
   handleSortOrderChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  toggleSelectAll: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  allSelected:any;
 }) {
+  const isDesktop = useResponive();
   const [showToolbar, setShowToolbar] = useState<boolean>(false);
+  const shouldShowToolbar = isDesktop || showToolbar;
 
   return (
     <div className="bg-gray-100 z-10 rounded-none shadow-none border-b px-4 pb-4 border-gray-300 mb-0 sticky top-0">
       <div className="flex justify-between items-center  gap-2 pt-4">
-        <h1 className="text-lg font-bold text-gray-900 flex-grow">Asset list</h1>
+        <h1 className="text-lg font-bold text-gray-900 flex-grow">
+          Asset list
+        </h1>
         <AssetPrintButton />
         <button
           onClick={() => setShowForm(!showForm)}
@@ -56,28 +65,42 @@ export default function AssetToolbar({
         </button>
       </div>
       <AnimatePresence>
-        {showToolbar && (
+        {(shouldShowToolbar || isDesktop) && (
           <motion.div
-            initial={{ height: 0, opacity: 0, overflow: "hidden" }}
-            animate={{ height: "auto", opacity: 1, overflow: "visible" }} // Set a specific height in pixels
-            exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+            initial={
+              isDesktop ? false : { height: 0, opacity: 0, overflow: "hidden" }
+            }
+            animate={
+              isDesktop
+                ? {}
+                : { height: "auto", opacity: 1, overflow: "visible" }
+            }
+            exit={
+              isDesktop ? {} : { height: 0, opacity: 0, overflow: "hidden" }
+            }
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className=" p-0 "
-            // style={{ overflow: "hidden" }}
+            className="p-0"
           >
             {/* Search Bar */}
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3  gap-4 p-4 mt-4 bg-white border border-gray-200  rounded-2xl">
-              <div className="lg:col-span-2 xl:col-span-1">
-
-              <InputText
-                value={search}
-                onChange={handleSearchChange}
-                icon={<Search />}
-                placeholder="Search by name"
-                
+              <div className="flex items-center gap-2 mb-4">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleSelectAll}
                 />
-
-                </div>
+                <label className="text-sm text-gray-700">
+                  Select all on this page
+                </label>
+              </div>
+              <div className="lg:col-span-2 xl:col-span-1">
+                <InputText
+                  value={search}
+                  onChange={handleSearchChange}
+                  icon={<Search />}
+                  placeholder="Search by name"
+                />
+              </div>
               {/* Filter Controls */}
               <div className="grid grid-cols-1 md:grid-cols-4  gap-4 ">
                 <InputSelect
