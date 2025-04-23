@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Asset } from "../types";
-import AssetItem from "../_shared/asset-item";
-import AssetPrintItem from "../_shared/asset-print-item";
+
 import { formatDate } from "@/components/utils/formatting";
+import { Asset } from "../(protected)/asset/types";
+import AssetPrintItem from "../(protected)/asset/_shared/asset-print-item";
 
 const SelectedAssetsPage = () => {
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -303,15 +303,25 @@ body {
     }
   };
 
+  const handlePrintNew = () => {
+    window.print();
+  }
+
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">Selected Assets</h1>
         <button
+          onClick={handlePrintNew}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md print:hidden"
+        >
+          Print New
+        </button>
+        <button
           onClick={handlePrint}
           className="px-4 py-2 bg-blue-600 text-white rounded-md print:hidden"
         >
-          Print
+          Print Legacy
         </button>
       </div>
 

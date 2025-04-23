@@ -1,6 +1,6 @@
 export interface Asset {
   id: string;
-  projectCode: string;
+  projectCode: AssetProjectCode;
   assetNo: string;
   lineNo: string;
   assetName: string;
@@ -23,4 +23,10 @@ export interface Asset {
   version: number;
   isLatest: boolean;
   deletedAt?: string | null;
+}
+
+
+export interface AssetProjectCode {
+  id : string;
+  code : string;
 }
