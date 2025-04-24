@@ -88,6 +88,7 @@ assetRoutes.get("/", async (c) => {
   }
 });
 
+
 // GET single asset (latest, not deleted)
 assetRoutes.get("/:id", async (c) => {
   try {
@@ -241,5 +242,6 @@ assetRoutes.delete("/:id", async (c) => {
     return c.json({ error: "Failed to delete asset" }, 500);
   }
 });
+
 
 export default assetRoutes;

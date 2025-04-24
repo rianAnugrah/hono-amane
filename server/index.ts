@@ -12,6 +12,7 @@ import users from "./routes/users";
 import detailsLocationRoute from "./routes/location-details";
 import projectCodeRoute from "./routes/project-codes";
 import locationRoute from "./routes/locations";
+import statRoutes from "./routes/stats";
 
 const isProduction = process.env.NODE_ENV === "production";
 const port = Number(env.APP_PORT);
@@ -36,6 +37,7 @@ app.route("/api/users", users); // Tambahkan route upload
 app.route("/api/locations", locationRoute); // Tambahkan route upload
 app.route("/api/locations-details", detailsLocationRoute); // Tambahkan route upload
 app.route("/api/project-codes", projectCodeRoute); // Tambahkan route upload
+app.route("/api/stats", statRoutes); // Tambahkan route upload
 
 // Serve uploaded files statically
 app.use('/uploads/*', serveStatic({ root: './' }));
