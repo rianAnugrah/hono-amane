@@ -97,6 +97,10 @@ assetRoutes.get("/:id", async (c) => {
         id: c.req.param("id"),
         deletedAt: null,
         isLatest: true,
+      }, include: {
+        projectCode: true,
+        locationDesc: true,
+        detailsLocation: true,
       },
     });
     if (!asset) return c.json({ error: "Asset not found" }, 404);
@@ -115,6 +119,10 @@ assetRoutes.get("/by-asset-number/:id", async (c) => {
         assetNo: c.req.param("id"),
         deletedAt: null,
         isLatest: true,
+      }, include: {
+        projectCode: true,
+        locationDesc: true,
+        detailsLocation: true,
       },
     });
     if (!asset)
