@@ -24,7 +24,8 @@ import { Link } from "@/renderer/Link";
 import { usePageContext } from "@/renderer/usePageContext";
 import DesktopLink from "./desktop-link";
 import MobileLink from "./mobile-link";
-import { AnimatePresence , motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useAssetSelectionStore } from "@/stores/store-asset-selection";
 
 export default function Navbar() {
   return (
@@ -131,6 +132,7 @@ function MobileNavbar() {
 }
 
 function DesktopNav() {
+  
   return (
     <nav className="hidden  md:flex flex-col  h-[100svh] gap-1 w-[10rem] pl-4 pb-4">
       <div className="h-[3.75rem] flex items-center justify-center"></div>
@@ -149,10 +151,11 @@ function DesktopNav() {
           <span className="text-xs font-bold">Scan QR</span>
         </Link>
       </div>
-      <div className="flex flex-grow"></div>
+      <div className="flex flex-grow flex-col">
+        
+
+      </div>
       <DesktopLink href="/login" icon={<LogOut />} label="Logout" />
     </nav>
   );
 }
-
-

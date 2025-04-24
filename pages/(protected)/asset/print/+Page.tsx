@@ -8,49 +8,22 @@ import { printAssets } from "../_shared/asset-print-utils";
 
 
 const SelectedAssetsPage = () => {
-  const [assets, setAssets] = useState<Asset[]>([]);
+ 
   const { selectedAssets, selectAsset, deselectAsset } = useAssetSelectionStore();
   
-  useEffect(() => {
-    const selectedIds = Object.keys(selectedAssets).filter(id => selectedAssets[id]);
-    
-    const fetchSelectedAssets = async () => {
-      if (selectedIds.length === 0) {
-        setAssets([]);
-        return;
-      }
-      
-      try {
-        const { data } = await axios.get("/api/assets", {
-          params: { ids: selectedIds },
-        });
-        
-        // Ensure we only keep assets that are still in selectedAssets
-        const filteredAssets = (data.assets ?? data).filter(
-          (asset) => selectedAssets[asset.id]
-        );
-        
-        setAssets(filteredAssets);
-      } catch (error) {
-        console.error("Error fetching selected assets:", error);
-        setAssets([]);
-      }
-    };
-    
-    fetchSelectedAssets();
-  }, [selectedAssets]);
+ 
 
   const handlePrint = async () => {
-    printAssets(assets);
+    printAssets(selectedAssets);
   };
 
   return (
     <button
       onClick={handlePrint}
       className="btn btn-neutral btn-sm"
-      disabled={assets.length <= 0}
+      disabled={selectedAssets.length <= 0}
     >
-      <Printer className="w-5 h-5"/> Print({assets.length})
+      <Printer className="w-5 h-5"/> Print({selectedAssets.length})
     </button>
   );
 };

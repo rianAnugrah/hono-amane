@@ -87,6 +87,9 @@ export const getCSSStyles = () => {
     <style>
       body {
         font-family: sans-serif;
+        height: auto;
+        display:flex;
+        flex-direction : column;
       }
 
       .container {

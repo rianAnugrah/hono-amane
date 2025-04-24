@@ -22,8 +22,9 @@ export default function AssetList({
   // Inside the component
   const { selectedAssets, selectAsset, deselectAsset } =
     useAssetSelectionStore();
-  const allSelected = assets.every((asset) => selectedAssets[asset.id]);
-
+    const allSelected = assets.every((asset) =>
+      selectedAssets.some((a) => a.id === asset.id)
+    );
   const handleToggle = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
   };
@@ -65,7 +66,7 @@ export default function AssetList({
             onToggle={handleToggle}
             handleEdit={handleEdit}
             handleDelete={handleDelete}
-            checked={!!selectedAssets[asset.id]}
+            checked={selectedAssets.some((a) => a.id === asset.id)}
             onSelectAsset={() => handleCheckboxChange(asset)}
           />
         </div>

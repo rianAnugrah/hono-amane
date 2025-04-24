@@ -114,25 +114,38 @@ const AssetCrudPage = () => {
     // Inside the component
     const { selectedAssets, selectAsset, deselectAsset } =
     useAssetSelectionStore();
-  const allSelected = assets.every((asset) => selectedAssets[asset.id]);
+    const allSelected = assets.every((asset) =>
+      selectedAssets.some((a) => a.id === asset.id)
+    );
 
 
 
-  const handleCheckboxChange = (asset: Asset) => {
-    if (selectedAssets[asset.id]) {
-      deselectAsset(asset.id);
-    } else {
-      selectAsset(asset);
-    }
-  };
-
-  const toggleSelectAll = () => {
-    if (allSelected) {
-      assets.forEach((asset) => deselectAsset(asset.id));
-    } else {
-      assets.forEach((asset) => selectAsset(asset));
-    }
-  };
+    const handleCheckboxChange = (asset: Asset) => {
+      const isSelected = selectedAssets.some((a) => a.id === asset.id);
+      if (isSelected) {
+        deselectAsset(asset.id);
+      } else {
+        selectAsset(asset);
+      }
+    };
+    
+    const toggleSelectAll = () => {
+      const allSelected = assets.every((asset) =>
+        selectedAssets.some((a) => a.id === asset.id)
+      );
+    
+      if (allSelected) {
+        assets.forEach((asset) => deselectAsset(asset.id));
+      } else {
+        assets.forEach((asset) => {
+          const alreadySelected = selectedAssets.some((a) => a.id === asset.id);
+          if (!alreadySelected) {
+            selectAsset(asset);
+          }
+        });
+      }
+    };
+    
 
 
   return (
