@@ -13,6 +13,7 @@ import AssetPrintButton from "./asset-print-button";
 import { useResponive } from "@/components/hooks/use-responisve";
 import Switch from "@/components/ui/switch";
 import Checkbox from "@/components/ui/checkbox";
+import SelectedAssetsPage from "@/pages/(protected)/asset/print/+Page";
 
 export default function AssetToolbar({
   setShowForm,
@@ -77,7 +78,7 @@ export default function AssetToolbar({
             className="p-0"
           >
             {/* Search Bar */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-6  gap-4  my-4   rounded-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-6 xl:grid-cols-6  gap-4  my-4   rounded-2xl">
              
               {/* Filter Controls */}
             
@@ -170,12 +171,13 @@ export default function AssetToolbar({
         <div className="px-4 py-2 flex items-center">Location</div>
         <div className="px-4 py-2 col-span-2 flex items-center">Value</div>
         <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
-          <AssetPrintButton />
+          {/* <AssetPrintButton /> */}
+          <SelectedAssetsPage />
           <button
             onClick={() => setShowForm(!showForm)}
             className="btn btn-primary btn-sm"
           >
-            <PlusCircle /> New Asset
+            <PlusCircle  className="w-5 h-5"/> New Asset
           </button>
         </div>
       </div>

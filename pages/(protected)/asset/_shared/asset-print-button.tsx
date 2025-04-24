@@ -15,10 +15,10 @@ export default function AssetPrintButton() {
       <div className="">
         <button
           onClick={handleOpenSelected}
-          className="btn btn-neutral btn-sm"
+          className="btn btn-neutral btn-sm "
           disabled={Object.keys(selectedAssets).length <= 0}
         >
-          <Printer /> ({Object.keys(selectedAssets).length})
+          <Printer className="w-5 h-5"/> Print({Object.keys(selectedAssets).length})
         </button>
       </div>
     </>

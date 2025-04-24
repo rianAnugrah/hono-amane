@@ -9,6 +9,10 @@ import uploadRoutes from "./routes/upload"; // Import route upload
 import { env } from "../config/env";
 import users from "./routes/users";
 
+import detailsLocationRoute from "./routes/location-details";
+import projectCodeRoute from "./routes/project-codes";
+import locationRoute from "./routes/locations";
+
 const isProduction = process.env.NODE_ENV === "production";
 const port = Number(env.APP_PORT);
 const app = new Hono();
@@ -29,6 +33,9 @@ app.route("/api/assets", assetRoutes);
 app.route("/api/auth", authRoutes);
 app.route("/api/upload", uploadRoutes); // Tambahkan route upload
 app.route("/api/users", users); // Tambahkan route upload
+app.route("/api/locations", locationRoute); // Tambahkan route upload
+app.route("/api/locations-details", detailsLocationRoute); // Tambahkan route upload
+app.route("/api/project-codes", projectCodeRoute); // Tambahkan route upload
 
 // Serve uploaded files statically
 app.use('/uploads/*', serveStatic({ root: './' }));

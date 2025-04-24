@@ -138,14 +138,8 @@ function DesktopNav() {
       <DesktopLink href="/asset" icon={<Archive />} label="Asset" />
       <DesktopLink href="/category" icon={<BookCopy />} label="Category" />
       <DesktopLink href="/location" icon={<MapPin />} label="Location" />
-      <DesktopLink
-        href="/condition"
-        icon={<CircleCheckBig />}
-        label="Condition"
-      />
-      <DesktopLink href="/report" icon={<FileCheck2 />} label="Report" />
       <DesktopLink href="/user" icon={<User2 />} label="User" />
-      <DesktopLink href="/setting" icon={<Settings />} label="Setting" />
+      {/* <DesktopLink href="/setting" icon={<Settings />} label="Setting" /> */}
       <div className="flex w-full items-center justify-center py-4">
         <Link
           href="/qr-scanner"
