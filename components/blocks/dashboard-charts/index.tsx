@@ -1,181 +1,129 @@
 import {
-  LineChart,
-  Line,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
   BarChart,
   Bar,
   PieChart,
   Pie,
   Cell,
+  XAxis,
+  YAxis,
+  Tooltip,
   Legend,
   ResponsiveContainer,
 } from "recharts";
 import { useState, useEffect } from "react";
 
-const trafficData = [
-  { name: "Cat A", visitors: 400 },
-  { name: "Cat B", visitors: 700 },
-  { name: "Cat C", visitors: 550 },
-  { name: "Cat D", visitors: 900 },
-  { name: "Cat E", visitors: 600 },
-  { name: "Cat F", visitors: 800 },
-  { name: "Cat G", visitors: 450 },
-  { name: "Cat H", visitors: 650 },
-  { name: "Cat I", visitors: 750 },
-  { name: "Cat J", visitors: 500 },
-  { name: "Cat K", visitors: 850 },
-  { name: "Cat L", visitors: 950 },
-  { name: "Cat M", visitors: 700 },
-  { name: "Cat N", visitors: 600 },
-  { name: "Cat O", visitors: 800 },
-  { name: "Cat P", visitors: 750 },
-  { name: "Cat Q", visitors: 900 },
-  { name: "Cat R", visitors: 650 },
-];
-
-const salesData = [
-  { name: "Product A", sales: 2400 },
-  { name: "Product B", sales: 1398 },
-  { name: "Product C", sales: 9800 },
-  { name: "Product D", sales: 3908 },
-];
-
-const userTypeData = [
-  { name: "Good", value: 300 },
-  { name: "Fair", value: 50 },
-  { name: "Broken", value: 500 },
-  { name: "N/A", value: 200 },
-];
-
+// Constants
 const COLORS = ["#FF4D4D", "#4CAF50", "#2196F3", "#9C27B0"];
+const MAX_LABEL_LENGTH = 8;
 
-export default function DashboardCharts({ stats }: { stats: any }) {
-  const [assetByLocationSData, setAssetByLocationSData] = useState<
-    { name: string; value: number }[]
-  >([]);
+export default function DashboardCharts({ stats }) {
+  const [chartData, setChartData] = useState({
+    locations: [],
+    categories: [],
+    conditions: []
+  });
 
-  const [assetByCategory, setAssetByCategory] = useState<
-  { name: string; value: number }[]
->([]);
-
-const [assetByCondition, setAssetByCondition] = useState<
-{ name: string; value: number }[]
->([]);
-
+  // Process all chart data in a single useEffect
   useEffect(() => {
-    if (stats?.locations?.data) {
-      console.log(stats?.locations?.data);
-      const mappedData = stats.locations.data.map((loc: any) => ({
-        name: loc.location,
-        value: loc.count,
-      }));
-
-      setAssetByLocationSData(mappedData);
+    if (stats) {
+      // Process location data
+      if (stats.locations?.data) {
+        const locationData = stats.locations.data.map(loc => ({
+          name: loc.location,
+          value: loc.count
+        }));
+        setChartData(prev => ({ ...prev, locations: locationData }));
+      }
+      
+      // Process category data
+      if (stats.categories?.data) {
+        const categoryData = stats.categories.data.map(cat => ({
+          name: cat.category,
+          value: cat.count
+        }));
+        setChartData(prev => ({ ...prev, categories: categoryData }));
+      }
+      
+      // Process condition data
+      if (stats.conditions?.data) {
+        const conditionData = stats.conditions.data.map(cond => ({
+          name: cond.condition,
+          value: cond.count
+        }));
+        setChartData(prev => ({ ...prev, conditions: conditionData }));
+      }
     }
   }, [stats]);
 
-  useEffect(() => {
-    if (stats?.categories?.data) {
-      console.log(stats?.categories?.data);
-      const mappedData = stats.categories.data.map((dta: any) => ({
-        name: dta.category,
-        value: dta.count,
-      }));
+  // Helper functions
+  const renderBarLabel = ({ x, y, width, value }) => (
+    <text
+      x={x + width / 2}
+      y={y - 5}
+      fill="#333"
+      textAnchor="middle"
+      fontSize={12}
+      fontWeight="bold"
+    >
+      {value}
+    </text>
+  );
 
-      setAssetByCategory(mappedData);
-    }
-  }, [stats]);
-
-  useEffect(() => {
-    if (stats?.conditions?.data) {
-      console.log(stats?.conditions?.data);
-      const mappedData = stats.conditions.data.map((dta: any) => ({
-        name: dta.condition,
-        value: dta.count,
-      }));
-
-      setAssetByCondition(mappedData);
-    }
-  }, [stats]);
-
-  console.log(assetByLocationSData);
-
-  const renderCustomBarLabel = (props: any) => {
-    const { x, y, width, value } = props;
-    return (
-      <text
-        x={x + width / 2}
-        y={y - 5} // geser dikit ke atas
-        fill="#333" // warna teks
-        textAnchor="middle"
-        fontSize={12}
-        fontWeight="bold"
-      >
-        {value}
-      </text>
-    );
+  const shortenLabel = (label) => {
+    return label.length > MAX_LABEL_LENGTH 
+      ? `${label.slice(0, MAX_LABEL_LENGTH)}...` 
+      : label;
   };
 
-  const shortenLabel = (label: string, maxLength: number = 8) => {
-    return label.length > maxLength ? `${label.slice(0, maxLength)}...` : label;
+  // Common chart configurations
+  const barChartConfig = {
+    fill: "#ada5e9",
+    label: renderBarLabel
+  };
+
+  const xAxisConfig = {
+    interval: 0,
+    angle: -45,
+    textAnchor: "end",
+    height: 100,
+    tickFormatter: shortenLabel
   };
 
   return (
     <div className="my-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Line Chart */}
+      {/* Asset by Locations (Full Width) */}
       <div className="bg-white p-4 rounded-2xl shadow-md md:col-span-2">
         <h2 className="text-xl font-bold mb-6">Asset by Locations</h2>
         <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={assetByLocationSData}>
-            <Bar dataKey="value" fill="#ada5e9" label={renderCustomBarLabel} />
-
-            {/* <CartesianGrid stroke="#ccc" /> */}
-            <XAxis
-              dataKey="name"
-              interval={0}
-              angle={-45}
-              textAnchor="end"
-              height={100}
-              tickFormatter={(value) => shortenLabel(value)}
-            />
-
+          <BarChart data={chartData.locations}>
+            <Bar dataKey="value" {...barChartConfig} />
+            <XAxis dataKey="name" {...xAxisConfig} />
             <YAxis />
             <Tooltip />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Bar Chart */}
+      {/* Asset by Category */}
       <div className="bg-white p-4 rounded-2xl shadow-md">
-        <h2 className="text-xl font-bold mb-6">Asset by Location</h2>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart width={400} height={250} data={assetByCategory}>
-          <Bar dataKey="value" fill="#ada5e9" label={renderCustomBarLabel} />
-            {/* <CartesianGrid stroke="#ccc" /> */}
-            <XAxis
-              dataKey="name"
-              interval={0}
-              angle={-45}
-              textAnchor="end"
-              height={100}
-              tickFormatter={(value) => shortenLabel(value)}
-            />
+        <h2 className="text-xl font-bold mb-6">Asset by Category</h2>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={chartData.categories}>
+            <Bar dataKey="value" {...barChartConfig} />
+            <XAxis dataKey="name" {...xAxisConfig} />
             <YAxis />
             <Tooltip />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Pie Chart */}
-      <div className="bg-white p-4 rounded-2xl shadow-md col-span-1 ">
+      {/* Asset by Condition */}
+      <div className="bg-white p-4 rounded-2xl shadow-md">
         <h2 className="text-xl font-bold mb-6">Asset by Condition</h2>
-        <ResponsiveContainer width="100%" height={250}>
-          <PieChart width={400} height={250}>
+        <ResponsiveContainer width="100%" height={400}>
+          <PieChart>
             <Pie
-              data={assetByCondition}
+              data={chartData.conditions}
               dataKey="value"
               nameKey="name"
               cx="50%"
@@ -183,8 +131,8 @@ const [assetByCondition, setAssetByCondition] = useState<
               outerRadius={80}
               label
             >
-              {userTypeData.map((entry, index) => (
-                <Cell
+              {chartData.conditions.map((entry, index) => (
+                <Cell 
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
                 />
