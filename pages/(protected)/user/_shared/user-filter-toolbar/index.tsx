@@ -1,5 +1,6 @@
 import InputSelect from "@/components/ui/input-select";
 import InputText from "@/components/ui/input-text";
+import axios from "axios";
 import { Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ReactNode } from "react";
@@ -9,6 +10,7 @@ type Props = {
     q?: string;
     role?: string;
     placement?: string;
+    locationId?: any;
     sort?: string;
     order?: string;
   };
@@ -23,40 +25,60 @@ export function UserFilterToolbar({
 }: Props) {
   const [q, setQ] = useState(defaultValues.q || "");
   const [role, setRole] = useState(defaultValues.role || "");
-  const [placement, setPlacement] = useState(defaultValues.placement || "");
+  const [locationId, setlocationId] = useState(defaultValues.locationId || 1);
   const [sort, setSort] = useState(defaultValues.sort || "createdAt");
   const [order, setOrder] = useState(defaultValues.order || "desc");
 
   // Trigger onChange whenever any filter state changes
   useEffect(() => {
-    onChange({ q, role, placement, sort, order });
-  }, [q, role, placement, sort, order, onChange]);
+    onChange({ q, role, locationId, sort, order });
+  }, [q, role, locationId, sort, order, onChange]);
 
   const handleReset = () => {
     setQ("");
     setRole("");
-    setPlacement("");
+    setlocationId("");
     setSort("createdAt");
     setOrder("desc");
     onChange({});
   };
 
+  const [locations, setLocations] = useState<Location[]>([]);
+
+  const [search, setSearch] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  const fetchLocations = async () => {
+    const res = await axios.get("/api/locations", {
+      params: { search, sort: sortOrder },
+    });
+    setLocations(res.data);
+  };
+
+  useEffect(() => {
+    fetchLocations();
+  }, [search, sortOrder]);
+
   return (
     <div className=" w-full  grid grid-cols-1  gap-4 p-4 bg-white backdrop-blur border border-gray-200/50 rounded-2xl shadow-sm">
       <InputText
-        placeholder="Search name or email"
+        placeholder="Name or email"
         value={q}
         onChange={(e) => setQ(e.target.value)}
         icon={<Search />}
       />
       {/* Sort Controls */}
       <div className="grid grid-cols-1 gap-4">
-        <InputText
-          placeholder="Search by Placement"
-          value={placement}
-          onChange={(e) => setPlacement(e.target.value)}
-          icon={<Search />}
-        />
+        {locations.length > 0 && (
+          <InputSelect
+            options={locations.map((loc) => ({
+              label: loc.description,
+              value: loc.id,
+            }))}
+            value={locationId || null}
+            onChange={(e) => setlocationId(e.target.value)}
+          />
+        )}
 
         <InputSelect
           value={sort}

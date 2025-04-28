@@ -3,6 +3,13 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { UserFilterToolbar } from "@/pages/(protected)/user/_shared/user-filter-toolbar";
 import { PlusCircle } from "lucide-react";
+import axios from "axios";
+import InputSelect from "@/components/ui/input-select";
+
+type Location = {
+  id: number;
+  description: string;
+};
 
 type User = {
   id: string;
@@ -10,6 +17,7 @@ type User = {
   name?: string;
   role?: string;
   placement?: string;
+  locationId?: number;
   createdAt: string;
   updatedAt: string;
   password: string;
@@ -30,6 +38,24 @@ export default function UserFormModal({
   onSubmit,
   onCancel,
 }: UserFormProps) {
+  const [locations, setLocations] = useState<Location[]>([]);
+
+  const [search, setSearch] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  const fetchLocations = async () => {
+    const res = await axios.get("/api/locations", {
+      params: { search, sort: sortOrder },
+    });
+    setLocations(res.data);
+  };
+
+  useEffect(() => {
+    fetchLocations();
+  }, [search, sortOrder]);
+
+  console.log("FORNM", locations);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -83,23 +109,43 @@ export default function UserFormModal({
               </div>
 
               <div>
-                <input
-                  className="w-full px-4 py-3 bg-gray-100 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Role"
-                  value={form.role || ""}
-                  onChange={(e) => setForm({ ...form, role: e.target.value })}
-                />
+                {locations.length > 0 && (
+                  <InputSelect
+                    options={[
+                      {
+                        value: "read_only",
+                        label: "Read only",
+                      },
+                      {
+                        value: "admin",
+                        label: "Admin",
+                      },
+                      {
+                        value: "pic",
+                        label: "PIC",
+                      },
+                      ,
+                    ]}
+                    value={form.role || "read_only"}
+                    onChange={(e) => setForm({ ...form, role: e.target.value })}
+                  />
+                )}
+
               </div>
 
               <div>
-                <input
-                  className="w-full px-4 py-3 bg-gray-100 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Placement"
-                  value={form.placement || ""}
-                  onChange={(e) =>
-                    setForm({ ...form, placement: e.target.value })
-                  }
-                />
+                {locations.length > 0 && (
+                  <InputSelect
+                    options={locations.map((loc) => ({
+                      label: loc.description,
+                      value: loc.id,
+                    }))}
+                    value={form.locationId || 1}
+                    onChange={(e) =>
+                      setForm({ ...form, locationId: e.target.value })
+                    }
+                  />
+                )}
               </div>
             </div>
 

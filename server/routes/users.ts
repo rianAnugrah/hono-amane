@@ -12,6 +12,7 @@ users.get("/", async (c) => {
     q,
     role,
     placement,
+    locationId,
     sort = "createdAt",
     order = "desc",
     page = "1",
@@ -22,8 +23,10 @@ users.get("/", async (c) => {
   const pageSize = parseInt(limit);
   const skip = (pageNumber - 1) * pageSize;
 
+  const parsedLocationId = locationId ? Number(locationId) : undefined;
+
   const where = {
-    deletedAt: null, // 👈 filter out soft-deleted users
+    deletedAt: null, // filter out soft-deleted users
     AND: [
       q
         ? {
@@ -34,7 +37,7 @@ users.get("/", async (c) => {
           }
         : {},
       role ? { role } : {},
-      placement ? { placement } : {},
+      parsedLocationId ? { locationId: parsedLocationId } : {},
     ],
   };
 
@@ -83,8 +86,6 @@ users.get("/:id", async (c) => {
   if (!user) return c.notFound();
   return c.json(user);
 });
-
-
 
 // CREATE user
 users.post("/", async (c) => {
