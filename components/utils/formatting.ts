@@ -22,3 +22,23 @@ export const formatDate = (dateString: string | null | undefined) => {
     }).format(value);
   };
   
+
+  export const formatIDRHuman = (value: number) => {
+    const absValue = Math.abs(value);
+    let formatted = "";
+  
+    if (absValue >= 1_000_000_000_000) {
+      formatted = (value / 1_000_000_000_000).toFixed(1).replace(/\.0$/, "") + "T";
+    } else if (absValue >= 1_000_000_000) {
+      formatted = (value / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
+    } else if (absValue >= 1_000_000) {
+      formatted = (value / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+    } else if (absValue >= 1_000) {
+      formatted = (value / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+    } else {
+      formatted = value.toString();
+    }
+  
+    return `IDR ${formatted}`;
+  };
+  

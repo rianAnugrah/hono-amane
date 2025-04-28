@@ -47,7 +47,7 @@ export default function AssetToolbar({
   const shouldShowToolbar = isDesktop || showToolbar;
 
   return (
-    <div className="bg-gray-100 z-10 rounded-none shadow-none border-b px-4  border-gray-300 mb-0 sticky top-0">
+    <div className="bg-gray-100 z-10 rounded-none shadow-none pb-4 md:pb-0 border-b md:border-none px-4  border-gray-300 mb-0 sticky top-0">
       <div className="flex justify-between items-center  gap-2 pt-4">
         <h1 className="text-lg font-bold text-gray-900 flex-grow">
           Asset list
@@ -156,7 +156,7 @@ export default function AssetToolbar({
 
       {/* TABLE HEADER */}
 
-      <div className="hidden w-full md:grid grid-cols-12 items-center font-bold text-xs">
+      <div className="hidden w-full md:grid grid-cols-12 items-center font-bold text-xs bg-gray-50 px-4 py-2 text-gray-500 rounded-t-xl border-none border-gray-300">
         <div className="col-span-4 pr-4 py-2 flex items-center gap-2">
           <Checkbox checked={allSelected} onChange={toggleSelectAll} />
           <InputText
@@ -167,7 +167,7 @@ export default function AssetToolbar({
           />
         </div>
         <div className="px-4 py-2 flex items-center">Condition</div>
-        <div className="px-4 py-2 flex items-center">Project Code</div>
+        <div className="px-4 py-2 flex items-center"> Code</div>
         <div className="px-4 py-2 flex items-center">Location</div>
         <div className="px-4 py-2 col-span-2 flex items-center">Value</div>
         <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">

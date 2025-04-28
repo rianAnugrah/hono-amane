@@ -11,7 +11,7 @@ import Navbar from "@/components/ui/navigation";
 import TopBar from "@/components/ui/top-bar";
 import autoAnimate from "@formkit/auto-animate";
 import { useUserStore } from "@/stores/store-user-login";
-
+import axios from "axios";
 
 function PageShell({
   children,
@@ -22,8 +22,7 @@ function PageShell({
 }) {
   const parent = useRef(null);
 
-  const { email, name, isAuth, set_user } = useUserStore();
-
+  const { email, name, isAuth, set_user, location, role } = useUserStore();
 
   // if (!isAuth) {
   //   throw redirect("/login");
@@ -43,6 +42,10 @@ function PageShell({
     console.log("hcmlSession cookie value:", hcmlSessionValue);
     checkCredential(hcmlSessionValue as string);
   }, [parent]);
+
+  useEffect(() => {
+    userCheckAndRegistration(email, name);
+  }, [email, name]);
 
   const checkCredential = async (token: string) => {
     if (!token) return;
@@ -67,6 +70,64 @@ function PageShell({
       console.error("Error checking credential:", error);
     }
   };
+
+  const userCheckAndRegistration = async (email: string, name?: string) => {
+    if (!email) return;
+
+    try {
+      // 1. Cek apakah user sudah terdaftar
+      const { data } = await axios.get(`/api/users/by-email/${email}`);
+
+      // 2. Kalau ditemukan, simpan ke state
+      if (data) {
+        const AuthData : any = {
+          email : data.email,
+          name : data.name,
+          isAuth : true,
+          location : data.location,
+          role: data.role
+        }
+        set_user(AuthData);
+        return;
+      }
+    } catch (err: any) {
+      if (err.response?.status !== 404) {
+        console.error("Error checking user:", err);
+        return;
+      }
+      // Jika 404, lanjut ke registrasi
+    }
+
+    try {
+      // 3. Daftarkan user baru
+      const now = new Date().toISOString();
+      const defaultPassword = "changeme123"; // ganti sesuai strategi keamananmu
+
+      const newUser = {
+        email,
+        name,
+        role: "read_only",
+        placement: "",
+        locationId: 1,
+        createdAt: now,
+        updatedAt: now,
+        password: defaultPassword,
+      };
+
+      const { data: registered } = await axios.post("/api/users", newUser);
+
+      // 4. Simpan user baru ke state
+      set_user(registered);
+    } catch (err) {
+      console.error("Error registering user:", err);
+    }
+  };
+
+  console.log("EMAIL", email);
+  console.log("Name", name);
+  console.log("isAuth", isAuth);
+  console.log("Location", location);
+  console.log("Role", role);
 
   return (
     <React.StrictMode>

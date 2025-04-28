@@ -13,6 +13,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { useState, useEffect } from "react";
 
 const trafficData = [
   { name: "Cat A", visitors: 400 },
@@ -51,17 +52,96 @@ const userTypeData = [
 
 const COLORS = ["#FF4D4D", "#4CAF50", "#2196F3", "#9C27B0"];
 
-export default function DashboardCharts() {
+export default function DashboardCharts({ stats }: { stats: any }) {
+  const [assetByLocationSData, setAssetByLocationSData] = useState<
+    { name: string; value: number }[]
+  >([]);
+
+  const [assetByCategory, setAssetByCategory] = useState<
+  { name: string; value: number }[]
+>([]);
+
+const [assetByCondition, setAssetByCondition] = useState<
+{ name: string; value: number }[]
+>([]);
+
+  useEffect(() => {
+    if (stats?.locations?.data) {
+      console.log(stats?.locations?.data);
+      const mappedData = stats.locations.data.map((loc: any) => ({
+        name: loc.location,
+        value: loc.count,
+      }));
+
+      setAssetByLocationSData(mappedData);
+    }
+  }, [stats]);
+
+  useEffect(() => {
+    if (stats?.categories?.data) {
+      console.log(stats?.categories?.data);
+      const mappedData = stats.categories.data.map((dta: any) => ({
+        name: dta.category,
+        value: dta.count,
+      }));
+
+      setAssetByCategory(mappedData);
+    }
+  }, [stats]);
+
+  useEffect(() => {
+    if (stats?.conditions?.data) {
+      console.log(stats?.conditions?.data);
+      const mappedData = stats.conditions.data.map((dta: any) => ({
+        name: dta.condition,
+        value: dta.count,
+      }));
+
+      setAssetByCondition(mappedData);
+    }
+  }, [stats]);
+
+  console.log(assetByLocationSData);
+
+  const renderCustomBarLabel = (props: any) => {
+    const { x, y, width, value } = props;
+    return (
+      <text
+        x={x + width / 2}
+        y={y - 5} // geser dikit ke atas
+        fill="#333" // warna teks
+        textAnchor="middle"
+        fontSize={12}
+        fontWeight="bold"
+      >
+        {value}
+      </text>
+    );
+  };
+
+  const shortenLabel = (label: string, maxLength: number = 8) => {
+    return label.length > maxLength ? `${label.slice(0, maxLength)}...` : label;
+  };
+
   return (
     <div className="my-6 grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Line Chart */}
       <div className="bg-white p-4 rounded-2xl shadow-md md:col-span-2">
-        <h2 className="text-xl font-bold mb-6">Asset by Category</h2>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={trafficData}>
-            <Bar dataKey="visitors" fill="#ada5e9" />
-            <CartesianGrid stroke="#ccc" />
-            <XAxis dataKey="name" />
+        <h2 className="text-xl font-bold mb-6">Asset by Locations</h2>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={assetByLocationSData}>
+            <Bar dataKey="value" fill="#ada5e9" label={renderCustomBarLabel} />
+
+            {/* <CartesianGrid stroke="#ccc" /> */}
+            <XAxis
+              dataKey="name"
+              interval={0}
+              angle={-45}
+              textAnchor="end"
+              height={100}
+              tickFormatter={(value) => shortenLabel(value)}
+            />
+
             <YAxis />
             <Tooltip />
           </BarChart>
@@ -72,10 +152,17 @@ export default function DashboardCharts() {
       <div className="bg-white p-4 rounded-2xl shadow-md">
         <h2 className="text-xl font-bold mb-6">Asset by Location</h2>
         <ResponsiveContainer width="100%" height={250}>
-          <BarChart width={400} height={250} data={salesData}>
-            <Bar dataKey="sales" fill="#ada5e9" />
-            <CartesianGrid stroke="#ccc" />
-            <XAxis dataKey="name" />
+          <BarChart width={400} height={250} data={assetByCategory}>
+          <Bar dataKey="value" fill="#ada5e9" label={renderCustomBarLabel} />
+            {/* <CartesianGrid stroke="#ccc" /> */}
+            <XAxis
+              dataKey="name"
+              interval={0}
+              angle={-45}
+              textAnchor="end"
+              height={100}
+              tickFormatter={(value) => shortenLabel(value)}
+            />
             <YAxis />
             <Tooltip />
           </BarChart>
@@ -88,7 +175,7 @@ export default function DashboardCharts() {
         <ResponsiveContainer width="100%" height={250}>
           <PieChart width={400} height={250}>
             <Pie
-              data={userTypeData}
+              data={assetByCondition}
               dataKey="value"
               nameKey="name"
               cx="50%"

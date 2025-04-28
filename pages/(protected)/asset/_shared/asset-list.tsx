@@ -57,7 +57,7 @@ export default function AssetList({
               itemRefs.current.delete(asset.id);
             }
           }}
-          className="flex items-center gap-0 border-b border-gray-200 relative py-0 font-bold text-xs"
+          className="flex items-center gap-0 md:border-b md:bg-white px-4 last:rounded-b-lg last:border-none md:border-gray-200 relative py-0 font-bold text-xs"
         >
          
           <AssetItem

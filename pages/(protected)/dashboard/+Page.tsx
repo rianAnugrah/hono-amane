@@ -1,5 +1,7 @@
 import DashboardCharts from "@/components/blocks/dashboard-charts";
+import { formatIDR, formatIDRHuman } from "@/components/utils/formatting";
 import { Link } from "@/renderer/Link";
+import axios from "axios";
 import {
   Archive,
   BookCopy,
@@ -9,12 +11,41 @@ import {
   PlusCircle,
   ScanQrCode,
 } from "lucide-react";
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 export function Page() {
+  const [stats, setStats] = useState(null);
+
+
+
+  const fetchStats = async () => {
+    try {
+      const { data } = await axios.get(`/api/stats/all`);
+
+      console.log("Data", data);
+
+      if (data.data) {
+        setStats(data.data);
+      } else {
+        // Handle direct array response
+        setStats(data);
+      }
+    } catch (error) {
+    //  console.error("Failed to fetch assets:", error);
+    }
+  };
+
+ 
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  //console.log("STATS",stats)
+
   return (
     <div className="w-full flex flex-col p-4 ">
-      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 w-full gap-4">
+     <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 w-full gap-4">
         <Link
           href="/asset/create"
           className="relative shadow-md group bg-[#fdfdfd] items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-black gap-2"
@@ -54,7 +85,7 @@ export function Page() {
       <div className="grid grid-cols-2 xl:grid-cols-4 w-full  gap-4">
         <DashboardItem
           title="Assets"
-          value={2348}
+          value={stats?.overview?.totalAssets | 0}
           href="/asset"
           buttonLabel="View all asset"
           icon={<Archive />}
@@ -62,7 +93,7 @@ export function Page() {
 
         <DashboardItem
           title="Categories"
-          value={18}
+          value={stats?.categories.totalCategories}
           href="/category"
           buttonLabel="Manage category"
           icon={<BookCopy />}
@@ -70,7 +101,7 @@ export function Page() {
 
         <DashboardItem
           title="Locations"
-          value={8}
+          value={stats?.locations?.totalLocations}
           href="/location"
           buttonLabel="Manage location"
           icon={<MapPin />}
@@ -79,17 +110,17 @@ export function Page() {
         <DashboardItem
           title="Total Acquisition value (Rp)"
           value={
-            <p className=" font-normal">
-              <span className="font-bold">271</span>B
-            </p>
+            stats?.overview?.totalAcqValueIdr
+              ? formatIDRHuman(stats?.overview?.totalAcqValueIdr)
+              : 0
           }
           href="/report"
           buttonLabel="Generate report"
           icon={<DollarSign />}
         />
-      </div>
+      </div> 
 
-      <DashboardCharts />
+      <DashboardCharts stats={stats}/>
     </div>
   );
 }

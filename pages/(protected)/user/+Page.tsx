@@ -185,7 +185,7 @@ export default function Page() {
                       Placement:
                     </span>
                     <span className="text-gray-800">
-                      {user.placement || "-"}
+                      {user.location?.description || "-"}
                     </span>
                   </div>
                   <div className="flex space-x-2 md:justify-start justify-end">

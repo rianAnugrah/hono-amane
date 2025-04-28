@@ -8,84 +8,115 @@ datasource db {
 }
 
 model Users {
-  id        String         @id @default(uuid())
-  email     String         @unique
-  name      String?
-  role      String?
-  placement String?
-  password  String
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-  deletedAt DateTime?      // soft delete
-  versions  UserVersion[]
+  id         String        @id @default(uuid())
+  email      String        @unique
+  name       String?
+  role       String?
+  placement  String?
+  password   String
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  deletedAt  DateTime?
+  locationId Int?
+  versions   UserVersion[]
+  location   LocationDesc? @relation(fields: [locationId], references: [id], onUpdate: NoAction)
 }
 
 model UserVersion {
-  id        String   @id @default(uuid())
-  userId    String
-  name      String?
-  role      String?
-  placement String?
-  updatedAt DateTime @default(now())
-
-  user Users @relation(fields: [userId], references: [id])
+  id         String        @id @default(uuid())
+  userId     String
+  name       String?
+  role       String?
+  placement  String?
+  updatedAt  DateTime      @default(now())
+  locationId Int?
+  location   LocationDesc? @relation(fields: [locationId], references: [id], onUpdate: NoAction)
+  user       Users         @relation(fields: [userId], references: [id])
 }
 
 model ProjectCode {
   id     Int     @id @default(autoincrement())
-  code   String  @unique
+  code   String  @unique @db.VarChar(255)
   assets Asset[]
 }
 
 model LocationDesc {
-  id     Int     @id @default(autoincrement())
-  description String @unique
-  assets Asset[]
+  id          Int           @id @default(autoincrement())
+  description String        @unique @db.VarChar(255)
+  assets      Asset[]
+  userVersion UserVersion[]
+  users       Users[]
 }
 
 model DetailsLocation {
-  id     Int     @id @default(autoincrement())
-  description String @unique
-  assets Asset[]
+  id          Int     @id @default(autoincrement())
+  description String  @unique @db.VarChar(255)
+  assets      Asset[]
 }
 
 model Asset {
-  id                String    @id @default(uuid())
-  version           Int       @default(1) // versioning
-  parentId          String?             // for linking to original asset, if needed
-  isLatest          Boolean   @default(true) // for querying latest version
-
-  projectCode_id    Int
-  projectCode       ProjectCode @relation(fields: [projectCode_id], references: [id])
-
-  assetNo           String
-  lineNo            String
-  assetName         String
-  remark            String?
-
-  locationDesc_id   Int?
-  locationDesc      LocationDesc? @relation(fields: [locationDesc_id], references: [id])
-
+  id                 String           @id @default(uuid())
+  assetNo            String
+  lineNo             String
+  assetName          String
+  remark             String?
+  condition          String
+  pisDate            DateTime
+  transDate          DateTime
+  categoryCode       String
+  afeNo              String?
+  adjustedDepre      Float
+  poNo               String?
+  acqValueIdr        Float
+  acqValue           Float
+  accumDepre         Float
+  ytdDepre           Float
+  bookValue          Float
+  taggingYear        String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  deletedAt          DateTime?
+  isLatest           Boolean          @default(true)
+  parentId           String?
+  version            Int              @default(1)
+  projectCode_id     Int?
+  locationDesc_id    Int?
   detailsLocation_id Int?
-  detailsLocation    DetailsLocation? @relation(fields: [detailsLocation_id], references: [id])
+  detailsLocation    DetailsLocation? @relation(fields: [detailsLocation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_details_location")
+  locationDesc       LocationDesc?    @relation(fields: [locationDesc_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location_desc")
+  projectCode        ProjectCode?     @relation(fields: [projectCode_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_project_code")
 
-  condition         String
-  pisDate           DateTime
-  transDate         DateTime
-  categoryCode      String
-  afeNo             String?
-  adjustedDepre     Float
-  poNo              String?
-  acqValueIdr       Float
-  acqValue          Float
-  accumDepre        Float
-  ytdDepre          Float
-  bookValue         Float
-  taggingYear       String?
+  @@index([assetNo, isLatest])
+}
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  deletedAt         DateTime? // soft delete
+model Asset_Copy {
+  id              String    @id
+  projectCode     String
+  assetNo         String
+  lineNo          String
+  assetName       String
+  remark          String?
+  locationDesc    String
+  detailsLocation String?
+  condition       String
+  pisDate         DateTime
+  transDate       DateTime
+  categoryCode    String
+  afeNo           String?
+  adjustedDepre   Float
+  poNo            String?
+  acqValueIdr     Float
+  acqValue        Float
+  accumDepre      Float
+  ytdDepre        Float
+  bookValue       Float
+  taggingYear     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime
+  deletedAt       DateTime?
+  isLatest        Boolean   @default(true)
+  parentId        String?
+  version         Int       @default(1)
 
-  @@index([assetNo, isLatest]) // useful for querying latest version by assetNo
+  @@index([assetNo, isLatest])
 }

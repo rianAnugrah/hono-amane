@@ -46,6 +46,7 @@ users.get("/", async (c) => {
       },
       skip,
       take: pageSize,
+      include: { location: true },
     }),
     prisma.users.count({ where }),
   ]);
@@ -62,12 +63,28 @@ users.get("/", async (c) => {
 });
 
 // GET user by ID
-users.get("/:id", async (c) => {
-  const id = c.req.param("id");
-  const user = await prisma.users.findUnique({ where: { id } });
+users.get("/by-email/:email", async (c) => {
+  const email = c.req.param("email").toLowerCase();
+  const user = await prisma.users.findUnique({
+    where: { email },
+    include: { location: true },
+  });
   if (!user) return c.notFound();
   return c.json(user);
 });
+
+// GET user by ID
+users.get("/:id", async (c) => {
+  const id = c.req.param("id");
+  const user = await prisma.users.findUnique({
+    where: { id },
+    include: { location: true },
+  });
+  if (!user) return c.notFound();
+  return c.json(user);
+});
+
+
 
 // CREATE user
 users.post("/", async (c) => {

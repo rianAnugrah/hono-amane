@@ -4,7 +4,7 @@ import Logo from "@/components/svg/logo";
 import { useUserStore } from "@/stores/store-user-login";
 
 export default function TopBar() {
-  const { email, name, isAuth } = useUserStore();
+  const { email, name, role , location} = useUserStore();
   return (
     <nav className=" relative z-20 ">
       <div className="w-full mx-auto px-4 ">
@@ -24,11 +24,11 @@ export default function TopBar() {
             </div>
             <div className="flex flex-col gap-0">
               <p className="  h-4 text-white text-lg flex items-center gap-2 mb-1">
-                {name} <Badge text="Admin" color="green" />
+                {name} <Badge text={role} color="green" />
               </p>
               <p className="  h-4 text-gray-300 text-xs flex items-center gap-1">
-                {/* <LocateIcon className="w-3" /> Surabaya */}
-                {email}
+                <LocateIcon className="w-3" /> {location?.description}
+                {/* {email} */}
               </p>
             </div>
           </div>

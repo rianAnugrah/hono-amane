@@ -17,7 +17,6 @@ import Checkbox from "@/components/ui/checkbox";
 import { formatIDR } from "@/components/utils/formatting";
 import AssetDetail from "./asset-detail";
 
-
 export default function AssetItem({
   asset,
   isExpanded,
@@ -37,11 +36,14 @@ export default function AssetItem({
 }) {
   return (
     <motion.div layout key={asset.id} className="w-full">
-      <div className="p-0 w-full flex flex-col">
+      <div className="p-0 w-full hidden md:flex flex-col">
         <div className="w-full grid grid-cols-12 ">
           <div className="col-span-4 pr-4 py-2 flex items-center gap-2">
             <div className="flex items-center">
-              <Checkbox checked={checked} onChange={() => onSelectAsset(asset)} />
+              <Checkbox
+                checked={checked}
+                onChange={() => onSelectAsset(asset)}
+              />
             </div>
             <div className="flex flex-col">
               <div>{asset.assetName}</div>
@@ -61,7 +63,9 @@ export default function AssetItem({
               {asset.condition}
             </span>
           </div>
-          <div className="px-4 py-2 flex items-center">{asset.projectCode?.code}</div>
+          <div className="px-4 py-2 flex items-center">
+            {asset.projectCode?.code}
+          </div>
           <div className="px-4 py-2 flex items-center">
             {asset.locationDesc?.description}
           </div>
@@ -96,6 +100,101 @@ export default function AssetItem({
           </div>
         </div>
         <AssetDetail isExpanded={isExpanded} asset={asset} />
+      </div>
+
+      {/* MOBILE CARD */}
+      <div className="md:hidden bg-white rounded-xl shadow-sm p-4 mb-4 border border-gray-100 transition-all duration-200 hover:shadow-md">
+        <div className="flex flex-col gap-3">
+          {/* Header Section */}
+          <div className="flex flex-nowrap items-center justify-between gap-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10">
+
+              <Checkbox
+                checked={checked}
+                onChange={() => onSelectAsset(asset)}
+                className="h-5 w-5"
+                />
+                </div>
+              <div className="">
+                <div className="font-semibold text-gray-800 text-base">
+                  {asset.assetName}
+                </div>
+                <div className="text-xs text-gray-500">{asset.assetNo}</div>
+              </div>
+            </div>
+            <span
+              className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                asset.condition === "Good"
+                  ? "bg-green-100 text-green-800"
+                  : asset.condition === "Broken"
+                  ? "bg-red-100 text-red-800"
+                  : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              {asset.condition}
+            </span>
+          </div>
+
+          {/* Details Section */}
+          <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+            <div>
+              <span className="font-medium text-gray-500">Project:</span>
+              <p>{asset.projectCode?.code || "N/A"}</p>
+            </div>
+            <div>
+              <span className="font-medium text-gray-500">Location:</span>
+              <p>{asset.locationDesc?.description || "N/A"}</p>
+            </div>
+            <div className="col-span-2">
+              <span className="font-medium text-gray-500">Value:</span>
+              <p>{formatIDR(asset.acqValueIdr)}</p>
+            </div>
+          </div>
+
+          {/* Actions Section */}
+          <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+            <div className="flex gap-2">
+              <Link
+                to={`/asset/${asset.assetNo}`}
+                className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+              >
+                <ExternalLink size={20} />
+              </Link>
+              <button
+                onClick={() => handleEdit(asset)}
+                className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+              >
+                <Pencil size={20} />
+              </button>
+              <button
+                onClick={() => handleDelete(asset.id)}
+                className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <Trash size={20} />
+              </button>
+            </div>
+            <button
+              onClick={() => onToggle(asset.id)}
+              className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+            >
+              {isExpanded ? (
+                <ChevronDown size={20} />
+              ) : (
+                <ChevronRight size={20} />
+              )}
+            </button>
+          </div>
+
+          {/* Expandable Asset Details */}
+          <div
+            className={`transition-all duration-300 ${
+              isExpanded ? "block" : "hidden"
+            }`}
+          >
+            <AssetDetail isExpanded={isExpanded} asset={asset} />
+          </div>
+        </div>
       </div>
     </motion.div>
   );
