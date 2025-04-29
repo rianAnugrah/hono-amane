@@ -45,7 +45,7 @@ export const SectionTab = ({
           ? "bg-white text-blue-600"
           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
       }`}
-      whileTap={{ scale: 0.95 }}
+      // whileTap={{ scale: 0.95 }}
     >
       {label}
       {statusIcon}

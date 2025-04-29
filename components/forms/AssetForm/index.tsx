@@ -1,13 +1,15 @@
-import { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import { AssetFormValues } from './types';
-import { getErrorMessage } from './validation';
-import { useFormValidation } from './hooks/useFormValidation';
-import { FormField } from './components/FormField';
-import { SectionTab } from './components/SectionTab';
-import { ProgressIndicator } from './components/ProgressIndicator';
-import { NavigationButtons } from './components/NavigationButtons';
-import { FormSection } from './components/FormSection';
+import { useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import { AssetFormValues } from "./types";
+import { getErrorMessage } from "./validation";
+import { useFormValidation } from "./hooks/useFormValidation";
+import { FormField } from "./components/FormField";
+import { SectionTab } from "./components/SectionTab";
+import { ProgressIndicator } from "./components/ProgressIndicator";
+import { NavigationButtons } from "./components/NavigationButtons";
+import { FormSection } from "./components/FormSection";
+import { SelectField } from "./components/SelectField";
+import { DatePickerFields } from "./components/DatepickerFields";
 
 interface AssetFormProps {
   editingId: string | null;
@@ -26,21 +28,16 @@ export default function AssetForm({
 }: AssetFormProps) {
   const [activeSection, setActiveSection] = useState("basic");
   const [direction, setDirection] = useState(0);
-  
-  const {
-    touchedFields,
-    validation,
-    sectionStatus,
-    handleBlur,
-    isFormValid,
-  } = useFormValidation(form);
+
+  const { touchedFields, validation, sectionStatus, handleBlur, isFormValid } =
+    useFormValidation(form);
 
   const sections = ["basic", "location", "financial", "depreciation", "dates"];
 
   const navigateSection = (next: boolean) => {
     const currentIndex = sections.indexOf(activeSection);
     const newIndex = next ? currentIndex + 1 : currentIndex - 1;
-    
+
     if (newIndex >= 0 && newIndex < sections.length) {
       setDirection(next ? 1 : -1);
       setActiveSection(sections[newIndex]);
@@ -59,10 +56,10 @@ export default function AssetForm({
       <h2 className="text-xl font-semibold mb-6 text-gray-800">
         {editingId ? "Edit" : "Create"} Asset
       </h2>
-      
+
       {/* Navigation Tabs */}
       <div className="flex space-x-1 mb-4 overflow-x-auto relative">
-        {sections.map(section => (
+        {sections.map((section) => (
           <SectionTab
             key={section}
             id={section}
@@ -73,9 +70,12 @@ export default function AssetForm({
           />
         ))}
       </div>
-      
+
       {/* Form Sections */}
-      <div className="relative overflow-hidden mb-6" style={{ minHeight: "calc(100% - 300px)" }}>
+      <div
+        className="relative overflow-hidden mb-6"
+        style={{ minHeight: "calc(100% - 300px)" }}
+      >
         <AnimatePresence initial={false} custom={direction} mode="wait">
           {activeSection === "basic" && (
             <FormSection direction={direction}>
@@ -88,7 +88,10 @@ export default function AssetForm({
                 onBlur={handleBlur}
                 validation={validation.projectCode}
                 touched={touchedFields.has("projectCode")}
-                errorMessage={getErrorMessage("projectCode", validation.projectCode)}
+                errorMessage={getErrorMessage(
+                  "projectCode",
+                  validation.projectCode
+                )}
               />
               <FormField
                 name="assetNo"
@@ -121,11 +124,14 @@ export default function AssetForm({
                 onBlur={handleBlur}
                 validation={validation.assetName}
                 touched={touchedFields.has("assetName")}
-                errorMessage={getErrorMessage("assetName", validation.assetName)}
+                errorMessage={getErrorMessage(
+                  "assetName",
+                  validation.assetName
+                )}
               />
             </FormSection>
           )}
-          
+
           {activeSection === "location" && (
             <FormSection direction={direction}>
               <FormField
@@ -137,18 +143,38 @@ export default function AssetForm({
                 onBlur={handleBlur}
                 validation={validation.categoryCode}
                 touched={touchedFields.has("categoryCode")}
-                errorMessage={getErrorMessage("categoryCode", validation.categoryCode)}
+                errorMessage={getErrorMessage(
+                  "categoryCode",
+                  validation.categoryCode
+                )}
               />
-              <FormField
-                name="locationDesc"
+              <SelectField
+                name="locationDesc_id"
                 label="Location"
                 placeholder="Enter location description"
-                value={form.locationDesc}
+                value={form.locationDesc_id}
                 onChange={handleChange}
                 onBlur={handleBlur}
+                options={[
+                  {
+                    label: "Jakarta",
+                    value: 1,
+                  },
+                  {
+                    label: "Surabaya",
+                    value: 2,
+                  },
+                  {
+                    label: "Pasuruan",
+                    value: 3,
+                  },
+                ]}
                 validation={validation.locationDesc}
                 touched={touchedFields.has("locationDesc")}
-                errorMessage={getErrorMessage("locationDesc", validation.locationDesc)}
+                errorMessage={getErrorMessage(
+                  "locationDesc",
+                  validation.locationDesc
+                )}
               />
               <FormField
                 name="condition"
@@ -159,11 +185,14 @@ export default function AssetForm({
                 onBlur={handleBlur}
                 validation={validation.condition}
                 touched={touchedFields.has("condition")}
-                errorMessage={getErrorMessage("condition", validation.condition)}
+                errorMessage={getErrorMessage(
+                  "condition",
+                  validation.condition
+                )}
               />
             </FormSection>
           )}
-          
+
           {activeSection === "financial" && (
             <FormSection direction={direction}>
               <FormField
@@ -188,7 +217,10 @@ export default function AssetForm({
                 onBlur={handleBlur}
                 validation={validation.acqValueIdr}
                 touched={touchedFields.has("acqValueIdr")}
-                errorMessage={getErrorMessage("acqValueIdr", validation.acqValueIdr)}
+                errorMessage={getErrorMessage(
+                  "acqValueIdr",
+                  validation.acqValueIdr
+                )}
               />
               <FormField
                 name="bookValue"
@@ -200,11 +232,14 @@ export default function AssetForm({
                 onBlur={handleBlur}
                 validation={validation.bookValue}
                 touched={touchedFields.has("bookValue")}
-                errorMessage={getErrorMessage("bookValue", validation.bookValue)}
+                errorMessage={getErrorMessage(
+                  "bookValue",
+                  validation.bookValue
+                )}
               />
             </FormSection>
           )}
-          
+
           {activeSection === "depreciation" && (
             <FormSection direction={direction}>
               <FormField
@@ -217,7 +252,10 @@ export default function AssetForm({
                 onBlur={handleBlur}
                 validation={validation.accumDepre}
                 touched={touchedFields.has("accumDepre")}
-                errorMessage={getErrorMessage("accumDepre", validation.accumDepre)}
+                errorMessage={getErrorMessage(
+                  "accumDepre",
+                  validation.accumDepre
+                )}
               />
               <FormField
                 name="adjustedDepre"
@@ -229,7 +267,10 @@ export default function AssetForm({
                 onBlur={handleBlur}
                 validation={validation.adjustedDepre}
                 touched={touchedFields.has("adjustedDepre")}
-                errorMessage={getErrorMessage("adjustedDepre", validation.adjustedDepre)}
+                errorMessage={getErrorMessage(
+                  "adjustedDepre",
+                  validation.adjustedDepre
+                )}
               />
               <FormField
                 name="ytdDepre"
@@ -245,10 +286,10 @@ export default function AssetForm({
               />
             </FormSection>
           )}
-          
+
           {activeSection === "dates" && (
             <FormSection direction={direction}>
-              <FormField
+              <DatePickerFields
                 name="pisDate"
                 label="PIS Date"
                 placeholder="YYYY-MM-DD"
@@ -260,7 +301,7 @@ export default function AssetForm({
                 touched={touchedFields.has("pisDate")}
                 errorMessage={getErrorMessage("pisDate", validation.pisDate)}
               />
-              <FormField
+              <DatePickerFields
                 name="transDate"
                 label="Transaction Date"
                 placeholder="YYYY-MM-DD"
@@ -270,13 +311,16 @@ export default function AssetForm({
                 onBlur={handleBlur}
                 validation={validation.transDate}
                 touched={touchedFields.has("transDate")}
-                errorMessage={getErrorMessage("transDate", validation.transDate)}
+                errorMessage={getErrorMessage(
+                  "transDate",
+                  validation.transDate
+                )}
               />
             </FormSection>
           )}
         </AnimatePresence>
       </div>
-      
+
       {/* Progress Indicator */}
       <div className="flex justify-center mb-6">
         <ProgressIndicator
@@ -286,7 +330,7 @@ export default function AssetForm({
           onSectionClick={handleSectionClick}
         />
       </div>
-      
+
       {/* Navigation and Submit Buttons */}
       <NavigationButtons
         activeSection={activeSection}
