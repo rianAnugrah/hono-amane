@@ -111,6 +111,7 @@ export default function UserFormModal({
               <div>
                 {locations.length > 0 && (
                   <InputSelect
+                  label="Role"
                     options={[
                       {
                         value: "read_only",
@@ -136,6 +137,7 @@ export default function UserFormModal({
               <div>
                 {locations.length > 0 && (
                   <InputSelect
+                  label="Location"
                     options={locations.map((loc) => ({
                       label: loc.description,
                       value: loc.id,

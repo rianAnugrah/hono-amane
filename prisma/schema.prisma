@@ -13,7 +13,6 @@ model Users {
   name       String?
   role       String?
   placement  String?
-  password   String
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
   deletedAt  DateTime?

@@ -80,13 +80,13 @@ function PageShell({
 
       // 2. Kalau ditemukan, simpan ke state
       if (data) {
-        const AuthData : any = {
-          email : data.email,
-          name : data.name,
-          isAuth : true,
-          location : data.location,
-          role: data.role
-        }
+        const AuthData: any = {
+          email: data.email,
+          name: data.name,
+          isAuth: true,
+          location: data.location,
+          role: data.role,
+        };
         set_user(AuthData);
         return;
       }
@@ -104,14 +104,10 @@ function PageShell({
       const defaultPassword = "changeme123"; // ganti sesuai strategi keamananmu
 
       const newUser = {
-        email,
-        name,
+        email: email.toLowerCase(),
+        name: name,
         role: "read_only",
-        placement: "",
         locationId: 1,
-        createdAt: now,
-        updatedAt: now,
-        password: defaultPassword,
       };
 
       const { data: registered } = await axios.post("/api/users", newUser);
