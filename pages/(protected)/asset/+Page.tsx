@@ -9,28 +9,38 @@ import AssetPagination from "./_shared/asset-pagination";
 import AssetList from "./_shared/asset-list";
 import AssetForm from "@/components/forms/AssetForm";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
+import { useUserStore } from "@/stores/store-user-login";
 
 const AssetCrudPage = () => {
   // Form and edit state
   const [form, setForm] = useState<Partial<Asset>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState<boolean>(false);
+  const { location } = useUserStore();
 
   // List state
   const [assets, setAssets] = useState<Asset[]>([]);
   const [search, setSearch] = useState<string>("");
   const [condition, setCondition] = useState<string>("");
+  const [locationDesc_id, setLocationDesc_id] = useState<string>("");
+  const [projectCode_id, setprojectCode_id] = useState<number | null>(null);
+  const [categoryCode, setCategoryCode] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("createdAt");
   const [sortOrder, setSortOrder] = useState<string>("desc");
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
   const [totalAssets, setTotalAssets] = useState<number>(0);
 
+  console.log("location", location);
+  // useEffect(() => {
+  //   setLocationDesc_id(location?.id?.toString() ?? "");
+  // }, [location]);
+
   // Fetch assets with filters
   const fetchAssets = async () => {
     try {
       const { data } = await axios.get(
-        `/api/assets?page=${page}&pageSize=${pageSize}&search=${search}&condition=${condition}&sortBy=${sortBy}&sortOrder=${sortOrder}`
+        `/api/assets?page=${page}&pageSize=${pageSize}&search=${search}&locationDesc_id=${locationDesc_id}&condition=${condition}&sortBy=${sortBy}&sortOrder=${sortOrder}`
       );
 
       if (data.assets) {
@@ -48,7 +58,7 @@ const AssetCrudPage = () => {
 
   useEffect(() => {
     fetchAssets();
-  }, [page, pageSize, search, condition, sortBy, sortOrder]);
+  }, [page, pageSize, search, condition, sortBy, sortOrder, locationDesc_id]);
 
   // Form handlers
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,6 +103,8 @@ const AssetCrudPage = () => {
     setSearch(e.target.value);
   const handleConditionChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setCondition(e.target.value);
+  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement> ) =>
+    setLocationDesc_id(e?.target?.value ? e.target.value : e );
   const handleSortByChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setSortBy(e.target.value);
   const handleSortOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
@@ -110,43 +122,38 @@ const AssetCrudPage = () => {
     setShowForm(false);
   };
 
-
-    // Inside the component
-    const { selectedAssets, selectAsset, deselectAsset } =
+  // Inside the component
+  const { selectedAssets, selectAsset, deselectAsset } =
     useAssetSelectionStore();
+  const allSelected = assets.every((asset) =>
+    selectedAssets.some((a) => a.id === asset.id)
+  );
+
+  const handleCheckboxChange = (asset: Asset) => {
+    const isSelected = selectedAssets.some((a) => a.id === asset.id);
+    if (isSelected) {
+      deselectAsset(asset.id);
+    } else {
+      selectAsset(asset);
+    }
+  };
+
+  const toggleSelectAll = () => {
     const allSelected = assets.every((asset) =>
       selectedAssets.some((a) => a.id === asset.id)
     );
 
-
-
-    const handleCheckboxChange = (asset: Asset) => {
-      const isSelected = selectedAssets.some((a) => a.id === asset.id);
-      if (isSelected) {
-        deselectAsset(asset.id);
-      } else {
-        selectAsset(asset);
-      }
-    };
-    
-    const toggleSelectAll = () => {
-      const allSelected = assets.every((asset) =>
-        selectedAssets.some((a) => a.id === asset.id)
-      );
-    
-      if (allSelected) {
-        assets.forEach((asset) => deselectAsset(asset.id));
-      } else {
-        assets.forEach((asset) => {
-          const alreadySelected = selectedAssets.some((a) => a.id === asset.id);
-          if (!alreadySelected) {
-            selectAsset(asset);
-          }
-        });
-      }
-    };
-    
-
+    if (allSelected) {
+      assets.forEach((asset) => deselectAsset(asset.id));
+    } else {
+      assets.forEach((asset) => {
+        const alreadySelected = selectedAssets.some((a) => a.id === asset.id);
+        if (!alreadySelected) {
+          selectAsset(asset);
+        }
+      });
+    }
+  };
 
   return (
     <div className="">
@@ -177,6 +184,8 @@ const AssetCrudPage = () => {
         handleSearchChange={handleSearchChange}
         condition={condition}
         handleConditionChange={handleConditionChange}
+        locationDesc_id={locationDesc_id}
+        handleLocationChange={handleLocationChange}
         sortBy={sortBy}
         handleSortByChange={handleSortByChange}
         sortOrder={sortOrder}

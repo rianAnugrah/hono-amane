@@ -1,9 +1,10 @@
+import { LocationSelector } from "@/components/blocks/location-selector";
 import InputSelect from "@/components/ui/input-select";
 import InputText from "@/components/ui/input-text";
-import axios from "axios";
 import { Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ReactNode } from "react";
+
 
 type Props = {
   defaultValues?: {
@@ -25,7 +26,7 @@ export function UserFilterToolbar({
 }: Props) {
   const [q, setQ] = useState(defaultValues.q || "");
   const [role, setRole] = useState(defaultValues.role || "");
-  const [locationId, setlocationId] = useState(defaultValues.locationId || 1);
+  const [locationId, setLocationId] = useState(defaultValues.locationId || 1);
   const [sort, setSort] = useState(defaultValues.sort || "createdAt");
   const [order, setOrder] = useState(defaultValues.order || "desc");
 
@@ -37,59 +38,37 @@ export function UserFilterToolbar({
   const handleReset = () => {
     setQ("");
     setRole("");
-    setlocationId("");
+    setLocationId("");
     setSort("createdAt");
     setOrder("desc");
     onChange({});
   };
 
-  const [locations, setLocations] = useState<Location[]>([]);
-
-  const [search, setSearch] = useState("");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
-  const fetchLocations = async () => {
-    const res = await axios.get("/api/locations", {
-      params: { search, sort: sortOrder },
-    });
-    setLocations(res.data);
-  };
-
-  useEffect(() => {
-    fetchLocations();
-  }, [search, sortOrder]);
-
   return (
-    <div className=" w-full  grid grid-cols-1  gap-4 p-4 bg-white backdrop-blur border border-gray-200/50 rounded-2xl shadow-sm">
+    <div className="w-full grid grid-cols-1 gap-4 p-4 bg-white backdrop-blur border border-gray-200/50 rounded-2xl shadow-sm">
       <InputText
         placeholder="Name or email"
         value={q}
         onChange={(e) => setQ(e.target.value)}
         icon={<Search />}
       />
-      {/* Sort Controls */}
-      <div className="grid grid-cols-1 gap-4">
-        {locations.length > 0 && (
-          <InputSelect
-            options={locations.map((loc) => ({
-              label: loc.description,
-              value: loc.id,
-            }))}
-            value={locationId || null}
-            onChange={(e) => setlocationId(e.target.value)}
-          />
-        )}
+      
+      {/* Replaced with the LocationSelector component */}
+      <LocationSelector 
+        value={locationId} 
+        onChange={(value : string | number) => setLocationId(value)}
+      />
 
-        <InputSelect
-          value={sort}
-          onChange={(e) => setRole(e.target.value)}
-          options={[
-            { value: "admin", label: "Admin" },
-            { value: "employee", label: "Employee" },
-          ]}
-          label="Filer by"
-        />
-      </div>
+      <InputSelect
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+        options={[
+          { value: "admin", label: "Admin" },
+          { value: "employee", label: "Employee" },
+        ]}
+        label="Filter by"
+      />
+      
       {/* Sort Controls */}
       <div className="grid grid-cols-1 gap-4">
         <InputSelect

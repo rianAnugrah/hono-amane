@@ -14,6 +14,7 @@ import { useResponive } from "@/components/hooks/use-responisve";
 import Switch from "@/components/ui/switch";
 import Checkbox from "@/components/ui/checkbox";
 import SelectedAssetsPage from "@/pages/(protected)/asset/print/+Page";
+import { LocationSelector } from "@/components/blocks/location-selector";
 
 export default function AssetToolbar({
   setShowForm,
@@ -28,6 +29,8 @@ export default function AssetToolbar({
   handleSortOrderChange,
   toggleSelectAll,
   allSelected,
+  locationDesc_id,
+  handleLocationChange,
 }: {
   setShowForm: (showForm: boolean) => void;
   showForm: boolean;
@@ -35,6 +38,8 @@ export default function AssetToolbar({
   handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   condition: string;
   handleConditionChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  locationDesc_id: string;
+  handleLocationChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   sortBy: string;
   handleSortByChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   sortOrder: string;
@@ -79,76 +84,66 @@ export default function AssetToolbar({
           >
             {/* Search Bar */}
             <div className="grid grid-cols-1 lg:grid-cols-6 xl:grid-cols-6  gap-4  my-4   rounded-2xl">
-             
               {/* Filter Controls */}
-            
-                <InputSelect
-                  onChange={handleConditionChange}
-                  options={[
-                    { value: "", label: "All" },
-                    { value: "Good", label: "Good" },
-                    { value: "Broken", label: "Broken" },
-                  ]}
-                  value={condition}
-                  label="Condition"
-                />
 
-                <InputSelect
-                  onChange={handleConditionChange}
-                  options={[
-                    { value: "", label: "All " },
-                    { value: "Good", label: "Good" },
-                    { value: "Broken", label: "Broken" },
-                  ]}
-                  value={condition}
-                  label="Location"
-                />
+              <InputSelect
+                onChange={handleConditionChange}
+                options={[
+                  { value: "", label: "All" },
+                  { value: "Good", label: "Good" },
+                  { value: "Broken", label: "Broken" },
+                ]}
+                value={condition}
+                label="Condition"
+              />
 
-                <InputSelect
-                  onChange={handleConditionChange}
-                  options={[
-                    { value: "", label: "All " },
-                    { value: "Good", label: "Good" },
-                    { value: "Broken", label: "Broken" },
-                  ]}
-                  value={condition}
-                  label="Category"
-                />
+              <LocationSelector
+                value={locationDesc_id}
+                onChange={(value: string | number) => handleLocationChange(value)}
+              />
 
-                <InputSelect
-                  onChange={handleConditionChange}
-                  options={[
-                    { value: "", label: "All " },
-                    { value: "Good", label: "Good" },
-                    { value: "Broken", label: "Broken" },
-                  ]}
-                  value={condition}
-                  label="Grade"
-                />
-             
+              {/* <InputSelect
+                onChange={handleConditionChange}
+                options={[
+                  { value: "", label: "All " },
+                  { value: "Good", label: "Good" },
+                  { value: "Broken", label: "Broken" },
+                ]}
+                value={condition}
+                label="Category"
+              />
 
-            
-                <InputSelect
-                  onChange={handleSortByChange}
-                  options={[
-                    { value: "createdAt", label: "Created Date" },
-                    { value: "assetNo", label: "Asset No" },
-                    { value: "assetName", label: "Asset Name" },
-                  ]}
-                  value={sortBy}
-                  label="Sort by"
-                />
+              <InputSelect
+                onChange={handleConditionChange}
+                options={[
+                  { value: "", label: "All " },
+                  { value: "Good", label: "Good" },
+                  { value: "Broken", label: "Broken" },
+                ]}
+                value={condition}
+                label="Grade"
+              /> */}
 
-                <InputSelect
-                  onChange={handleSortOrderChange}
-                  options={[
-                    { value: "desc", label: "Descending" },
-                    { value: "asc", label: "Ascending" },
-                  ]}
-                  value={sortOrder}
-                  label="Sort order"
-                />
-            
+              <InputSelect
+                onChange={handleSortByChange}
+                options={[
+                  { value: "createdAt", label: "Created Date" },
+                  { value: "assetNo", label: "Asset No" },
+                  { value: "assetName", label: "Asset Name" },
+                ]}
+                value={sortBy}
+                label="Sort by"
+              />
+
+              <InputSelect
+                onChange={handleSortOrderChange}
+                options={[
+                  { value: "desc", label: "Descending" },
+                  { value: "asc", label: "Ascending" },
+                ]}
+                value={sortOrder}
+                label="Sort order"
+              />
             </div>
           </motion.div>
         )}
@@ -177,7 +172,7 @@ export default function AssetToolbar({
             onClick={() => setShowForm(!showForm)}
             className="btn btn-primary btn-sm"
           >
-            <PlusCircle  className="w-5 h-5"/> New Asset
+            <PlusCircle className="w-5 h-5" /> New Asset
           </button>
         </div>
       </div>

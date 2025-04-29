@@ -16,6 +16,7 @@ import {
 import Checkbox from "@/components/ui/checkbox";
 import { formatIDR } from "@/components/utils/formatting";
 import AssetDetail from "./asset-detail";
+import { useUserStore } from "@/stores/store-user-login";
 
 export default function AssetItem({
   asset,
@@ -34,6 +35,9 @@ export default function AssetItem({
   checked: boolean;
   onSelectAsset: (asset: Asset) => void;
 }) {
+
+
+  const {location} = useUserStore()
   return (
     <motion.div layout key={asset.id} className="w-full">
       <div className="p-0 w-full hidden md:flex flex-col">
@@ -72,6 +76,8 @@ export default function AssetItem({
           <div className="px-4 py-2 col-span-2 flex items-center">
             {formatIDR(asset.acqValueIdr)}
           </div>
+
+          {location?.id === asset.locationDesc_id &&
           <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
             <Link
               href={`/asset/${asset.assetNo}`}
@@ -97,7 +103,7 @@ export default function AssetItem({
             >
               {isExpanded ? <ChevronDown /> : <ChevronRight />}
             </button>
-          </div>
+          </div>}
         </div>
         <AssetDetail isExpanded={isExpanded} asset={asset} />
       </div>
