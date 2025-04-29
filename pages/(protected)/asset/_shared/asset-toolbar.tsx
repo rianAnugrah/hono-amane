@@ -31,6 +31,7 @@ export default function AssetToolbar({
   allSelected,
   locationDesc_id,
   handleLocationChange,
+  handleResetFilters,
 }: {
   setShowForm: (showForm: boolean) => void;
   showForm: boolean;
@@ -43,6 +44,7 @@ export default function AssetToolbar({
   sortBy: string;
   handleSortByChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   sortOrder: string;
+  handleResetFilters: () => void;
   handleSortOrderChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   toggleSelectAll: (e: React.ChangeEvent<HTMLInputElement>) => void;
   allSelected: any;
@@ -92,15 +94,21 @@ export default function AssetToolbar({
                   { value: "", label: "All" },
                   { value: "Good", label: "Good" },
                   { value: "Broken", label: "Broken" },
+                  // { value: "#N/A", label: "N/A" },
+                  { value: "X", label: "X" },
+                  { value: "poor", label: "Poor" },
                 ]}
                 value={condition}
                 label="Condition"
               />
+              <div className="col-span-2">
 
               <LocationSelector
                 value={locationDesc_id}
-                onChange={(value: string | number) => handleLocationChange(value)}
-              />
+                onChange={(value:any) => handleLocationChange(value)}
+                
+                />
+                </div>
 
               {/* <InputSelect
                 onChange={handleConditionChange}
@@ -144,7 +152,10 @@ export default function AssetToolbar({
                 value={sortOrder}
                 label="Sort order"
               />
+              <button onClick={handleResetFilters} className="btn btn-secondary">Reset Filter</button>
+
             </div>
+
           </motion.div>
         )}
       </AnimatePresence>

@@ -7,9 +7,10 @@ interface InputSelectProps {
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   options: { value: string; label: string }[];
   label?: string;
+  searchInput:any;
 }
 
-export default function InputSelect({ value, onChange, options, label = "Condition" }: InputSelectProps) {
+export default function InputSelect({ value, onChange, options, label = "Condition" , searchInput}: InputSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(() => {
     return options.find(option => option.value === value) || options[0];
@@ -114,7 +115,11 @@ export default function InputSelect({ value, onChange, options, label = "Conditi
             transition={{ duration: 0.2 }}
             className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
           >
-            <div className="max-h-60 overflow-y-auto py-1">
+            <div className="max-h-60 overflow-y-auto py-0 relative">
+              <div className='sticky top-0 w-full bg-white'>
+
+              {searchInput}
+              </div>
               {options.map((option) => (
                 <motion.div
                   key={option.value}

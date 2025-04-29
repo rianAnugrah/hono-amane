@@ -103,8 +103,8 @@ const AssetCrudPage = () => {
     setSearch(e.target.value);
   const handleConditionChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setCondition(e.target.value);
-  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement> ) =>
-    setLocationDesc_id(e?.target?.value ? e.target.value : e );
+  const handleLocationChange = (e :any ) =>
+    setLocationDesc_id(e);
   const handleSortByChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setSortBy(e.target.value);
   const handleSortOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
@@ -114,6 +114,19 @@ const AssetCrudPage = () => {
     setPage(1); // Reset to first page when changing page size
   };
   const handlePageChange = (newPage: number) => setPage(newPage);
+
+  const handleResetFilters = () => {
+    setSearch("");
+    setCondition("");
+    setLocationDesc_id("");
+    setprojectCode_id(null);
+    setCategoryCode("");
+    setSortBy("createdAt");
+    setSortOrder("desc");
+    setPage(1);
+    setPageSize(20);
+  };
+  
 
   // Reset form
   const handleCancel = () => {
@@ -189,6 +202,7 @@ const AssetCrudPage = () => {
         sortBy={sortBy}
         handleSortByChange={handleSortByChange}
         sortOrder={sortOrder}
+        handleResetFilters={handleResetFilters}
         handleSortOrderChange={handleSortOrderChange}
         toggleSelectAll={toggleSelectAll}
         allSelected={allSelected}
