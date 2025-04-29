@@ -35,9 +35,7 @@ export default function AssetItem({
   checked: boolean;
   onSelectAsset: (asset: Asset) => void;
 }) {
-
-
-  const {location} = useUserStore()
+  const { location } = useUserStore();
   return (
     <motion.div layout key={asset.id} className="w-full">
       <div className="p-0 w-full hidden md:flex flex-col">
@@ -77,34 +75,35 @@ export default function AssetItem({
             {formatIDR(asset.acqValueIdr)}
           </div>
 
-          {/* {location?.id === asset.locationDesc_id &&  */}
-          {true && 
-          <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
-            <Link
-              href={`/asset/${asset.assetNo}`}
-              className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-            >
-              <ExternalLink />
-            </Link>
-            <button
-              onClick={() => handleEdit(asset)}
-              className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-            >
-              <Pencil />
-            </button>
-            <button
-              onClick={() => handleDelete(asset.id)}
-              className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
-            >
-              <Trash />
-            </button>
-            <button
-              onClick={() => onToggle(asset.id)}
-              className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors focus:outline-none"
-            >
-              {isExpanded ? <ChevronDown /> : <ChevronRight />}
-            </button>
-          </div>}
+          {location?.id === asset.locationDesc_id && (
+          // {true && (
+            <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
+              <Link
+                href={`/asset/${asset.assetNo}`}
+                className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+              >
+                <ExternalLink />
+              </Link>
+              <button
+                onClick={() => handleEdit(asset)}
+                className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+              >
+                <Pencil />
+              </button>
+              <button
+                onClick={() => handleDelete(asset.id)}
+                className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+              >
+                <Trash />
+              </button>
+              <button
+                onClick={() => onToggle(asset.id)}
+                className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors focus:outline-none"
+              >
+                {isExpanded ? <ChevronDown /> : <ChevronRight />}
+              </button>
+            </div>
+          )}
         </div>
         <AssetDetail isExpanded={isExpanded} asset={asset} />
       </div>
@@ -116,13 +115,12 @@ export default function AssetItem({
           <div className="flex flex-nowrap items-center justify-between gap-2">
             <div className="flex items-center gap-3">
               <div className="w-10">
-
-              <Checkbox
-                checked={checked}
-                onChange={() => onSelectAsset(asset)}
-                className="h-5 w-5"
+                <Checkbox
+                  checked={checked}
+                  onChange={() => onSelectAsset(asset)}
+                  className="h-5 w-5"
                 />
-                </div>
+              </div>
               <div className="">
                 <div className="font-semibold text-gray-800 text-base">
                   {asset.assetName}
@@ -160,39 +158,41 @@ export default function AssetItem({
           </div>
 
           {/* Actions Section */}
-          <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-            <div className="flex gap-2">
-              <Link
-                to={`/asset/${asset.assetNo}`}
+          {location?.id === asset.locationDesc_id && (
+          // {true && (
+            <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+              <div className="flex gap-2">
+                <Link
+                  to={`/asset/${asset.assetNo}`}
+                  className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+                >
+                  <ExternalLink size={20} />
+                </Link>
+                <button
+                  onClick={() => handleEdit(asset)}
+                  className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+                >
+                  <Pencil size={20} />
+                </button>
+                <button
+                  onClick={() => handleDelete(asset.id)}
+                  className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <Trash size={20} />
+                </button>
+              </div>
+              <button
+                onClick={() => onToggle(asset.id)}
                 className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
               >
-                <ExternalLink size={20} />
-              </Link>
-              <button
-                onClick={() => handleEdit(asset)}
-                className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
-              >
-                <Pencil size={20} />
-              </button>
-              <button
-                onClick={() => handleDelete(asset.id)}
-                className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-              >
-                <Trash size={20} />
+                {isExpanded ? (
+                  <ChevronDown size={20} />
+                ) : (
+                  <ChevronRight size={20} />
+                )}
               </button>
             </div>
-            <button
-              onClick={() => onToggle(asset.id)}
-              className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
-            >
-              {isExpanded ? (
-                <ChevronDown size={20} />
-              ) : (
-                <ChevronRight size={20} />
-              )}
-            </button>
-          </div>
-
+          )}
           {/* Expandable Asset Details */}
           <div
             className={`transition-all duration-300 ${
