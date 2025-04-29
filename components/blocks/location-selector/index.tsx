@@ -3,6 +3,7 @@ import axios from "axios";
 import InputSelect from "@/components/ui/input-select";
 import InputText from "@/components/ui/input-text";
 import { Search } from "lucide-react";
+import { SelectField } from "@/components/forms/AssetForm/components/SelectField";
 
 // Define the Location type
 interface Location {
@@ -65,7 +66,7 @@ export function LocationSelector({
     <div className="space-y-2">
       {/* Location select */}
       {locations.length > 0 && (
-        <InputSelect
+        <SelectField
           options={[
             { label: "All", value: "" },
             ...locations.map((loc) => ({
@@ -86,6 +87,7 @@ export function LocationSelector({
           label={label}
           placeholder={placeholder}
           isLoading={isLoading}
+          searchable
           searchInput={
             <div className="flex items-center gap-2 p-4">
               <InputText

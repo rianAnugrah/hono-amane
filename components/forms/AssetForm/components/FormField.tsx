@@ -26,7 +26,7 @@ export const FormField = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="flex items-center relative flex-grow my-4">
+      <div className="flex items-center relative flex-grow">
         <div className="relative w-full">
           <input
             type={type}

@@ -173,6 +173,24 @@ export default function AssetForm({
     }));
   };
 
+  // Validate all fields when editingId exists (runs once on component mount)
+  useEffect(() => {
+    if (editingId) {
+      // Mark all fields as touched
+      const allFieldNames = Object.keys(form);
+      setTouchedFields(new Set(allFieldNames));
+      
+      // Validate all fields
+      const validationResults: ValidationState = {};
+      allFieldNames.forEach(fieldName => {
+        validationResults[fieldName] = validateField(fieldName, form[fieldName]);
+      });
+      
+      // Update validation state
+      setValidation(validationResults);
+    }
+  }, [editingId]); // Only run when editingId changes
+
   // Handle field change
   useEffect(() => {
     // Validate all touched fields when form changes
@@ -532,7 +550,7 @@ export default function AssetForm({
         <div className="flex space-x-3">
           {activeSection !== "basic" && (
             <motion.button
-              onClick={() => navigateSection(false)}
+              onClick={() =>{ navigateSection(false);}}
               className="flex-1 bg-gray-200 text-gray-700 px-4 py-3 rounded-xl font-medium active:bg-gray-300"
               whileTap={{ scale: 0.95 }}
             >

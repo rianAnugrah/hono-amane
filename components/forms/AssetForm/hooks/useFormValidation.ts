@@ -5,12 +5,12 @@ import { validateField } from '../validation';
 export const useFormValidation = (form: AssetFormValues) => {
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
   const [validation, setValidation] = useState<ValidationState>({
-    projectCode: "untouched",
+    projectCode_id: "untouched",
     assetNo: "untouched",
     lineNo: "untouched",
     assetName: "untouched", 
     categoryCode: "untouched",
-    locationDesc: "untouched",
+    locationDesc_id: "untouched",
     condition: "untouched",
     acqValue: "untouched",
     acqValueIdr: "untouched",
@@ -54,8 +54,8 @@ export const useFormValidation = (form: AssetFormValues) => {
   // Update section status when validation changes
   useEffect(() => {
     const sections = {
-      basic: ["projectCode", "assetNo", "lineNo", "assetName"],
-      location: ["categoryCode", "locationDesc", "condition"],
+      basic: ["projectCode_id", "assetNo", "lineNo", "assetName"],
+      location: ["categoryCode", "locationDesc_id", "condition"],
       financial: ["acqValue", "acqValueIdr", "bookValue"],
       depreciation: ["accumDepre", "adjustedDepre", "ytdDepre"],
       dates: ["pisDate", "transDate"]
@@ -81,11 +81,29 @@ export const useFormValidation = (form: AssetFormValues) => {
     return Object.values(sectionStatus).every(status => status === "complete");
   };
 
+  // Validate all fields for edit mode
+  const validateAllFields = () => {
+    // Mark all fields as touched
+    const allFieldNames = Object.keys(form) as Array<keyof AssetFormValues>;
+    const allTouchedFields = new Set(allFieldNames);
+    setTouchedFields(allTouchedFields);
+    
+    // Validate all fields
+    const newValidation = { ...validation };
+    allFieldNames.forEach(fieldName => {
+      newValidation[fieldName] = validateField(fieldName, form[fieldName]);
+    });
+    
+    // Update validation state
+    setValidation(newValidation);
+  };
+
   return {
     touchedFields,
     validation,
     sectionStatus,
     handleBlur,
     isFormValid,
+    validateAllFields,
   };
 };

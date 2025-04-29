@@ -272,7 +272,7 @@ export const DatePickerFields = ({
       transition={{ duration: 0.2 }}
       ref={containerRef}
     >
-      <div className="flex items-center relative flex-grow pt-4">
+      <div className="flex items-center relative flex-grow">
         <div className="relative w-full">
           <input
             ref={inputRef}

@@ -33,7 +33,7 @@ interface Asset {
   projectCode_id?: number | null;
   locationDesc_id?: number | null;
   detailsLocation_id?: number | null;
-  
+
   // Relations (optional for when they are included)
   projectCode?: any;
   locationDesc?: any;
@@ -46,14 +46,14 @@ assetRoutes.get("/", async (c) => {
     // Pagination parameters
     const page = parseInt(c.req.query("page") || "1", 10);
     const pageSize = parseInt(c.req.query("pageSize") || "10", 10);
-    
+
     // Search parameter
     const search = c.req.query("search") || "";
-    
+
     // Sorting parameters
     const sortBy = c.req.query("sortBy") || "createdAt";
     const sortOrder = c.req.query("sortOrder") || "desc";
-    
+
     // Filter parameters for various fields
     const filterCondition = c.req.query("condition");
     const filterAssetNo = c.req.query("assetNo");
@@ -62,77 +62,107 @@ assetRoutes.get("/", async (c) => {
     const filterAfeNo = c.req.query("afeNo");
     const filterPoNo = c.req.query("poNo");
     const filterTaggingYear = c.req.query("taggingYear");
-    
+
     // Related entity filters
-    const filterProjectCodeId = c.req.query("projectCode_id") ? parseInt(c.req.query("projectCode_id")) : undefined;
-    const filterLocationDescId = c.req.query("locationDesc_id") ? parseInt(c.req.query("locationDesc_id")) : undefined;
-    const filterDetailsLocationId = c.req.query("detailsLocation_id") ? parseInt(c.req.query("detailsLocation_id")) : undefined;
-    
+    const filterProjectCodeId = c.req.query("projectCode_id")
+      ? parseInt(c.req.query("projectCode_id"))
+      : undefined;
+    const filterLocationDescId = c.req.query("locationDesc_id")
+      ? parseInt(c.req.query("locationDesc_id"))
+      : undefined;
+    const filterDetailsLocationId = c.req.query("detailsLocation_id")
+      ? parseInt(c.req.query("detailsLocation_id"))
+      : undefined;
+
     // Date range filters
     const pisDateFrom = c.req.query("pisDateFrom");
     const pisDateTo = c.req.query("pisDateTo");
     const transDateFrom = c.req.query("transDateFrom");
     const transDateTo = c.req.query("transDateTo");
-    
+
     // Numeric range filters
-    const acqValueMin = c.req.query("acqValueMin") ? parseFloat(c.req.query("acqValueMin")) : undefined;
-    const acqValueMax = c.req.query("acqValueMax") ? parseFloat(c.req.query("acqValueMax")) : undefined;
-    const bookValueMin = c.req.query("bookValueMin") ? parseFloat(c.req.query("bookValueMin")) : undefined;
-    const bookValueMax = c.req.query("bookValueMax") ? parseFloat(c.req.query("bookValueMax")) : undefined;
+    const acqValueMin = c.req.query("acqValueMin")
+      ? parseFloat(c.req.query("acqValueMin"))
+      : undefined;
+    const acqValueMax = c.req.query("acqValueMax")
+      ? parseFloat(c.req.query("acqValueMax"))
+      : undefined;
+    const bookValueMin = c.req.query("bookValueMin")
+      ? parseFloat(c.req.query("bookValueMin"))
+      : undefined;
+    const bookValueMax = c.req.query("bookValueMax")
+      ? parseFloat(c.req.query("bookValueMax"))
+      : undefined;
 
     // Build where conditions object
     const whereConditions: any = {
       deletedAt: null,
       isLatest: true,
     };
-    
+
     // Add text search condition if provided
     if (search) {
       whereConditions.OR = [
         { assetName: { contains: search, mode: "insensitive" } },
         { assetNo: { contains: search, mode: "insensitive" } },
-        { remark: { contains: search, mode: "insensitive" } }
+        { remark: { contains: search, mode: "insensitive" } },
       ];
     }
-    
+
     // Add filter conditions for text fields
-    if (filterCondition) whereConditions.condition = { equals: filterCondition };
-    if (filterAssetNo) whereConditions.assetNo = { contains: filterAssetNo, mode: "insensitive" };
-    if (filterLineNo) whereConditions.lineNo = { contains: filterLineNo, mode: "insensitive" };
-    if (filterCategoryCode) whereConditions.categoryCode = { equals: filterCategoryCode };
-    if (filterAfeNo) whereConditions.afeNo = { contains: filterAfeNo, mode: "insensitive" };
-    if (filterPoNo) whereConditions.poNo = { contains: filterPoNo, mode: "insensitive" };
-    if (filterTaggingYear) whereConditions.taggingYear = { equals: filterTaggingYear };
-    
+    if (filterCondition)
+      whereConditions.condition = { equals: filterCondition };
+    if (filterAssetNo)
+      whereConditions.assetNo = {
+        contains: filterAssetNo,
+        mode: "insensitive",
+      };
+    if (filterLineNo)
+      whereConditions.lineNo = { contains: filterLineNo, mode: "insensitive" };
+    if (filterCategoryCode)
+      whereConditions.categoryCode = { equals: filterCategoryCode };
+    if (filterAfeNo)
+      whereConditions.afeNo = { contains: filterAfeNo, mode: "insensitive" };
+    if (filterPoNo)
+      whereConditions.poNo = { contains: filterPoNo, mode: "insensitive" };
+    if (filterTaggingYear)
+      whereConditions.taggingYear = { equals: filterTaggingYear };
+
     // Add relation filters
-    if (filterProjectCodeId !== undefined) whereConditions.projectCode_id = filterProjectCodeId;
-    if (filterLocationDescId !== undefined) whereConditions.locationDesc_id = filterLocationDescId;
-    if (filterDetailsLocationId !== undefined) whereConditions.detailsLocation_id = filterDetailsLocationId;
-    
+    if (filterProjectCodeId !== undefined)
+      whereConditions.projectCode_id = filterProjectCodeId;
+    if (filterLocationDescId !== undefined)
+      whereConditions.locationDesc_id = filterLocationDescId;
+    if (filterDetailsLocationId !== undefined)
+      whereConditions.detailsLocation_id = filterDetailsLocationId;
+
     // Add date range filters
     if (pisDateFrom || pisDateTo) {
       whereConditions.pisDate = {};
       if (pisDateFrom) whereConditions.pisDate.gte = new Date(pisDateFrom);
       if (pisDateTo) whereConditions.pisDate.lte = new Date(pisDateTo);
     }
-    
+
     if (transDateFrom || transDateTo) {
       whereConditions.transDate = {};
-      if (transDateFrom) whereConditions.transDate.gte = new Date(transDateFrom);
+      if (transDateFrom)
+        whereConditions.transDate.gte = new Date(transDateFrom);
       if (transDateTo) whereConditions.transDate.lte = new Date(transDateTo);
     }
-    
+
     // Add numeric range filters
     if (acqValueMin !== undefined || acqValueMax !== undefined) {
       whereConditions.acqValue = {};
       if (acqValueMin !== undefined) whereConditions.acqValue.gte = acqValueMin;
       if (acqValueMax !== undefined) whereConditions.acqValue.lte = acqValueMax;
     }
-    
+
     if (bookValueMin !== undefined || bookValueMax !== undefined) {
       whereConditions.bookValue = {};
-      if (bookValueMin !== undefined) whereConditions.bookValue.gte = bookValueMin;
-      if (bookValueMax !== undefined) whereConditions.bookValue.lte = bookValueMax;
+      if (bookValueMin !== undefined)
+        whereConditions.bookValue.gte = bookValueMin;
+      if (bookValueMax !== undefined)
+        whereConditions.bookValue.lte = bookValueMax;
     }
 
     // Execute the query with filters and pagination
@@ -170,9 +200,6 @@ assetRoutes.get("/", async (c) => {
   }
 });
 
-
-
-
 // GET single asset (latest, not deleted)
 assetRoutes.get("/:id", async (c) => {
   try {
@@ -181,7 +208,8 @@ assetRoutes.get("/:id", async (c) => {
         id: c.req.param("id"),
         deletedAt: null,
         isLatest: true,
-      }, include: {
+      },
+      include: {
         projectCode: true,
         locationDesc: true,
         detailsLocation: true,
@@ -203,7 +231,8 @@ assetRoutes.get("/by-asset-number/:id", async (c) => {
         assetNo: c.req.param("id"),
         deletedAt: null,
         isLatest: true,
-      }, include: {
+      },
+      include: {
         projectCode: true,
         locationDesc: true,
         detailsLocation: true,
@@ -224,37 +253,60 @@ assetRoutes.get("/by-asset-number/:id", async (c) => {
 // CREATE asset
 assetRoutes.post("/", async (c) => {
   try {
-    const body: Asset = await c.req.json();
-    const asset: Asset = await prisma.asset.create({
+    const body: Partial<Asset> = await c.req.json();
+
+    const asset = await prisma.asset.create({
       data: {
         version: 1,
         isLatest: true,
-        projectCode: body.projectCode,
-        assetNo: body.assetNo,
-        lineNo: body.lineNo,
-        assetName: body.assetName,
-        remark: body.remark,
-        locationDesc: body.locationDesc,
-        detailsLocation: body.detailsLocation,
-        condition: body.condition,
-        pisDate: new Date(body.pisDate),
-        transDate: new Date(body.transDate),
-        categoryCode: body.categoryCode,
-        afeNo: body.afeNo,
-        adjustedDepre: parseFloat(String(body.adjustedDepre)),
-        poNo: body.poNo,
-        acqValueIdr: parseFloat(String(body.acqValueIdr)),
-        acqValue: parseFloat(String(body.acqValue)),
-        accumDepre: parseFloat(String(body.accumDepre)),
-        ytdDepre: parseFloat(String(body.ytdDepre)),
-        bookValue: parseFloat(String(body.bookValue)),
-        taggingYear: body.taggingYear,
+        assetNo: body.assetNo!,
+        lineNo: body.lineNo!,
+        assetName: body.assetName!,
+        remark: body.remark ?? null,
+        condition: body.condition!,
+        pisDate: new Date(body.pisDate!),
+        transDate: new Date(body.transDate!),
+        categoryCode: body.categoryCode!,
+        afeNo: body.afeNo ?? null,
+        adjustedDepre: parseFloat(body.adjustedDepre as any),
+        poNo: body.poNo ?? null,
+        acqValueIdr: parseFloat(body.acqValueIdr as any),
+        acqValue: parseFloat(body.acqValue as any),
+        accumDepre: parseFloat(body.accumDepre as any),
+        ytdDepre: parseFloat(body.ytdDepre as any),
+        bookValue: parseFloat(body.bookValue as any),
+        taggingYear: body.taggingYear ?? null,
+        projectCode_id: body.projectCode_id ?? null,
+        locationDesc_id: body.locationDesc_id ?? null,
+        detailsLocation_id: body.detailsLocation_id ?? null,
       },
     });
+
     return c.json(asset, 201);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating asset:", error);
-    return c.json({ error: "Failed to create asset" }, 500);
+
+    const isPrismaError = error.code && error.meta;
+
+    return c.json(
+      {
+        error: "Failed to create asset",
+        message: error.message,
+        ...(isPrismaError && {
+          prisma: {
+            code: error.code,
+            target: error.meta?.target,
+            cause: error.meta?.cause,
+            details: error.meta,
+          },
+        }),
+        raw:
+          process.env.NODE_ENV === "development"
+            ? JSON.stringify(error, null, 2)
+            : undefined,
+      },
+      500
+    );
   }
 });
 
@@ -278,18 +330,13 @@ assetRoutes.put("/:id", async (c) => {
     // Create new version
     const newAsset = await prisma.asset.create({
       data: {
-        ...old,
-        id: undefined,
         version: old.version + 1,
-        parentId: old.parentId || old.id,
         isLatest: true,
-        projectCode: body.projectCode ?? old.projectCode,
+        parentId: old.parentId || old.id,
         assetNo: body.assetNo ?? old.assetNo,
         lineNo: body.lineNo ?? old.lineNo,
         assetName: body.assetName ?? old.assetName,
         remark: body.remark ?? old.remark,
-        locationDesc: body.locationDesc ?? old.locationDesc,
-        detailsLocation: body.detailsLocation ?? old.detailsLocation,
         condition: body.condition ?? old.condition,
         pisDate: body.pisDate ? new Date(body.pisDate) : old.pisDate,
         transDate: body.transDate ? new Date(body.transDate) : old.transDate,
@@ -303,13 +350,37 @@ assetRoutes.put("/:id", async (c) => {
         ytdDepre: body.ytdDepre ?? old.ytdDepre,
         bookValue: body.bookValue ?? old.bookValue,
         taggingYear: body.taggingYear ?? old.taggingYear,
+        projectCode_id: body.projectCode_id ?? old.projectCode_id,
+        locationDesc_id: body.locationDesc_id ?? old.locationDesc_id,
+        detailsLocation_id: body.detailsLocation_id ?? old.detailsLocation_id,
       },
     });
 
     return c.json(newAsset);
-  } catch (error) {
-    console.error("Error updating asset:", error);
-    return c.json({ error: "Failed to update asset" }, 500);
+  } catch (error: any) {
+    console.error("Error update asset:", error);
+
+    const isPrismaError = error.code && error.meta;
+
+    return c.json(
+      {
+        error: "Failed to create asset",
+        message: error.message,
+        ...(isPrismaError && {
+          prisma: {
+            code: error.code,
+            target: error.meta?.target,
+            cause: error.meta?.cause,
+            details: error.meta,
+          },
+        }),
+        raw:
+          process.env.NODE_ENV === "development"
+            ? JSON.stringify(error, null, 2)
+            : undefined,
+      },
+      500
+    );
   }
 });
 
@@ -334,6 +405,5 @@ assetRoutes.delete("/:id", async (c) => {
     return c.json({ error: "Failed to delete asset" }, 500);
   }
 });
-
 
 export default assetRoutes;

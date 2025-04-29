@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { AssetFormValues } from "./types";
 import { getErrorMessage } from "./validation";
@@ -10,6 +10,7 @@ import { NavigationButtons } from "./components/NavigationButtons";
 import { FormSection } from "./components/FormSection";
 import { SelectField } from "./components/SelectField";
 import { DatePickerFields } from "./components/DatepickerFields";
+import axios from "axios";
 
 interface AssetFormProps {
   editingId: string | null;
@@ -28,8 +29,13 @@ export default function AssetForm({
 }: AssetFormProps) {
   const [activeSection, setActiveSection] = useState("basic");
   const [direction, setDirection] = useState(0);
+  const [locationOptions, setLocationOptions] = useState([]);
+  const [projectCodes, setProjectCodes] = useState([]);
 
-  const { touchedFields, validation, sectionStatus, handleBlur, isFormValid } =
+  const [search, setSearch] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isLoading, setIsLoading] = useState(false);
+  const { touchedFields, validation, sectionStatus, handleBlur, isFormValid, validateAllFields } =
     useFormValidation(form);
 
   const sections = ["basic", "location", "financial", "depreciation", "dates"];
@@ -49,6 +55,87 @@ export default function AssetForm({
     const newIndex = sections.indexOf(section);
     setDirection(newIndex > currentIndex ? 1 : -1);
     setActiveSection(section);
+  };
+
+  const categoryCodeOptions = [
+    {
+      label: "Select",
+      value: "",
+    },
+    {
+      label: "A",
+      value: "A",
+    },
+    {
+      label: "B",
+      value: "B",
+    },
+    {
+      label: "C",
+      value: "C",
+    },
+    {
+      label: "D",
+      value: "D",
+    },
+    {
+      label: "E",
+      value: "E",
+    },
+    {
+      label: "F",
+      value: "F",
+    },
+    {
+      label: "G",
+      value: "G",
+    },
+  ];
+
+  const fetchLocations = async () => {
+    setIsLoading(true);
+    try {
+      const res = await axios.get("/api/locations", {
+        params: { search, sort: sortOrder },
+      });
+      setLocationOptions(res.data);
+    } catch (error) {
+      console.error("Failed to fetch locations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchProjectCode = async () => {
+    setIsLoading(true);
+    try {
+      const res = await axios.get("/api/project-codes");
+      setProjectCodes(res.data);
+    } catch (error) {
+      console.error("Failed to fetch locations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLocations();
+  }, [search, sortOrder]);
+
+  useEffect(() => {
+    fetchProjectCode();
+  }, []);
+  
+  // Validate all fields when in edit mode
+  useEffect(() => {
+    if (editingId) {
+      validateAllFields();
+    }
+  }, [editingId, validateAllFields]);
+
+  // Function to display object as formatted JSON
+  const formatObject = (obj) => {
+    return JSON.stringify(obj, null, 2);
   };
 
   return (
@@ -73,24 +160,33 @@ export default function AssetForm({
 
       {/* Form Sections */}
       <div
-        className="relative overflow-hidden mb-6"
+        className="relative overflow-hidden mb-6 flex"
         style={{ minHeight: "calc(100% - 300px)" }}
       >
+        <div className="w-full relative">
+
         <AnimatePresence initial={false} custom={direction} mode="wait">
           {activeSection === "basic" && (
             <FormSection direction={direction}>
-              <FormField
-                name="projectCode"
+              <SelectField
+                name="projectCode_id"
                 label="Project Code"
                 placeholder="Enter project code"
-                value={form.projectCode}
+                value={form.projectCode_id}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                validation={validation.projectCode}
-                touched={touchedFields.has("projectCode")}
+                options={[
+                  { label: "Select", value: "" },
+                  ...projectCodes.map((pc) => ({
+                    label: pc.code,
+                    value: pc.id,
+                  })),
+                ]}
+                validation={validation.projectCode_id}
+                touched={touchedFields.has("projectCode_id")}
                 errorMessage={getErrorMessage(
-                  "projectCode",
-                  validation.projectCode
+                  "projectCode_id",
+                  validation.projectCode_id
                 )}
               />
               <FormField
@@ -134,7 +230,7 @@ export default function AssetForm({
 
           {activeSection === "location" && (
             <FormSection direction={direction}>
-              <FormField
+              <SelectField
                 name="categoryCode"
                 label="Category Code"
                 placeholder="Enter category code"
@@ -142,6 +238,7 @@ export default function AssetForm({
                 onChange={handleChange}
                 onBlur={handleBlur}
                 validation={validation.categoryCode}
+                options={categoryCodeOptions}
                 touched={touchedFields.has("categoryCode")}
                 errorMessage={getErrorMessage(
                   "categoryCode",
@@ -156,32 +253,33 @@ export default function AssetForm({
                 onChange={handleChange}
                 onBlur={handleBlur}
                 options={[
-                  {
-                    label: "Jakarta",
-                    value: 1,
-                  },
-                  {
-                    label: "Surabaya",
-                    value: 2,
-                  },
-                  {
-                    label: "Pasuruan",
-                    value: 3,
-                  },
+                  { label: "Select", value: "" },
+                  ...locationOptions.map((loc) => ({
+                    label: loc.description,
+                    value: loc.id,
+                  })),
                 ]}
-                validation={validation.locationDesc}
-                touched={touchedFields.has("locationDesc")}
+                validation={validation.locationDesc_id}
+                touched={touchedFields.has("locationDesc_id")}
                 errorMessage={getErrorMessage(
-                  "locationDesc",
-                  validation.locationDesc
+                  "locationDesc_id",
+                  validation.locationDesc_id
                 )}
               />
-              <FormField
+              <SelectField
                 name="condition"
                 label="Condition"
                 placeholder="Enter asset condition"
                 value={form.condition}
                 onChange={handleChange}
+                options={[
+                  { value: "", label: "Select" },
+                  { value: "Good", label: "Good" },
+                  { value: "Broken", label: "Broken" },
+                  // { value: "#N/A", label: "N/A" },
+                  { value: "X", label: "X" },
+                  { value: "poor", label: "Poor" },
+                ]}
                 onBlur={handleBlur}
                 validation={validation.condition}
                 touched={touchedFields.has("condition")}
@@ -319,6 +417,14 @@ export default function AssetForm({
             </FormSection>
           )}
         </AnimatePresence>
+        </div>
+
+        {/* <div className="border border-red-500 p-4 rounded">
+          <div className="font-bold text-lg mb-2">Debug</div>
+          <pre className="bg-gray-100 p-2 rounded overflow-auto max-h-96">
+            {formatObject(form)}
+          </pre>
+        </div> */}
       </div>
 
       {/* Progress Indicator */}

@@ -16,6 +16,7 @@ interface SelectFieldProps {
   icon?: React.ReactNode;
   searchable?: boolean;
   searchPlaceholder?: string;
+  searchInput?:any;
 }
 
 export const SelectField = ({
@@ -30,6 +31,7 @@ export const SelectField = ({
   touched,
   errorMessage,
   icon,
+  searchInput,
   searchable = false,
   searchPlaceholder = "Search..."
 }: SelectFieldProps) => {

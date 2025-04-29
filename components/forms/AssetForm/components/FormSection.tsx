@@ -28,7 +28,7 @@ export const FormSection = ({ children, direction }: FormSectionProps) => {
         x: { type: "spring", stiffness: 300, damping: 30 },
         opacity: { duration: 0.2 }
       }}
-      className="space-y-4 absolute w-full"
+      className="space-y-4 absolute w-full py-4"
     >
       {children}
     </motion.div>

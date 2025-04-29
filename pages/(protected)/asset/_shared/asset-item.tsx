@@ -77,7 +77,8 @@ export default function AssetItem({
             {formatIDR(asset.acqValueIdr)}
           </div>
 
-          {location?.id === asset.locationDesc_id &&
+          {/* {location?.id === asset.locationDesc_id &&  */}
+          {true && 
           <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
             <Link
               href={`/asset/${asset.assetNo}`}
