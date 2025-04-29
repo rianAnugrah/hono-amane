@@ -5,6 +5,7 @@ import { UserFilterToolbar } from "@/pages/(protected)/user/_shared/user-filter-
 import { PlusCircle } from "lucide-react";
 import axios from "axios";
 import InputSelect from "@/components/ui/input-select";
+import MultiSelect from "@/components/ui/multi-select";
 
 type Location = {
   id: number;
@@ -17,7 +18,7 @@ type User = {
   name?: string;
   role?: string;
   placement?: string;
-  locationId?: number;
+  locationId?: string[];
   createdAt: string;
   updatedAt: string;
   password: string;
@@ -55,6 +56,10 @@ export default function UserFormModal({
   }, [search, sortOrder]);
 
   console.log("FORNM", locations);
+  // Function to display object as formatted JSON
+  const formatObject = (obj) => {
+    return JSON.stringify(obj, null, 2);
+  };
 
   return (
     <motion.div
@@ -73,7 +78,7 @@ export default function UserFormModal({
           <h2 className="text-xl font-semibold text-center mb-6">
             {editingId ? "Edit User" : "New User"}
           </h2>
-
+         
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-4">
               <div>
@@ -111,7 +116,7 @@ export default function UserFormModal({
               <div>
                 {locations.length > 0 && (
                   <InputSelect
-                  label="Role"
+                    label="Role"
                     options={[
                       {
                         value: "read_only",
@@ -131,21 +136,18 @@ export default function UserFormModal({
                     onChange={(e) => setForm({ ...form, role: e.target.value })}
                   />
                 )}
-
               </div>
 
               <div>
                 {locations.length > 0 && (
-                  <InputSelect
-                  label="Location"
+                  <MultiSelect
+                    label="Location"
                     options={locations.map((loc) => ({
                       label: loc.description,
                       value: loc.id,
                     }))}
-                    value={form.locationId || 1}
-                    onChange={(e) =>
-                      setForm({ ...form, locationId: e.target.value })
-                    }
+                    values={form.locationId || []} // <-- must be an array
+                    onChange={(e) => setForm({ ...form, locationId: e })}
                   />
                 )}
               </div>
