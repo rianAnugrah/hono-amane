@@ -11,6 +11,7 @@ import { FormSection } from "./components/FormSection";
 import { SelectField } from "./components/SelectField";
 import { DatePickerFields } from "./components/DatepickerFields";
 import axios from "axios";
+import { X } from "lucide-react";
 
 interface AssetFormProps {
   editingId: string | null;
@@ -139,11 +140,12 @@ export default function AssetForm({
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm mb-6 h-full overflow-y-auto">
+    <div className="bg-white p-6 rounded-2xl shadow-sm mb-6 h-full overflow-y-auto relative">
       <h2 className="text-xl font-semibold mb-6 text-gray-800">
         {editingId ? "Edit" : "Create"} Asset
       </h2>
 
+      <button className="absolute right-8 top-6 btn btn-ghost" onClick={handleCancel}><X /></button>
       {/* Navigation Tabs */}
       <div className="flex space-x-1 mb-4 overflow-x-auto relative">
         {sections.map((section) => (
@@ -161,11 +163,13 @@ export default function AssetForm({
       {/* Form Sections */}
       <div
         className="relative overflow-hidden mb-6 flex"
-        style={{ minHeight: "calc(100% - 300px)" }}
+        style={{ minHeight: "calc(100% - 220px)" }}
       >
         <div className="w-full relative">
 
+      
         <AnimatePresence initial={false} custom={direction} mode="wait">
+       
           {activeSection === "basic" && (
             <FormSection direction={direction}>
               <SelectField
