@@ -1,6 +1,7 @@
 import DashboardCharts from "@/components/blocks/dashboard-charts";
 import { formatIDR, formatIDRHuman } from "@/components/utils/formatting";
 import { Link } from "@/renderer/Link";
+import { useUserStore } from "@/stores/store-user-login";
 import axios from "axios";
 import {
   Archive,
@@ -15,8 +16,7 @@ import React, { useState, useEffect } from "react";
 
 export function Page() {
   const [stats, setStats] = useState(null);
-
-
+  const { role } = useUserStore();
 
   const fetchStats = async () => {
     try {
@@ -31,11 +31,9 @@ export function Page() {
         setStats(data);
       }
     } catch (error) {
-    //  console.error("Failed to fetch assets:", error);
+      //  console.error("Failed to fetch assets:", error);
     }
   };
-
- 
 
   useEffect(() => {
     fetchStats();
@@ -45,22 +43,24 @@ export function Page() {
 
   return (
     <div className="w-full flex flex-col p-4 ">
-     <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 w-full gap-4">
-        <Link
-          href="/asset/create"
-          className="relative shadow-md group bg-[#fdfdfd] items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-black gap-2"
-        >
-          <img
-            src="/img/add-new-asset.jpg"
-            alt="Scan Asset"
-            className="h-[10rem] absolute top-0 right-0 z-0 opacity-100 group-hover:opacity-70 group-hover:scale-125 group-hover:-rotate-12 transition-all"
-          />
-          <div className="z-10 w-[20rem] flex flex-col group-hover:text-gray-600 transition-all">
-            <PlusCircle className="w-[2rem] h-[2rem] mb-2" />
-            <p className="text-xl font-bold  text-left">Add new asset</p>
-            <p className="text-sm text-left">Register new asset</p>
-          </div>
-        </Link>
+      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 w-full gap-4">
+        {role === "admin" && (
+          <Link
+            href="/asset/create"
+            className="relative shadow-md group bg-[#fdfdfd] items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-black gap-2"
+          >
+            <img
+              src="/img/add-new-asset.jpg"
+              alt="Scan Asset"
+              className="h-[10rem] absolute top-0 right-0 z-0 opacity-100 group-hover:opacity-70 group-hover:scale-125 group-hover:-rotate-12 transition-all"
+            />
+            <div className="z-10 w-[20rem] flex flex-col group-hover:text-gray-600 transition-all">
+              <PlusCircle className="w-[2rem] h-[2rem] mb-2" />
+              <p className="text-xl font-bold  text-left">Add new asset</p>
+              <p className="text-sm text-left">Register new asset</p>
+            </div>
+          </Link>
+        )}
         <Link
           href="/qr-scanner"
           className="relative shadow-md cursor-pointer bg-[#ada5e9] group items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-white gap-2 transition-all"
@@ -118,9 +118,9 @@ export function Page() {
           buttonLabel="Generate report"
           icon={<DollarSign />}
         />
-      </div> 
+      </div>
 
-      <DashboardCharts stats={stats}/>
+      <DashboardCharts stats={stats} />
     </div>
   );
 }
@@ -138,6 +138,7 @@ function DashboardItem({
   buttonLabel: string;
   icon?: React.ReactElement;
 }) {
+  const { role } = useUserStore();
   return (
     <div className="w-full group shadow-md rounded-xl bg-gray-200 border border-gray-300 p-2 flex flex-col items-end gap-2">
       <div className="flex relative flex-col rounded-lg border border-gray-300 overflow-hidden bg-white p-4 w-full">
@@ -154,9 +155,11 @@ function DashboardItem({
         )}
       </div>
 
-      <a className="btn btn-primary btn-ghost" href={href}>
-        {buttonLabel}
-      </a>
+      {role === "admin" && (
+        <a className="btn btn-primary btn-ghost" href={href}>
+          {buttonLabel}
+        </a>
+      )}
     </div>
   );
 }

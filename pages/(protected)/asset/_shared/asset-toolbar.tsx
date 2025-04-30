@@ -15,6 +15,7 @@ import Switch from "@/components/ui/switch";
 import Checkbox from "@/components/ui/checkbox";
 import SelectedAssetsPage from "@/pages/(protected)/asset/print/+Page";
 import { LocationSelector } from "@/components/blocks/location-selector";
+import { useUserStore } from "@/stores/store-user-login";
 
 export default function AssetToolbar({
   setShowForm,
@@ -52,6 +53,7 @@ export default function AssetToolbar({
   const isDesktop = useResponive();
   const [showToolbar, setShowToolbar] = useState<boolean>(false);
   const shouldShowToolbar = isDesktop || showToolbar;
+  const { role } = useUserStore();
 
   return (
     <div className="bg-gray-100 z-10 rounded-none shadow-none pb-4 md:pb-0 border-b md:border-none px-4  border-gray-300 mb-0 sticky top-0">
@@ -102,13 +104,11 @@ export default function AssetToolbar({
                 label="Condition"
               />
               <div className="col-span-2">
-
-              <LocationSelector
-                value={locationDesc_id}
-                onChange={(value:any) => handleLocationChange(value)}
-                
+                <LocationSelector
+                  value={locationDesc_id}
+                  onChange={(value: any) => handleLocationChange(value)}
                 />
-                </div>
+              </div>
 
               {/* <InputSelect
                 onChange={handleConditionChange}
@@ -152,10 +152,10 @@ export default function AssetToolbar({
                 value={sortOrder}
                 label="Sort order"
               />
-              <button onClick={handleResetFilters} className="btn btn-neutral">Reset Filter</button>
-
+              <button onClick={handleResetFilters} className="btn btn-neutral">
+                Reset Filter
+              </button>
             </div>
-
           </motion.div>
         )}
       </AnimatePresence>
@@ -177,14 +177,18 @@ export default function AssetToolbar({
         <div className="px-4 py-2 flex items-center">Location</div>
         <div className="px-4 py-2 col-span-2 flex items-center">Value</div>
         <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
-          {/* <AssetPrintButton /> */}
           <SelectedAssetsPage />
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="btn btn-primary btn-sm"
-          >
-            <PlusCircle className="w-5 h-5" /> New Asset
-          </button>
+          {role !== "read_only" && (
+            <>
+
+              <button
+                onClick={() => setShowForm(!showForm)}
+                className="btn btn-primary btn-sm"
+              >
+                <PlusCircle className="w-5 h-5" /> New Asset
+              </button>
+            </>
+          )}
         </div>
       </div>
 

@@ -26,6 +26,7 @@ import DesktopLink from "./desktop-link";
 import MobileLink from "./mobile-link";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
+import { useUserStore } from "@/stores/store-user-login";
 
 export default function Navbar() {
   return (
@@ -39,6 +40,8 @@ export default function Navbar() {
 function MobileNavbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const { role } = useUserStore();
+
   return (
     <nav className="bg-[#476f80] md:hidden border-t w-full bottom-0 fixed z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -46,7 +49,6 @@ function MobileNavbar() {
           <div className="flex justify-between items-center w-full">
             <MobileLink href="/dashboard" icon={<HomeIcon />} label="Home" />
             <MobileLink href="/asset" icon={<Archive />} label="Asset" />
-
             <a
               href="/qr-scanner"
               className="text-xl bg-orange-600 p-1 shadow rounded flex flex-col items-center gap-1 text-white active:scale-95 transition-all duration-100"
@@ -54,8 +56,12 @@ function MobileNavbar() {
               <ScanQrCode className="w-10 h-10" />
               {/* <span className="text-xs">Scan</span> */}
             </a>
-            <MobileLink href="/location" icon={<MapPin />} label="Location" />
 
+            {role !== "admin" ? (
+              <div>&nbsp;</div>
+            ) : (
+              <MobileLink href="/location" icon={<MapPin />} label="Location" />
+            )}
             <button
               onClick={() => setMenuOpen(true)}
               className={`text-xl flex flex-col items-center gap-1  text-white active:scale-95 transition-all group`}
@@ -132,15 +138,19 @@ function MobileNavbar() {
 }
 
 function DesktopNav() {
-  
+  const {role} = useUserStore()
   return (
     <nav className="hidden  md:flex flex-col  h-[100svh] gap-1 w-[10rem] pl-4 pb-4">
       <div className="h-[3.75rem] flex items-center justify-center"></div>
       <DesktopLink href="/dashboard" icon={<HomeIcon />} label="Home" />
       <DesktopLink href="/asset" icon={<Archive />} label="Asset" />
-      <DesktopLink href="/category" icon={<BookCopy />} label="Category" />
-      <DesktopLink href="/location" icon={<MapPin />} label="Location" />
-      <DesktopLink href="/user" icon={<User2 />} label="User" />
+      {role === "admin" && (
+        <>
+          <DesktopLink href="/category" icon={<BookCopy />} label="Category" />
+          <DesktopLink href="/location" icon={<MapPin />} label="Location" />
+          <DesktopLink href="/user" icon={<User2 />} label="User" />
+        </>
+      )}
       {/* <DesktopLink href="/setting" icon={<Settings />} label="Setting" /> */}
       <div className="flex w-full items-center justify-center py-4">
         <Link
@@ -151,10 +161,7 @@ function DesktopNav() {
           <span className="text-xs font-bold">Scan QR</span>
         </Link>
       </div>
-      <div className="flex flex-grow flex-col">
-        
-
-      </div>
+      <div className="flex flex-grow flex-col"></div>
       <DesktopLink href="/login" icon={<LogOut />} label="Logout" />
     </nav>
   );

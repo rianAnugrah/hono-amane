@@ -105,7 +105,7 @@ export default function Page() {
             </button>
             <h1 className="text-2xl font-bold">Users</h1>
           </div>
-          <button
+          {/* <button
             onClick={() => {
               setForm({ email: "", password: "" });
               setIsModalOpen(true);
@@ -114,7 +114,7 @@ export default function Page() {
           >
             <PlusCircle />
             Add User
-          </button>
+          </button> */}
         </div>
 
         <AnimatePresence>

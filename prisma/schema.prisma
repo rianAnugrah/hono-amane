@@ -8,17 +8,34 @@ datasource db {
 }
 
 model Users {
-  id         String        @id @default(uuid())
-  email      String        @unique
+  id         String          @id @default(uuid())
+  email      String          @unique
   name       String?
   role       String?
   placement  String?
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
   deletedAt  DateTime?
-  locationId Int?
   versions   UserVersion[]
-  location   LocationDesc? @relation(fields: [locationId], references: [id], onUpdate: NoAction)
+  userLocations UserLocation[] // <== many-to-many link
+}
+
+model LocationDesc {
+  id          Int             @id @default(autoincrement())
+  description String          @unique @db.VarChar(255)
+  assets      Asset[]
+  userVersion UserVersion[]
+  userLocations UserLocation[] // <== many-to-many link
+}
+
+model UserLocation {
+  userId     String
+  locationId Int
+
+  user       Users         @relation(fields: [userId], references: [id])
+  location   LocationDesc  @relation(fields: [locationId], references: [id])
+
+  @@id([userId, locationId]) // composite primary key
 }
 
 model UserVersion {
@@ -39,13 +56,6 @@ model ProjectCode {
   assets Asset[]
 }
 
-model LocationDesc {
-  id          Int           @id @default(autoincrement())
-  description String        @unique @db.VarChar(255)
-  assets      Asset[]
-  userVersion UserVersion[]
-  users       Users[]
-}
 
 model DetailsLocation {
   id          Int     @id @default(autoincrement())

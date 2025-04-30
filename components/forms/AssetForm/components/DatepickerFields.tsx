@@ -312,7 +312,7 @@ export const DatePickerFields = ({
           
           <label
             className={`absolute pointer-events-none items-center rounded-full h-6 flex gap-0 transition-all duration-200 ${
-              value || isOpen
+             true
                 ? "text-xs -top-3 bg-white px-2 left-2 " + (isInvalid ? "text-red-500" : isValid ? "text-green-500" : "text-gray-800")
                 : "text-gray-400 top-1/2 -translate-y-1/2 px-4 left-0"
             }`}

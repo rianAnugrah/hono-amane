@@ -78,7 +78,7 @@ export default function UserFormModal({
           <h2 className="text-xl font-semibold text-center mb-6">
             {editingId ? "Edit User" : "New User"}
           </h2>
-         
+
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-4">
               <div>
@@ -146,7 +146,12 @@ export default function UserFormModal({
                       label: loc.description,
                       value: loc.id,
                     }))}
-                    values={form.locationId || []} // <-- must be an array
+                    value={
+                      Array.isArray(form.locationId)
+                        ? form.locationId
+                        : [form.locationId || []]
+                    }
+                    // <-- must be an array
                     onChange={(e) => setForm({ ...form, locationId: e })}
                   />
                 )}

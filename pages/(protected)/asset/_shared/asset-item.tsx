@@ -35,7 +35,7 @@ export default function AssetItem({
   checked: boolean;
   onSelectAsset: (asset: Asset) => void;
 }) {
-  const { location } = useUserStore();
+  const { location , role } = useUserStore();
   return (
     <motion.div layout key={asset.id} className="w-full">
       <div className="p-0 w-full hidden md:flex flex-col">
@@ -75,7 +75,7 @@ export default function AssetItem({
             {formatIDR(asset.acqValueIdr)}
           </div>
 
-          {location?.id === asset.locationDesc_id && (
+          {location?.id === asset.locationDesc_id && role !== "read_only" && (
           // {true && (
             <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
               <Link
@@ -158,7 +158,7 @@ export default function AssetItem({
           </div>
 
           {/* Actions Section */}
-          {location?.id === asset.locationDesc_id && (
+          {location?.id === asset.locationDesc_id && role !== "read_only" &&  (
           // {true && (
             <div className="flex justify-between items-center pt-2 border-t border-gray-100">
               <div className="flex gap-2">
@@ -166,7 +166,7 @@ export default function AssetItem({
                   to={`/asset/${asset.assetNo}`}
                   className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
                 >
-                  <ExternalLink size={20} />
+                  <ExternalLink size={20} />{role}
                 </Link>
                 <button
                   onClick={() => handleEdit(asset)}
