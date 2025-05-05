@@ -76,7 +76,7 @@ function PageShell({
 
     try {
       // 1. Cek apakah user sudah terdaftar
-      const { data } = await axios.get(`/api/users/by-email/${email}`);
+      const { data } = await axios.get(`/api/users/by-email/${email.toLowerCase()}`);
 
       // 2. Kalau ditemukan, simpan ke state
       if (data) {
@@ -84,7 +84,7 @@ function PageShell({
           email: data.email,
           name: data.name,
           isAuth: true,
-          location: data.location,
+          location: data.userLocations,
           role: data.role,
         };
         set_user(AuthData);

@@ -5,7 +5,7 @@ type User = {
   isAuth: boolean;
   name: string;
   role: string;
-  location: string;
+  location: any;
 };
 
 type UserState = User & {
@@ -17,7 +17,7 @@ export const useUserStore = create<UserState>((set) => ({
   isAuth: false,
   name: "",
   role: "",
-  location: "",
+  location: [],
   set_user: ({ email, name, isAuth, location, role }) =>
     set(() => ({ email, isAuth, name, location, role })),
 }));

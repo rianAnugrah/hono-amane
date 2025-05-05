@@ -8,46 +8,31 @@ datasource db {
 }
 
 model Users {
-  id         String          @id @default(uuid())
-  email      String          @unique
-  name       String?
-  role       String?
-  placement  String?
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
-  deletedAt  DateTime?
-  versions   UserVersion[]
-  userLocations UserLocation[] // <== many-to-many link
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String?
+  role          String?
+  placement     String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+  userLocations UserLocation[]
 }
 
 model LocationDesc {
-  id          Int             @id @default(autoincrement())
-  description String          @unique @db.VarChar(255)
-  assets      Asset[]
-  userVersion UserVersion[]
-  userLocations UserLocation[] // <== many-to-many link
+  id            Int            @id @default(autoincrement())
+  description   String         @unique @db.VarChar(255)
+  assets        Asset[]
+  userLocations UserLocation[]
 }
 
 model UserLocation {
   userId     String
   locationId Int
+  location   LocationDesc @relation(fields: [locationId], references: [id])
+  user       Users        @relation(fields: [userId], references: [id])
 
-  user       Users         @relation(fields: [userId], references: [id])
-  location   LocationDesc  @relation(fields: [locationId], references: [id])
-
-  @@id([userId, locationId]) // composite primary key
-}
-
-model UserVersion {
-  id         String        @id @default(uuid())
-  userId     String
-  name       String?
-  role       String?
-  placement  String?
-  updatedAt  DateTime      @default(now())
-  locationId Int?
-  location   LocationDesc? @relation(fields: [locationId], references: [id], onUpdate: NoAction)
-  user       Users         @relation(fields: [userId], references: [id])
+  @@id([userId, locationId])
 }
 
 model ProjectCode {
@@ -55,7 +40,6 @@ model ProjectCode {
   code   String  @unique @db.VarChar(255)
   assets Asset[]
 }
-
 
 model DetailsLocation {
   id          Int     @id @default(autoincrement())

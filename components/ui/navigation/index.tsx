@@ -27,7 +27,7 @@ import MobileLink from "./mobile-link";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
 import { useUserStore } from "@/stores/store-user-login";
-
+import Logo from "@/components/svg/logo";
 export default function Navbar() {
   return (
     <>
@@ -138,10 +138,14 @@ function MobileNavbar() {
 }
 
 function DesktopNav() {
-  const {role} = useUserStore()
+  const { role } = useUserStore();
   return (
     <nav className="hidden  md:flex flex-col  h-[100svh] gap-1 w-[10rem] pl-4 pb-4">
-      <div className="h-[3.75rem] flex items-center justify-center"></div>
+      <div className="h-[4.75rem] flex items-center justify-center">
+        <div className="h-[3rem] w-[3rem]">
+          <Logo />
+        </div>
+      </div>
       <DesktopLink href="/dashboard" icon={<HomeIcon />} label="Home" />
       <DesktopLink href="/asset" icon={<Archive />} label="Asset" />
       {role === "admin" && (
