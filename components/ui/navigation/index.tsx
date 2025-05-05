@@ -17,6 +17,7 @@ import {
   Pin,
   Scan,
   ScanQrCode,
+  SearchCheck,
   Settings,
   User2,
 } from "lucide-react";
@@ -150,6 +151,7 @@ function DesktopNav() {
       <DesktopLink href="/asset" icon={<Archive />} label="Asset" />
       {role === "admin" && (
         <>
+          <DesktopLink href="/audit" icon={<SearchCheck />} label="Inspection" />
           <DesktopLink href="/category" icon={<BookCopy />} label="Category" />
           <DesktopLink href="/location" icon={<MapPin />} label="Location" />
           <DesktopLink href="/user" icon={<User2 />} label="User" />

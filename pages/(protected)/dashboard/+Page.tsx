@@ -1,5 +1,5 @@
 import DashboardCharts from "@/components/blocks/dashboard-charts";
-import { formatIDR, formatIDRHuman } from "@/components/utils/formatting";
+import { formatIDR, formatIDRHuman, formatUSDHuman } from "@/components/utils/formatting";
 import { Link } from "@/renderer/Link";
 import { useUserStore } from "@/stores/store-user-login";
 import axios from "axios";
@@ -108,10 +108,10 @@ export function Page() {
         />
 
         <DashboardItem
-          title="Total Acquisition value (Rp)"
+          title="Total Acquisition value (USD)"
           value={
-            stats?.overview?.totalAcqValueIdr
-              ? formatIDRHuman(stats?.overview?.totalAcqValueIdr)
+            stats?.overview?.totalBookValue
+              ? formatUSDHuman(stats?.overview?.totalBookValue)
               : 0
           }
           href="/report"

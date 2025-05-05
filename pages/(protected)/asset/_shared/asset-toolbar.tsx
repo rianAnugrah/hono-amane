@@ -152,7 +152,7 @@ export default function AssetToolbar({
                 value={sortOrder}
                 label="Sort order"
               />
-              <button onClick={handleResetFilters} className="btn btn-neutral">
+              <button onClick={handleResetFilters} className="btn">
                 Reset Filter
               </button>
             </div>
