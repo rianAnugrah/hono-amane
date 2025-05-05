@@ -7,7 +7,7 @@ interface InputSelectProps {
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   options: { value: string; label: string }[];
   label?: string;
-  searchInput:any;
+  searchInput?:any;
 }
 
 export default function InputSelect({ value, onChange, options, label = "Condition" , searchInput}: InputSelectProps) {

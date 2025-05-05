@@ -1,4 +1,11 @@
-import { Bell, ChevronDown, LocateIcon, Pin, User2 , MapPin } from "lucide-react";
+import {
+  Bell,
+  ChevronDown,
+  LocateIcon,
+  Pin,
+  User2,
+  MapPin,
+} from "lucide-react";
 import Badge from "../badge";
 import Logo from "@/components/svg/logo";
 import { useUserStore } from "@/stores/store-user-login";
@@ -16,11 +23,7 @@ export default function TopBar() {
             <div>
               <div className="text-white text-2xl">Asset Management</div>
               {location?.length > 0 ? (
-                <div className="flex gap-1">
-                  {location.map((loc: any) => {
-                    return <Badge text={<span className="flex gap-1 items-center"><MapPin size={12} />{loc?.location?.description}</span>} color="gray" />;
-                  })}
-                </div>
+                <LocationDisplay size={3} location={location} />
               ) : (
                 ""
               )}
@@ -86,3 +89,63 @@ function Notifications() {
     </button>
   );
 }
+
+const LocationDisplay = ({
+  location,
+  size = 2,
+}: {
+  location: any;
+  size: number;
+}) => {
+  return (
+    <div className="flex gap-1 items-center">
+      {location.slice(0, size).map((loc: any, index: number) => (
+        <Badge
+          key={index}
+          text={
+            <span className="flex gap-1 items-center">
+              <MapPin size={12} />
+              {loc?.location?.description}
+            </span>
+          }
+          color="gray"
+        />
+      ))}
+
+      {location.length > size && (
+        <Badge
+          color="gray"
+          text={
+            <div className="dropdown dropdown-end w-full h-full cursor-pointer hover:font-bold">
+              <div tabIndex={0} role="button" className="">
+                <span className="text-xs">+{location.length - size}</span>
+              </div>
+              <div
+                tabIndex={0}
+                className="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-64 shadow-sm"
+              >
+                <div tabIndex={0} className="card-body">
+                  <h2 className="card-title">Your location access</h2>
+                  {location
+                    .slice(size, location.length)
+                    .map((loc: any, index: number) => (
+                      <Badge
+                        key={index}
+                        text={
+                          <span className="flex gap-1 items-center">
+                            <MapPin size={12} />
+                            {loc?.location?.description}
+                          </span>
+                        }
+                        color="gray"
+                      />
+                    ))}
+                </div>
+              </div>
+            </div>
+          }
+        />
+      )}
+    </div>
+  );
+};

@@ -5,7 +5,6 @@ import { Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ReactNode } from "react";
 
-
 type Props = {
   defaultValues?: {
     q?: string;
@@ -45,64 +44,60 @@ export function UserFilterToolbar({
   };
 
   return (
-    <div className="w-full grid grid-cols-1 gap-4 p-4 bg-white backdrop-blur border border-gray-200/50 rounded-2xl shadow-sm">
-      <InputText
-        placeholder="Name or email"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        icon={<Search />}
-      />
-      
+    <div className="w-full grid grid-cols-1 lg:grid-cols-6 gap-4 items-center mb-4 py-4 bg-white sticky top-0 px-4 rounded-xl shadow-xs">
+      <div className="col-span-2">
+        <InputText
+          placeholder="Name or email"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          icon={<Search />}
+        />
+      </div>
       {/* Replaced with the LocationSelector component */}
-      <LocationSelector 
-        value={locationId} 
-        onChange={(value : string | number) => setLocationId(value)}
-      />
+      {/* <div className="border"> */}
+
+      {/* <LocationSelector
+        value={locationId}
+        onChange={(value: string | number) => setLocationId(value)}
+        />
+        </div> */}
 
       <InputSelect
         value={role}
         onChange={(e) => setRole(e.target.value)}
         options={[
           { value: "admin", label: "Admin" },
-          { value: "employee", label: "Employee" },
+          { value: "pic", label: "PIC" },
+          { value: "read_only", label: "Read only" },
         ]}
         label="Filter by"
       />
-      
-      {/* Sort Controls */}
-      <div className="grid grid-cols-1 gap-4">
-        <InputSelect
-          value={sort}
-          onChange={(e) => setSort(e.target.value)}
-          options={[
-            { value: "createdAt", label: "Created Date" },
-            { value: "name", label: "Name" },
-            { value: "email", label: "Email" },
-          ]}
-          label="Sort by"
-        />
 
-        <InputSelect
-          value={order}
-          onChange={(e) => setOrder(e.target.value)}
-          options={[
-            { value: "asc", label: "Ascending" },
-            { value: "desc", label: "Descending" },
-          ]}
-          label="Order by"
-        />
-      </div>
+      <InputSelect
+        value={sort}
+        onChange={(e) => setSort(e.target.value)}
+        options={[
+          { value: "createdAt", label: "Created Date" },
+          { value: "name", label: "Name" },
+          { value: "email", label: "Email" },
+        ]}
+        label="Sort by"
+      />
 
+      <InputSelect
+        value={order}
+        onChange={(e) => setOrder(e.target.value)}
+        options={[
+          { value: "asc", label: "Ascending" },
+          { value: "desc", label: "Descending" },
+        ]}
+        label="Order by"
+      />
       {/* Action Buttons */}
-      <div className="flex gap-2 w-full">
-        <button
-          onClick={handleReset}
-          className="px-4 py-1.5 bg-gray-200/80 backdrop-blur text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300/80 active:bg-gray-400/80 transition-colors"
-        >
-          Reset
-        </button>
-        <div className="flex w-full justify-end">{children}</div>
-      </div>
+
+      <button onClick={handleReset} className="btn w-full btn-ghost">
+        Reset
+      </button>
     </div>
   );
 }

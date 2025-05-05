@@ -63,7 +63,7 @@ export function LocationSelector({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="">
       {/* Location select */}
       {locations.length > 0 && (
         <SelectField

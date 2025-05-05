@@ -18,10 +18,10 @@ type User = {
   name?: string;
   role?: string;
   placement?: string;
-  locationId?: string[];
   createdAt: string;
   updatedAt: string;
-  password: string;
+  password?: string;
+  locationIds?: number[]; // use this instead of `location` or `locationId`
 };
 
 type UserFormProps = {
@@ -55,11 +55,11 @@ export default function UserFormModal({
     fetchLocations();
   }, [search, sortOrder]);
 
-  console.log("FORNM", locations);
+  //console.log("FORNM", locations);
   // Function to display object as formatted JSON
-  const formatObject = (obj) => {
-    return JSON.stringify(obj, null, 2);
-  };
+  // const formatObject = (obj) => {
+  //   return JSON.stringify(obj, null, 2);
+  // };
 
   return (
     <motion.div
@@ -88,19 +88,6 @@ export default function UserFormModal({
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
-                />
-              </div>
-
-              <div>
-                <input
-                  className="w-full px-4 py-3 bg-gray-100 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Password"
-                  type="password"
-                  value={form.password}
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
-                  required={!editingId}
                 />
               </div>
 
@@ -146,13 +133,13 @@ export default function UserFormModal({
                       label: loc.description,
                       value: loc.id,
                     }))}
-                    value={
-                      Array.isArray(form.locationId)
-                        ? form.locationId
-                        : [form.locationId || []]
+                    values={form.locationIds || []}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        locationIds: e.map((val) => Number(val)),
+                      })
                     }
-                    // <-- must be an array
-                    onChange={(e) => setForm({ ...form, locationId: e })}
                   />
                 )}
               </div>

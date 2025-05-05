@@ -38,16 +38,30 @@ export default function Page() {
     fetchUsers();
   }, [filters]);
 
+  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const method = editingId ? "PUT" : "POST";
     const url = editingId ? `/api/users/${editingId}` : "/api/users";
 
+    const { email, name, role, placement, password, locationIds } = form;
+
+    const body = {
+      email,
+      name,
+      role,
+      placement,
+      locationIds,
+      ...(editingId ? {} : { password }), // don't send password when editing
+    };
+    
     await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(body),
     });
+    
 
     setForm({ email: "", password: "" });
     setEditingId(null);
@@ -56,7 +70,13 @@ export default function Page() {
   };
 
   const handleEdit = (user: User) => {
-    setForm(user);
+
+
+
+    const locsArray = user?.locations?.map((loc) => loc.id)
+    console.log("USER", user , locsArray)
+
+    setForm({ ...user, locationIds: locsArray });
     setEditingId(user.id);
     setIsModalOpen(true);
   };
@@ -76,10 +96,11 @@ export default function Page() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+
   return (
-    <div className="flex min-h-screen w-full overflow-hidden">
+    <div className="">
       {/* Sidebar */}
-      <motion.div
+      {/* <motion.div
         className="sticky top-0 h-screen bg-gray-100 flex-shrink-0 overflow-y-auto"
         initial={{ width: 256 }}
         animate={{ width: isSidebarOpen ? 256 : 0, opacity: isSidebarOpen ? 1 : 0 }}
@@ -90,19 +111,19 @@ export default function Page() {
             <UserFilterToolbar onChange={setFilters} />
           </div>
         )}
-      </motion.div>
+      </motion.div> */}
 
       {/* Main Content */}
-      <div className="flex-1 p-4 overflow-y-auto">
-        <div className="flex justify-between items-center gap-4 mb-4">
+      <div className="flex-1 p-4 overflow-y-auto relative h-[calc(100vh_-_11rem)]">
+        <div className="flex justify-between items-center gap-4 mb-4 ">
           <div className="flex items-center gap-4">
-            <button
+            {/* <button
               onClick={toggleSidebar}
               className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors duration-150"
               aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
             >
               {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            </button> */}
             <h1 className="text-2xl font-bold">Users</h1>
           </div>
           {/* <button
@@ -129,7 +150,9 @@ export default function Page() {
           )}
         </AnimatePresence>
 
-        <div className="bg-white shadow-lg rounded-2xl overflow-hidden">
+        <UserFilterToolbar onChange={setFilters} />
+
+        <div className="bg-white shadow-xs rounded-2xl overflow-hidden">
           <div className="hidden md:grid md:grid-cols-5 bg-gray-50 px-6 py-4">
             <div className="text-sm font-medium text-gray-500">Email</div>
             <div className="text-sm font-medium text-gray-500">Name</div>
@@ -137,6 +160,7 @@ export default function Page() {
             <div className="text-sm font-medium text-gray-500">Placement</div>
             <div className="text-sm font-medium text-gray-500">Actions</div>
           </div>
+          
           <div className="divide-y divide-gray-100">
             <AnimatePresence mode="popLayout">
               {users.map((user, index) => (

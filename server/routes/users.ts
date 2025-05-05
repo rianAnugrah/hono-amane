@@ -4,7 +4,6 @@ import { Hono } from "hono";
 const users = new Hono();
 const prisma = new PrismaClient();
 
-// GET /users
 users.get("/", async (c) => {
   try {
     const {
@@ -40,21 +39,17 @@ users.get("/", async (c) => {
         parsedLocationId
           ? {
               userLocations: {
-                some: {
-                  locationId: parsedLocationId,
-                },
+                some: { locationId: parsedLocationId },
               },
             }
           : {},
       ],
     };
 
-    const [users, total] = await Promise.all([
+    const [rawUsers, total] = await Promise.all([
       prisma.users.findMany({
         where,
-        orderBy: {
-          [sort]: order === "asc" ? "asc" : "desc",
-        },
+        orderBy: { [sort]: order === "asc" ? "asc" : "desc" },
         skip,
         take: pageSize,
         include: {
@@ -66,8 +61,14 @@ users.get("/", async (c) => {
       prisma.users.count({ where }),
     ]);
 
+    // 💡 Add `locations` array manually
+    const usersWithLocations = rawUsers.map((user) => ({
+      ...user,
+      locations: user.userLocations.map((ul) => ul.location),
+    }));
+
     return c.json({
-      data: users,
+      data: usersWithLocations,
       pagination: {
         total,
         page: pageNumber,
@@ -81,7 +82,6 @@ users.get("/", async (c) => {
   }
 });
 
-// GET user by ID
 users.get("/:id", async (c) => {
   try {
     const id = c.req.param("id");
@@ -93,8 +93,14 @@ users.get("/:id", async (c) => {
         },
       },
     });
+
     if (!user) return c.notFound();
-    return c.json(user);
+
+    // Add `locations` array derived from `userLocations`
+    return c.json({
+      ...user,
+      locations: user.userLocations.map((ul) => ul.location),
+    });
   } catch (error) {
     console.error("Error fetching user:", error);
     return c.json({ error: "Failed to fetch user." }, 500);
@@ -114,9 +120,14 @@ users.get("/by-email/:email", async (c) => {
       },
     });
     if (!user) return c.notFound();
-    return c.json(user);
+
+    // Add `locations` array derived from `userLocations`
+    return c.json({
+      ...user,
+      locations: user.userLocations.map((ul) => ul.location),
+    });
   } catch (error) {
-    console.error("Error fetching user by email:", error);
+    console.error("Error fetching user:", error);
     return c.json({ error: "Failed to fetch user." }, 500);
   }
 });

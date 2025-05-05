@@ -4,9 +4,9 @@ import { ChevronDown, X } from 'lucide-react';
 
 // Define the types for our props
 interface MultiSelectProps {
-  values: string[];
-  onChange: (values: string[]) => void;
-  options: { value: string; label: string }[];
+  values: (string | number)[];
+  onChange: (values: (string | number)[]) => void;
+  options: { value: string | number; label: string }[];
   label?: string;
   placeholder?: string;
   searchPlaceholder?: string;
@@ -21,9 +21,8 @@ export default function MultiSelect({
   searchPlaceholder = "Search..."
 }: MultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOptions, setSelectedOptions] = useState(() => {
-    return options.filter(option => values.includes(option.value));
-  });
+  const [selectedOptions, setSelectedOptions] = useState<{ value: string | number; label: string }[]>([]);
+
   const [searchTerm, setSearchTerm] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -41,9 +40,11 @@ export default function MultiSelect({
     };
   }, []);
 
-  // Update selected options when values change externally
   useEffect(() => {
-    setSelectedOptions(options.filter(option => values.includes(option.value)));
+    const matched = options.filter(option =>
+      values.map(String).includes(String(option.value))
+    );
+    setSelectedOptions(matched);
   }, [values, options]);
 
   // Filter options based on search term
@@ -100,6 +101,7 @@ export default function MultiSelect({
       <div className="flex items-center relative mb-1">
         <label className="text-xs font-medium absolute rounded-full -top-2 left-2 px-2 text-gray-500 bg-white z-10">
           {label}
+         
         </label>
         
         <div 
