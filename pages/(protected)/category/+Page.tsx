@@ -95,11 +95,11 @@ export default function ProjectCodesPage() {
       </div>
 
       {/* List */}
-      <div className="space-y-4">
+      <div className="bg-white shadow-lg rounded-2xl overflow-hidden">
         {projectCodes.map((project) => (
           <div
             key={project.id}
-            className="border rounded p-4 flex items-center justify-between"
+            className="grid grid-cols-1 md:grid-cols-2 px-4 md:px-6 py-4 hover:bg-gray-50 transition-all duration-200 gap-y-2 md:gap-y-0"
           >
             {editId === project.id ? (
               <>
@@ -108,7 +108,7 @@ export default function ProjectCodesPage() {
                   onChange={(e) => setEditCode(e.target.value)}
                   className="border px-2 py-1 rounded mr-2 w-full"
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-2 justify-end ">
                   <button
                     onClick={() => handleUpdate(project.id)}
                     className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
@@ -129,7 +129,7 @@ export default function ProjectCodesPage() {
             ) : (
               <>
                 <span className="text-lg">{project.code}</span>
-                <div className="flex gap-2">
+                <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => {
                       setEditId(project.id);

@@ -130,9 +130,9 @@ export default function Page() {
         </AnimatePresence>
 
         <div className="bg-white shadow-lg rounded-2xl overflow-hidden">
-          <div className="hidden md:grid md:grid-cols-5 bg-gray-50 px-6 py-4">
-            <div className="text-sm font-medium text-gray-500">Email</div>
-            <div className="text-sm font-medium text-gray-500">Name</div>
+          <div className="hidden md:grid md:grid-cols-8 bg-gray-50 px-6 py-4">
+            <div className="text-sm font-medium text-gray-500 col-span-3">Email</div>
+            <div className="text-sm font-medium text-gray-500 col-span-2">Name</div>
             <div className="text-sm font-medium text-gray-500">Role</div>
             <div className="text-sm font-medium text-gray-500">Placement</div>
             <div className="text-sm font-medium text-gray-500">Actions</div>
@@ -146,9 +146,9 @@ export default function Page() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ delay: index * 0.1 }}
-                  className="grid grid-cols-1 md:grid-cols-5 px-4 md:px-6 py-4 hover:bg-gray-50 transition-all duration-200 gap-y-2 md:gap-y-0"
+                  className="grid grid-cols-1 md:grid-cols-8 px-4 md:px-6 py-4 hover:bg-gray-50 transition-all duration-200 gap-y-2 md:gap-y-0"
                 >
-                  <div className="flex items-center">
+                  <div className="flex items-center col-span-3">
                     <span className="md:hidden text-sm font-medium text-gray-500 w-20">
                       Email:
                     </span>
@@ -159,7 +159,7 @@ export default function Page() {
                       {user.email}
                     </Link>
                   </div>
-                  <div className="flex items-center">
+                  <div className="flex items-center col-span-2">
                     <span className="md:hidden text-sm font-medium text-gray-500 w-20">
                       Name:
                     </span>

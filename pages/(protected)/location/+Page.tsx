@@ -1,6 +1,9 @@
 // pages/locations/+Page.tsx
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import InputText from "@/components/ui/input-text";
+import { Search } from "lucide-react";
+import InputSelect from "@/components/ui/input-select";
 
 type Location = {
   id: number;
@@ -9,14 +12,14 @@ type Location = {
 
 export default function LocationsPage() {
   const [locations, setLocations] = useState<Location[]>([]);
-  const [newLocation, setNewLocation] = useState('');
+  const [newLocation, setNewLocation] = useState("");
   const [editId, setEditId] = useState<number | null>(null);
-  const [editValue, setEditValue] = useState('');
-  const [search, setSearch] = useState('');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [editValue, setEditValue] = useState("");
+  const [search, setSearch] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const fetchLocations = async () => {
-    const res = await axios.get('/api/locations', {
+    const res = await axios.get("/api/locations", {
       params: { search, sort: sortOrder },
     });
     setLocations(res.data);
@@ -28,8 +31,8 @@ export default function LocationsPage() {
 
   const handleCreate = async () => {
     if (!newLocation.trim()) return;
-    await axios.post('/api/locations', { description: newLocation });
-    setNewLocation('');
+    await axios.post("/api/locations", { description: newLocation });
+    setNewLocation("");
     fetchLocations();
   };
 
@@ -37,7 +40,7 @@ export default function LocationsPage() {
     if (!editValue.trim()) return;
     await axios.put(`/api/locations/${id}`, { description: editValue });
     setEditId(null);
-    setEditValue('');
+    setEditValue("");
     fetchLocations();
   };
 
@@ -49,25 +52,6 @@ export default function LocationsPage() {
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Locations</h1>
-
-      {/* Search and Sort Controls */}
-      <div className="flex items-center gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border px-3 py-2 rounded w-full"
-        />
-        <select
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-          className="border px-3 py-2 rounded"
-        >
-          <option value="asc">Sort A-Z</option>
-          <option value="desc">Sort Z-A</option>
-        </select>
-      </div>
 
       {/* New Location Form */}
       <div className="flex items-center gap-2 mb-6">
@@ -87,11 +71,36 @@ export default function LocationsPage() {
       </div>
 
       {/* Locations List */}
-      <div className="space-y-4">
+      <div className="bg-white shadow-lg rounded-2xl overflow-hidden">
+        {/* Search and Sort Controls */}
+        <div className="flex items-center gap-4 mb-6 bg-gray-50 px-6 py-4 text-gray-500">
+          <InputText
+            icon={<Search />}
+            placeholder="Search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <InputSelect
+          
+            options={[
+              {
+                value : "asc",
+                label : "Sort A-Z"
+              },
+              {
+                value : "desc",
+                label : "Sort Z-A"
+              }
+            ]}
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
+          />
+          
+        </div>
         {locations.map((loc) => (
           <div
             key={loc.id}
-            className="border rounded p-4 flex items-center justify-between"
+            className="grid grid-cols-1 md:grid-cols-2 px-4 md:px-6 py-4 hover:bg-gray-50 transition-all duration-200 gap-y-2 md:gap-y-0"
           >
             {editId === loc.id ? (
               <>
@@ -100,7 +109,7 @@ export default function LocationsPage() {
                   onChange={(e) => setEditValue(e.target.value)}
                   className="border px-2 py-1 rounded mr-2 w-full"
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => handleUpdate(loc.id)}
                     className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
@@ -110,7 +119,7 @@ export default function LocationsPage() {
                   <button
                     onClick={() => {
                       setEditId(null);
-                      setEditValue('');
+                      setEditValue("");
                     }}
                     className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
                   >
@@ -121,7 +130,7 @@ export default function LocationsPage() {
             ) : (
               <>
                 <span className="text-lg">{loc.description}</span>
-                <div className="flex gap-2">
+                <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => {
                       setEditId(loc.id);
