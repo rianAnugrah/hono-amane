@@ -140,7 +140,7 @@ export default function AssetForm({
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm mb-6 h-full overflow-y-auto relative">
+    <div className="bg-white p-6 rounded-lg shadow-sm mb-6 h-full overflow-y-auto relative">
       <h2 className="text-xl font-semibold mb-6 text-gray-800">
         {editingId ? "Edit" : "Create"} Asset
       </h2>

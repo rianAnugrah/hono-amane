@@ -21,8 +21,8 @@ interface LocationSelectorProps {
 export function LocationSelector({
   value,
   onChange,
-  label = "Location",
-  placeholder = "Select location",
+  label = "",
+  placeholder = "",
 }: LocationSelectorProps) {
   const [locations, setLocations] = useState<Location[]>([]);
   const [search, setSearch] = useState("");
@@ -66,7 +66,7 @@ export function LocationSelector({
     <div className="">
       {/* Location select */}
       {locations.length > 0 && (
-        <SelectField
+        <InputSelect
           options={[
             { label: "All", value: "" },
             ...locations.map((loc) => ({
@@ -84,8 +84,7 @@ export function LocationSelector({
               onChange(e.value);
             }
           }}
-          label={label}
-          placeholder={placeholder}
+
           isLoading={isLoading}
           searchable
           searchInput={

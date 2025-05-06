@@ -10,7 +10,7 @@ interface InputSelectProps {
   searchInput?:any;
 }
 
-export default function InputSelect({ value, onChange, options, label = "Condition" , searchInput}: InputSelectProps) {
+export default function InputSelect({ value, onChange, options, label = "" , searchInput}: InputSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(() => {
     return options.find(option => option.value === value) || options[0];
@@ -92,7 +92,7 @@ export default function InputSelect({ value, onChange, options, label = "Conditi
         </label>
         
         <div 
-          className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer flex justify-between items-center"
+          className="w-full px-2 py-1 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer flex justify-between items-center"
           onClick={() => setIsOpen(!isOpen)}
         >
           <span className="text-gray-800">{selectedOption.label}</span>

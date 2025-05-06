@@ -152,7 +152,7 @@ export default function Page() {
 
         <UserFilterToolbar onChange={setFilters} />
 
-        <div className="bg-white shadow-xs rounded-2xl overflow-hidden">
+        <div className="bg-white shadow-xs rounded-lg overflow-hidden">
           <div className="hidden md:grid md:grid-cols-5 bg-gray-50 px-6 py-4">
             <div className="text-sm font-medium text-gray-500">Email</div>
             <div className="text-sm font-medium text-gray-500">Name</div>

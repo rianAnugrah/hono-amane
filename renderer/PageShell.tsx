@@ -135,7 +135,7 @@ function PageShell({
             <div className="flex w-full max-h-[calc(100svh_-_4rem)] overflow-y-auto   md:px-4 md:pb-4">
               <div
                 ref={parent}
-                className="w-full pb-[5rem] bg-gray-100 rounded-2xl overflow-y-auto  border-gray-300 p-0"
+                className="w-full pb-[5rem] bg-gray-100 rounded-lg overflow-y-auto  border-gray-300 p-0"
               >
                 {children}
               </div>
@@ -149,7 +149,8 @@ function PageShell({
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-full h-[100svh] relative flex bg-gradient-to-br  from-[#476f80] to-[#647c89]">
+    // <div className="w-full h-[100svh] relative flex bg-gradient-to-br  from-[#476f80] to-[#647c89]">
+    <div className="w-full h-[100svh] relative flex bg-gradient-to-br  from-cyan-950 to-blue-950">
       {children}
     </div>
   );

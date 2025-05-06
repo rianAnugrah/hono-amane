@@ -113,38 +113,35 @@ const LocationDisplay = ({
       ))}
 
       {location.length > size && (
-        <Badge
-          color="gray"
-          text={
-            <div className="dropdown dropdown-end w-full h-full cursor-pointer hover:font-bold">
-              <div tabIndex={0} role="button" className="">
-                <span className="text-xs">+{location.length - size}</span>
-              </div>
-              <div
-                tabIndex={0}
-                className="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-64 shadow-sm"
-              >
-                <div tabIndex={0} className="card-body">
-                  <h2 className="card-title">Your location access</h2>
-                  {location
-                    .slice(size, location.length)
-                    .map((loc: any, index: number) => (
-                      <Badge
-                        key={index}
-                        text={
-                          <span className="flex gap-1 items-center">
-                            <MapPin size={12} />
-                            {loc?.location?.description}
-                          </span>
-                        }
-                        color="gray"
-                      />
-                    ))}
-                </div>
+        <div className="">
+          <div className="dropdown dropdown-end w-full h-full cursor-pointer hover:font-bold">
+            <div tabIndex={0} role="button" className="">
+              <span className="bg-gray-50 rounded-full w-5 h-5 text-xs p-1">+{location.length - size}</span>
+            </div>
+            <div
+              tabIndex={0}
+              className="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-64 shadow-sm"
+            >
+              <div tabIndex={0} className="card-body">
+                <h2 className="card-title">Your location access</h2>
+                {location
+                  .slice(size, location.length)
+                  .map((loc: any, index: number) => (
+                    <Badge
+                      key={index}
+                      text={
+                        <span className="flex gap-1 items-center">
+                          <MapPin size={12} />
+                          {loc?.location?.description}
+                        </span>
+                      }
+                      color="gray"
+                    />
+                  ))}
               </div>
             </div>
-          }
-        />
+          </div>
+        </div>
       )}
     </div>
   );

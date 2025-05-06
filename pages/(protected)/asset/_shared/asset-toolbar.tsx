@@ -61,6 +61,7 @@ export default function AssetToolbar({
         <h1 className="text-lg font-bold text-gray-900 flex-grow">
           Asset list
         </h1>
+        <div className="flex flex-grow"></div>
 
         <button
           onClick={() => setShowToolbar(!showToolbar)}
@@ -68,6 +69,20 @@ export default function AssetToolbar({
         >
           {!showToolbar ? <Filter /> : <FilterX />}
         </button>
+        <div className="flex items-center justify-end gap-2">
+          <SelectedAssetsPage />
+          {role !== "read_only" && (
+            <>
+
+              <button
+                onClick={() => setShowForm(!showForm)}
+                className="btn btn-soft btn-sm"
+              >
+                <PlusCircle className="w-5 h-5" /> New Asset
+              </button>
+            </>
+          )}
+        </div>
       </div>
       <AnimatePresence>
         {(shouldShowToolbar || isDesktop) && (
@@ -84,16 +99,16 @@ export default function AssetToolbar({
               isDesktop ? {} : { height: 0, opacity: 0, overflow: "hidden" }
             }
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="p-0"
+            className="p-4 border rounded-lg border-gray-200 my-2 bg-white "
           >
-            {/* Search Bar */}
-            <div className="grid grid-cols-1 lg:grid-cols-6 xl:grid-cols-6  gap-4  my-4   rounded-2xl">
+         
+            <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-5  gap-4  mb-1   rounded-lg">
               {/* Filter Controls */}
 
               <InputSelect
                 onChange={handleConditionChange}
                 options={[
-                  { value: "", label: "All" },
+                  { value: "", label: "All Condition" },
                   { value: "Good", label: "Good" },
                   { value: "Broken", label: "Broken" },
                   // { value: "#N/A", label: "N/A" },
@@ -101,7 +116,6 @@ export default function AssetToolbar({
                   { value: "poor", label: "Poor" },
                 ]}
                 value={condition}
-                label="Condition"
               />
               <div className="col-span-2">
                 <LocationSelector
@@ -135,12 +149,11 @@ export default function AssetToolbar({
               <InputSelect
                 onChange={handleSortByChange}
                 options={[
-                  { value: "createdAt", label: "Created Date" },
-                  { value: "assetNo", label: "Asset No" },
-                  { value: "assetName", label: "Asset Name" },
+                  { value: "createdAt", label: "Sort by Created Date" },
+                  { value: "assetNo", label: "Sort by Asset No" },
+                  { value: "assetName", label: "Sort by Asset Name" },
                 ]}
                 value={sortBy}
-                label="Sort by"
               />
 
               <InputSelect
@@ -150,19 +163,19 @@ export default function AssetToolbar({
                   { value: "asc", label: "Ascending" },
                 ]}
                 value={sortOrder}
-                label="Sort order"
               />
-              <button onClick={handleResetFilters} className="btn">
+             
+            </div>
+            <button onClick={handleResetFilters} className="btn  btn-xs text-blue-400">
                 Reset Filter
               </button>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* TABLE HEADER */}
 
-      <div className="hidden w-full md:grid grid-cols-12 items-center font-bold text-xs bg-gray-50 px-4 py-2 text-gray-500 rounded-t-xl border-none border-gray-300">
+      <div className="hidden w-full md:grid grid-cols-12 items-center font-bold text-xs bg-white px-4 py-2 text-gray-500 rounded-t-lg border border-gray-200">
         <div className="col-span-4 pr-4 py-2 flex items-center gap-2">
           <Checkbox checked={allSelected} onChange={toggleSelectAll} />
           <InputText
@@ -177,7 +190,7 @@ export default function AssetToolbar({
         <div className="px-4 py-2 flex items-center">Location</div>
         <div className="px-4 py-2 col-span-2 flex items-center">Value</div>
         <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
-          <SelectedAssetsPage />
+          {/* <SelectedAssetsPage />
           {role !== "read_only" && (
             <>
 
@@ -188,7 +201,8 @@ export default function AssetToolbar({
                 <PlusCircle className="w-5 h-5" /> New Asset
               </button>
             </>
-          )}
+          )} */}
+          Options
         </div>
       </div>
 

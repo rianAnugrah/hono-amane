@@ -24,7 +24,7 @@ export default function DesktopLink({
           isActive
             ? "bg-gray-100 text-orange-600 w-[12rem]"
             : "text-gray-300 w-[9rem]"
-        } hover:bg-gray-100 hover:text-orange-600   justify-start py-2 px-4 rounded-full `}
+        } hover:bg-gray-100 hover:text-orange-600   justify-start py-2 px-4 rounded-lg `}
       >
         {icon &&
           React.cloneElement(icon, {

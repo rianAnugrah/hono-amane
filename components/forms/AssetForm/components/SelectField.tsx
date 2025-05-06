@@ -158,7 +158,7 @@ export const SelectField = ({
               <ChevronDown size={18} className="text-gray-500" />
             </motion.div>
           </div>
-          
+          {(label || placeholder) &&         
           <label
             className={`absolute pointer-events-none items-center rounded-full h-6 flex gap-0 transition-all duration-200 ${
               true
@@ -172,7 +172,7 @@ export const SelectField = ({
               </div>
             )}
             {label || placeholder}
-          </label>
+          </label>}
           
           {touched && (
             <div className="absolute right-8 top-1/2 -translate-y-1/2">

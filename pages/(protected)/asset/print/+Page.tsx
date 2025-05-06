@@ -20,7 +20,7 @@ const SelectedAssetsPage = () => {
   return (
     <button
       onClick={handlePrint}
-      className="btn btn-neutral btn-sm"
+      className="btn btn-neutral btn-soft btn-sm"
       disabled={selectedAssets.length <= 0}
     >
       <Printer className="w-5 h-5"/> Print({selectedAssets.length})
