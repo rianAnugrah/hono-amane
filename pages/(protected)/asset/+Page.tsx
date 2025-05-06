@@ -30,6 +30,9 @@ const AssetCrudPage = () => {
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
   const [totalAssets, setTotalAssets] = useState<number>(0);
+  const [currentView, setCurrentView] = useState<"table" | "card" | "compact">(
+    "card"
+  );
 
   console.log("location", location);
   // useEffect(() => {
@@ -103,8 +106,7 @@ const AssetCrudPage = () => {
     setSearch(e.target.value);
   const handleConditionChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setCondition(e.target.value);
-  const handleLocationChange = (e :any ) =>
-    setLocationDesc_id(e);
+  const handleLocationChange = (e: any) => setLocationDesc_id(e);
   const handleSortByChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setSortBy(e.target.value);
   const handleSortOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
@@ -126,7 +128,6 @@ const AssetCrudPage = () => {
     setPage(1);
     setPageSize(20);
   };
-  
 
   // Reset form
   const handleCancel = () => {
@@ -193,6 +194,8 @@ const AssetCrudPage = () => {
       <AssetToolbar
         setShowForm={setShowForm}
         showForm={showForm}
+        currentView={currentView}
+        setCurrentView={setCurrentView}
         search={search}
         handleSearchChange={handleSearchChange}
         condition={condition}
@@ -208,16 +211,14 @@ const AssetCrudPage = () => {
         allSelected={allSelected}
       />
 
-      {/* Assets List - Card View */}
-      <div className="grid grid-cols-1 mb-8">
-        <AssetList
-          assets={assets}
-          handleEdit={handleEdit}
-          handleDelete={handleDelete}
-          handleCheckboxChange={handleCheckboxChange}
-          toggleSelectAll={toggleSelectAll}
-        />
-      </div>
+      <AssetList
+        assets={assets}
+        handleEdit={handleEdit}
+        handleDelete={handleDelete}
+        currentView={currentView}
+        handleCheckboxChange={handleCheckboxChange}
+        toggleSelectAll={toggleSelectAll}
+      />
 
       <AssetPagination
         page={page}

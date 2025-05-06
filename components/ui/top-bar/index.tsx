@@ -5,6 +5,7 @@ import {
   Pin,
   User2,
   MapPin,
+  ShieldCheck,
 } from "lucide-react";
 import Badge from "../badge";
 import Logo from "@/components/svg/logo";
@@ -37,18 +38,22 @@ export default function TopBar() {
             <div
               tabIndex={0}
               role="button"
-              className="flex gap-2 items-center   rounded-lg hover:bg-gray-700 w-[18rem] p-2"
+              className="flex gap-4 items-center   rounded-lg hover:bg-gray-700 w-[18rem] p-2"
             >
-              <div className="bg-amber-600 w-10 h-10 rounded-full p-2">
-                <User2 className=" text-white" />
-              </div>
-              <div className="flex flex-grow flex-col gap-0">
+             
+              <div className="flex flex-grow flex-col gap-1 items-end">
                 <p className="  h-4 text-white text-lg flex items-center gap-2 mb-1">
                   {name}
                 </p>
-                <p className="  h-4 text-gray-300 text-xs flex items-center gap-1">
-                  <Badge text={role} color="green" />
+                <p className="  h-4  text-xs flex items-center gap-1">
+                  <div className="flex rounded-full items-center bg-green-100 text-green-500 py-[2px] px-2">
+
+                  <ShieldCheck size={16}/> {role}
+                  </div>
                 </p>
+              </div>
+              <div className="bg-amber-600 w-10 h-10 rounded-full p-2">
+                <User2 className=" text-white" />
               </div>
 
               <div>

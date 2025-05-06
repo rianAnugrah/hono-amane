@@ -11,8 +11,10 @@ export default function AssetList({
   handleEdit,
   handleDelete,
   handleCheckboxChange,
+  currentView
 }: {
   assets: Asset[];
+  currentView: string;
   handleEdit: (asset: Asset) => void;
   handleDelete: (id: string) => void;
   handleCheckboxChange: (asset: Asset) => void;
@@ -46,7 +48,7 @@ export default function AssetList({
   }, [expandedId]);
 
   return (
-    <div className="px-4">
+    <div className={`px-4 ${currentView === "table" ? "grid grid-cols-1" : "grid md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 gap-4 py-4 rounded-lg"}`}>
       {assets.map((asset) => (
         <div
           key={asset.id}
@@ -57,11 +59,11 @@ export default function AssetList({
               itemRefs.current.delete(asset.id);
             }
           }}
-          className="flex items-center gap-0 md:border-b md:border-x md:bg-white px-4 last:rounded-b-lg  md:border-gray-200 relative py-0 font-bold text-xs"
         >
          
           <AssetItem
             asset={asset}
+            currentView={currentView}
             isExpanded={expandedId === asset.id}
             onToggle={handleToggle}
             handleEdit={handleEdit}

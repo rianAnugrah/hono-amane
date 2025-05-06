@@ -68,7 +68,7 @@ export function LocationSelector({
       {locations.length > 0 && (
         <InputSelect
           options={[
-            { label: "All", value: "" },
+            { label: "All Locations", value: "" },
             ...locations.map((loc) => ({
               label: loc.description,
               value: loc.id,

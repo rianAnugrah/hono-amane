@@ -45,7 +45,7 @@ export default function AssetDetail({
           animate={{ height: "auto", opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-lg p-6 mb-4"
+          className="overflow-hidden bg-white p-6 mb-4"
         >
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             {/* QR Code Section */}

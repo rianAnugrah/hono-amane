@@ -16,7 +16,7 @@ export default function InputText({
   const [isFocused, setIsFocused] = useState(false);
 
   return (
-    <div className="flex items-center relative flex-grow">
+    <div className="flex items-center relative flex-grow ">
       <div className="relative w-full">
         <input
           type="text"
