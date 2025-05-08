@@ -187,7 +187,7 @@ export default function AssetToolbar({
               transition={{ duration: 0.3, ease: "easeInOut" }}
               className="fixed h-screen w-full flex bg-black/50 top-0 left-0 z-[100]"
               id="overlay"
-              onClick={() => setShowSlideUpToolbar(false)}
+              // onClick={() => setShowSlideUpToolbar(false)}
             >
               <motion.div
                 initial={{ y: "100%" }}
