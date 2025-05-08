@@ -63,12 +63,14 @@ assetRoutes.get("/", async (c) => {
     const filterPoNo = c.req.query("poNo");
     const filterTaggingYear = c.req.query("taggingYear");
 
-    // Related entity filters
+    // Handle multiple location IDs (comma-separated)
+    const locationDescIds = c.req.query("locationDesc_id")
+      ? c.req.query("locationDesc_id").split(',').map(id => parseInt(id.trim()))
+      : undefined;
+
+    // Other related entity filters (single values)
     const filterProjectCodeId = c.req.query("projectCode_id")
       ? parseInt(c.req.query("projectCode_id"))
-      : undefined;
-    const filterLocationDescId = c.req.query("locationDesc_id")
-      ? parseInt(c.req.query("locationDesc_id"))
       : undefined;
     const filterDetailsLocationId = c.req.query("detailsLocation_id")
       ? parseInt(c.req.query("detailsLocation_id"))
@@ -131,8 +133,12 @@ assetRoutes.get("/", async (c) => {
     // Add relation filters
     if (filterProjectCodeId !== undefined)
       whereConditions.projectCode_id = filterProjectCodeId;
-    if (filterLocationDescId !== undefined)
-      whereConditions.locationDesc_id = filterLocationDescId;
+    
+    // Handle multiple location IDs using "in" operator if provided
+    if (locationDescIds && locationDescIds.length > 0) {
+      whereConditions.locationDesc_id = { in: locationDescIds };
+    }
+    
     if (filterDetailsLocationId !== undefined)
       whereConditions.detailsLocation_id = filterDetailsLocationId;
 
