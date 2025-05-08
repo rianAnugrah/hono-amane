@@ -47,7 +47,7 @@ const CardItem = ({
   return (
     <div className={`bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-100 hover:shadow-md border-blue-500 relative ${checked ? "border-4" : "border-none"}`}>
       {/* Top Action - Favorite/Select */}
-      <div className="absolute top-3 left-3 z-[1]">
+      <div className="absolute top-3 left-3 z-1">
         <Checkbox
           checked={checked}
           onChange={() => onSelectAsset(asset)}

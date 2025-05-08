@@ -44,7 +44,7 @@ function MobileNavbar() {
   const { role } = useUserStore();
 
   return (
-    <nav className="bg-[#476f80] md:hidden border-t w-full bottom-0 fixed z-50">
+    <nav className="bg-gradient-to-br  from-cyan-950 to-blue-950 md:hidden border-t w-full bottom-0 fixed z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex justify-between items-center w-full">
@@ -61,15 +61,19 @@ function MobileNavbar() {
             {role !== "admin" ? (
               <div>&nbsp;</div>
             ) : (
+              <>
               <MobileLink href="/location" icon={<MapPin />} label="Location" />
+              <MobileLink href="/audit" icon={<SearchCheck />} label="Inspection" />
+              
+              </>
             )}
-            <button
+            {/* <button
               onClick={() => setMenuOpen(true)}
               className={`text-xl flex flex-col items-center gap-1  text-white active:scale-95 transition-all group`}
             >
               <MenuIcon className="group-hover:scale-[1.2] transition-all duration-300 w-[1rem] h-[1rem]" />
               <span className="text-xs">Menu</span>
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

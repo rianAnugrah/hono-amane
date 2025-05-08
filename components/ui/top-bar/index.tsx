@@ -6,6 +6,7 @@ import {
   User2,
   MapPin,
   ShieldCheck,
+  Menu,
 } from "lucide-react";
 import Badge from "../badge";
 import Logo from "@/components/svg/logo";
@@ -14,10 +15,10 @@ import { useUserStore } from "@/stores/store-user-login";
 export default function TopBar() {
   const { email, name, role, location } = useUserStore();
   return (
-    <nav className=" relative z-20 ">
-      <div className="w-full mx-auto px-4 ">
-        <div className="flex justify-between h-20 items-center">
-          <div className="flex-grow hidden md:flex items-center gap-2 justify-start ">
+    <nav className="w-full  relative z-10 ">
+ 
+        <div className=" mx-auto px-4 hidden md:flex justify-between h-20 items-center w-full">
+          <div className="flex-grow  items-center gap-2 justify-start ">
             {/* <div className="h-[2rem] w-[2rem]">
               <Logo />
             </div> */}
@@ -33,6 +34,10 @@ export default function TopBar() {
           {/* <div className="hidden md:flex mx-4">
             <Notifications />
           </div> */}
+
+          <div className="flex flex-grow">
+
+          </div>
 
           <div className="dropdown dropdown-end dropdown-hover cursor-pointer">
             <div
@@ -78,6 +83,14 @@ export default function TopBar() {
             <Notifications />
           </div> */}
         </div>
+  
+
+      <div className="flex md:hidden text-white px-4 py-6">
+          <p className="text-lg">Asset Management</p>
+          <div className="flex flex-grow">
+            &nbsp;
+          </div>
+          <Menu />
       </div>
     </nav>
   );

@@ -56,7 +56,63 @@ export default function AssetToolbar({
   allSelected: any;
 }) {
   const [showToolbar, setShowToolbar] = useState<boolean>(false);
+  const [showSlideUpToolbar, setShowSlideUpToolbar] = useState<boolean>(false);
   const { role } = useUserStore();
+
+  const renderFIlter = () => {
+    return (
+      <>
+        <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-5 gap-4 px-4 pt-4 pb-1 rounded-lg">
+          {/* Filter Controls */}
+
+          <div className="md:col-span-2">
+            <LocationSelector
+              value={locationDesc_id}
+              onChange={(value: any) => handleLocationChange(value)}
+            />
+          </div>
+
+          <InputSelect
+            onChange={handleConditionChange}
+            options={[
+              { value: "", label: "All Condition" },
+              { value: "Good", label: "Good" },
+              { value: "Broken", label: "Broken" },
+              // { value: "#N/A", label: "N/A" },
+              { value: "X", label: "X" },
+              { value: "poor", label: "Poor" },
+            ]}
+            value={condition}
+          />
+
+          <InputSelect
+            onChange={handleSortByChange}
+            options={[
+              { value: "createdAt", label: "Sort by Created Date" },
+              { value: "assetNo", label: "Sort by Asset No" },
+              { value: "assetName", label: "Sort by Asset Name" },
+            ]}
+            value={sortBy}
+          />
+
+          <InputSelect
+            onChange={handleSortOrderChange}
+            options={[
+              { value: "desc", label: "Descending" },
+              { value: "asc", label: "Ascending" },
+            ]}
+            value={sortOrder}
+          />
+        </div>
+        <button
+          onClick={handleResetFilters}
+          className="btn btn-lg w-[calc(100%_-_2rem)] md:w-auto md:btn-xs text-blue-400 mx-4 mb-4"
+        >
+          Reset Filter
+        </button>
+      </>
+    );
+  };
 
   return (
     <div className="bg-gray-100 z-10 rounded-none shadow-none pb-4 md:pb-0 border-b md:border-none px-4  border-gray-300 mb-0 sticky top-0">
@@ -68,15 +124,23 @@ export default function AssetToolbar({
           placeholder="Search by name"
         />
 
-        <div className="flex flex-grow"></div>
+        <button
+          onClick={() => setShowSlideUpToolbar(!showSlideUpToolbar)}
+          className="flex md:hidden btn btn-soft "
+        >
+          {!showSlideUpToolbar ? <Filter size={14} /> : <FilterX size={14} />}{" "}
+          Filter
+        </button>
+
+        <div className="hidden md:flex flex-grow"></div>
 
         <button
           onClick={() => setShowToolbar(!showToolbar)}
-          className="btn btn-soft btn-sm"
+          className="hidden md:flex btn btn-soft btn-sm"
         >
           {!showToolbar ? <Filter size={14} /> : <FilterX size={14} />} Filter
         </button>
-        <div className="flex items-center justify-end gap-2">
+        <div className="md:flex items-center justify-end gap-2 hidden">
           <AssetViewToggle
             currentView={currentView}
             onChange={setCurrentView}
@@ -103,54 +167,44 @@ export default function AssetToolbar({
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="border rounded-lg border-gray-200 bg-white"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-5 gap-4 px-4 pt-4 pb-1 rounded-lg">
-              {/* Filter Controls */}
+            {renderFIlter()}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-              <div className="col-span-2">
-                <LocationSelector
-                  value={locationDesc_id}
-                  onChange={(value: any) => handleLocationChange(value)}
-                />
-              </div>
-
-              <InputSelect
-                onChange={handleConditionChange}
-                options={[
-                  { value: "", label: "All Condition" },
-                  { value: "Good", label: "Good" },
-                  { value: "Broken", label: "Broken" },
-                  // { value: "#N/A", label: "N/A" },
-                  { value: "X", label: "X" },
-                  { value: "poor", label: "Poor" },
-                ]}
-                value={condition}
-              />
-
-              <InputSelect
-                onChange={handleSortByChange}
-                options={[
-                  { value: "createdAt", label: "Sort by Created Date" },
-                  { value: "assetNo", label: "Sort by Asset No" },
-                  { value: "assetName", label: "Sort by Asset Name" },
-                ]}
-                value={sortBy}
-              />
-
-              <InputSelect
-                onChange={handleSortOrderChange}
-                options={[
-                  { value: "desc", label: "Descending" },
-                  { value: "asc", label: "Ascending" },
-                ]}
-                value={sortOrder}
-              />
-            </div>
-            <button
-              onClick={handleResetFilters}
-              className="btn btn-xs text-blue-400 mx-4 mb-4"
+      <AnimatePresence>
+        {showSlideUpToolbar && (
+          <motion.div
+            initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+            animate={{ height: "auto", opacity: 1, overflow: "visible" }}
+            exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="fixed h-screen w-full flex bg-black/50 top-0 left-0 z-[100]"
+              id="overlay"
+              onClick={() => setShowSlideUpToolbar(false)}
             >
-              Reset Filter
-            </button>
+              <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="absolute bottom-0 bg-white h-2/5 rounded-t-4xl w-full py-4"
+                id="content"
+              >
+                <div
+                  className="mx-auto flex h-2 w-20 bg-gray-300 rounded-full mb-10"
+                  onClick={() => setShowSlideUpToolbar(false)}
+                ></div>
+
+                {renderFIlter()}
+              </motion.div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -176,20 +230,6 @@ export default function AssetToolbar({
           </div>
         </div>
       )}
-      {/* END OF TABLE HEADER */}
-
-      {/* {currentView === "card" && (
-        <div className="p-2 w-full ">
-          <div className="p-4 w-full max-w-md mx-auto bg-white my-2 rounded-lg">
-            <InputText
-              value={search}
-              onChange={handleSearchChange}
-              icon={<Search />}
-              placeholder="Search by name"
-            />
-          </div>
-        </div>
-      )} */}
     </div>
   );
 }
