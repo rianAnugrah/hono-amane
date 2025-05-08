@@ -19,6 +19,18 @@ import AssetDetail from "./asset-detail";
 import { useUserStore } from "@/stores/store-user-login";
 import CardItem from "./asset-card-item";
 
+/**
+ * Interface untuk objek lokasi
+ */
+interface LocationItem {
+  userId: string;
+  locationId: number;
+  location: {
+    id: number;
+    description: string;
+  };
+}
+
 export default function AssetItem({
   asset,
   isExpanded,
@@ -39,6 +51,57 @@ export default function AssetItem({
   onSelectAsset: (asset: Asset) => void;
 }) {
   const { location, role } = useUserStore();
+
+  console.log("LCOATION ITEM", location);
+
+  function isLocationIdExists(
+    locationsArray: LocationItem[],
+    locationIdToCheck: number
+  ): boolean {
+    // Validasi input sudah ditangani oleh TypeScript
+
+    // Cek apakah locationId ada dalam array
+    return locationsArray.some((item) => item.locationId === locationIdToCheck);
+  }
+
+  function renderEditButton(
+    locationsArray: LocationItem[],
+    locationIdToCheck: number
+  ): React.ReactNode {
+    if (isLocationIdExists(locationsArray, locationIdToCheck)) {
+      return (
+        <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
+          <Link
+            href={`/asset/${asset.assetNo}`}
+            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+          >
+            <ExternalLink />
+          </Link>
+          <button
+            onClick={() => handleEdit(asset)}
+            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+          >
+            <Pencil />
+          </button>
+          <button
+            onClick={() => handleDelete(asset.id)}
+            className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+          >
+            <Trash />
+          </button>
+          <button
+            onClick={() => onToggle(asset.id)}
+            className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors focus:outline-none"
+          >
+            {isExpanded ? <ChevronDown /> : <ChevronRight />}
+          </button>
+        </div>
+      );
+    } else {
+      return "";
+    }
+  }
+
   return (
     <motion.div layout key={asset.id} className="w-full">
       {/* DESKTOP VIEW */}
@@ -79,43 +142,14 @@ export default function AssetItem({
             <div className="px-4 py-2 col-span-2 flex items-center">
               {formatIDR(asset.acqValueIdr)}
             </div>
-
-            {location?.id === asset.locationDesc_id && role !== "read_only" && (
-              // {true && (
-              <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
-                <Link
-                  href={`/asset/${asset.assetNo}`}
-                  className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                >
-                  <ExternalLink />
-                </Link>
-                <button
-                  onClick={() => handleEdit(asset)}
-                  className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                >
-                  <Pencil />
-                </button>
-                <button
-                  onClick={() => handleDelete(asset.id)}
-                  className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
-                >
-                  <Trash />
-                </button>
-                <button
-                  onClick={() => onToggle(asset.id)}
-                  className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors focus:outline-none"
-                >
-                  {isExpanded ? <ChevronDown /> : <ChevronRight />}
-                </button>
-              </div>
-            )}
+            {role !== "read_only" &&
+              renderEditButton(location, asset.locationDesc_id)}
           </div>
           <AssetDetail isExpanded={isExpanded} asset={asset} />
         </div>
       )}
 
       {currentView === "card" && (
-        
         <CardItem
           asset={asset}
           checked={checked}
@@ -127,7 +161,6 @@ export default function AssetItem({
           isExpanded={isExpanded}
           onToggle={onToggle}
         />
-       
       )}
     </motion.div>
   );
