@@ -52,7 +52,7 @@ export default function AssetItem({
 }) {
   const { location, role } = useUserStore();
 
-  console.log("LCOATION ITEM", location);
+  // console.log("LCOATION ITEM", location);
 
   function isLocationIdExists(
     locationsArray: LocationItem[],

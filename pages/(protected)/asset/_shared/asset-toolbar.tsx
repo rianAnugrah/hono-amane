@@ -6,17 +6,14 @@ import {
   FilterX,
   PlusCircle,
   Search,
-  SlidersHorizontal,
 } from "lucide-react";
 import { useState } from "react";
-import AssetPrintButton from "./asset-print-button";
-import { useResponive } from "@/components/hooks/use-responisve";
-import Switch from "@/components/ui/switch";
 import Checkbox from "@/components/ui/checkbox";
 import SelectedAssetsPage from "@/pages/(protected)/asset/print/+Page";
 import { LocationSelector } from "@/components/blocks/location-selector";
 import { useUserStore } from "@/stores/store-user-login";
 import AssetViewToggle from "./asset-view-toggle";
+import SlideUpModal from "@/components/blocks/slide-up-modal";
 
 export default function AssetToolbar({
   setShowForm,
@@ -115,7 +112,7 @@ export default function AssetToolbar({
   };
 
   return (
-    <div className="bg-gray-100 z-10 rounded-none shadow-none pb-4 md:pb-0 border-b md:border-none px-4  border-gray-300 mb-0 sticky top-0">
+    <div className="bg-gray-100 z-[2] rounded-none shadow-none pb-4 md:pb-0 border-b md:border-none px-4  border-gray-300 mb-0 sticky top-0">
       <div className="flex justify-between items-center  gap-2 pt-4">
         <InputText
           value={search}
@@ -172,42 +169,12 @@ export default function AssetToolbar({
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {showSlideUpToolbar && (
-          <motion.div
-            initial={{ height: 0, opacity: 0, overflow: "hidden" }}
-            animate={{ height: "auto", opacity: 1, overflow: "visible" }}
-            exit={{ height: 0, opacity: 0, overflow: "hidden" }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="fixed h-screen w-full flex bg-black/50 top-0 left-0 z-[100]"
-              id="overlay"
-              // onClick={() => setShowSlideUpToolbar(false)}
-            >
-              <motion.div
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                exit={{ y: "100%" }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="absolute bottom-0 bg-white h-2/5 rounded-t-4xl w-full py-4"
-                id="content"
-              >
-                <div
-                  className="mx-auto flex h-2 w-20 bg-gray-300 rounded-full mb-10"
-                  onClick={() => setShowSlideUpToolbar(false)}
-                ></div>
-
-                {renderFIlter()}
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <SlideUpModal
+        modalOpen={showSlideUpToolbar}
+        onToggle={setShowSlideUpToolbar}
+      >
+        {renderFIlter()}
+      </SlideUpModal>
 
       {/* TABLE HEADER */}
       {currentView === "table" && (

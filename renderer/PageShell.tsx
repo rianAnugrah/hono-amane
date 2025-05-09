@@ -76,7 +76,9 @@ function PageShell({
 
     try {
       // 1. Cek apakah user sudah terdaftar
-      const { data } = await axios.get(`/api/users/by-email/${email.toLowerCase()}`);
+      const { data } = await axios.get(
+        `/api/users/by-email/${email.toLowerCase()}`
+      );
 
       // 2. Kalau ditemukan, simpan ke state
       if (data) {
@@ -130,15 +132,18 @@ function PageShell({
       <PageContextProvider pageContext={pageContext}>
         <Layout>
           <Navbar />
-          <div className=" w-full md:w-[calc(100%_-_10rem)]  flex flex-col h-full">
-            <TopBar />
-            <div className="flex w-full max-h-[calc(100svh_-_4rem)] overflow-y-auto   md:px-4 md:pb-4">
-              <div
-                ref={parent}
-                className="w-full pb-[5rem] bg-gray-100 rounded-lg overflow-y-auto  border-gray-300 p-0"
-              >
-                {children}
+          <div className="w-full md:w-[calc(100%_-_10rem)] flex flex-col h-full">
+            <div
+              className="flex w-full flex-col max-h-[calc(100svh_-_0rem)] overflow-y-auto md:p-4 "
+              ref={parent}
+            >
+              {/* Fixed TopBar */}
+              <div className="sticky top-0 z-10 bg-gray-100 rounded-t-lg">
+                <TopBar />
               </div>
+
+              {/* Scrollable Content */}
+              <div className="overflow-y-auto  bg-gray-100 rounded-b-lg pb-10">{children}</div>
             </div>
           </div>
         </Layout>

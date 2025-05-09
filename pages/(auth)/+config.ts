@@ -9,7 +9,7 @@ export default {
   meta: {
     // Define new setting 'title'
     title: {
-      env: { server: true, client: true },
+      env: { server: false, client: true },
     },
     // Define new setting 'description'
     description: {
