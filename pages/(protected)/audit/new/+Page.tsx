@@ -13,7 +13,7 @@ interface Asset {
 
 export default function NewAssetAuditPage() {
   // Get current user from store
-  const { id: currentUserId } = useUserStore();
+  const { id: currentUserId , role } = useUserStore();
 
   // List state
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -83,6 +83,8 @@ export default function NewAssetAuditPage() {
     }
   };
 
+  
+
   return (
     <motion.div
       className="max-w-xl mx-auto p-6 bg-white rounded-2xl shadow"
@@ -93,38 +95,35 @@ export default function NewAssetAuditPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium">Asset</label>
-          <select
+          <InputSelect
             value={form.assetId}
             onChange={(e) => setForm({ ...form, assetId: e.target.value })}
-            className="w-full mt-1 p-2 border rounded"
-            required
-          >
-            <option value="">Select Asset</option>
-            {assets.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.assetNo} - {a.assetName}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: "", label: "Select Asset" },
+              ...assets.map((a) => ({ value: a.id, label: `${a.assetNo} - ${a.assetName}` })),
+            ]}
+            
+          />
         </div>
         <div>
           <label className="block text-sm font-medium">Auditor</label>
-          <select
+          <InputSelect
             value={currentUserId}
             onChange={(e) => setForm({ ...form, checkedById: e.target.value })}
-            className="w-full mt-1 p-2 border rounded"
-            required
-            disabled
-          >
-            {Array.isArray(users) &&
-              users
-                .filter((u) => u.id === currentUserId)
-                .map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name}
-                  </option>
-                ))}
-          </select>
+            options={
+              role !== 'admin'
+                ? [{ value: currentUserId, label: `${users.find(u => u.id === currentUserId)?.name || 'Current User'} (You)` }]
+                : Array.isArray(users)
+                  ? [
+                      { value: "", label: "Choose user" },
+                      ...users.map((u) => ({ 
+                        value: u.id, 
+                        label: u.id === currentUserId ? `${u.name} (You)` : u.name 
+                      }))
+                    ]
+                  : [{ value: "", label: "Choose user" }]
+            }
+          />
         </div>
 
         <div>

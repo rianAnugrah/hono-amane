@@ -150,9 +150,12 @@ function DesktopNav() {
       </div>
       <DesktopLink href="/dashboard" icon={<HomeIcon />} label="Home" />
       <DesktopLink href="/asset" icon={<Archive />} label="Asset" />
+      {role === "admin" || role === "pic" && (
+        <DesktopLink href="/audit" icon={<SearchCheck />} label="Inspection" />
+      )}
+
       {role === "admin" && (
         <>
-          <DesktopLink href="/audit" icon={<SearchCheck />} label="Inspection" />
           <DesktopLink href="/category" icon={<BookCopy />} label="Category" />
           <DesktopLink href="/location" icon={<MapPin />} label="Location" />
           <DesktopLink href="/user" icon={<User2 />} label="User" />
