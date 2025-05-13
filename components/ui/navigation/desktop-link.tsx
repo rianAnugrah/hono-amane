@@ -1,6 +1,5 @@
-import { Link } from "@/renderer/Link";
 import { usePageContext } from "@/renderer/usePageContext";
-import React from "react";
+import React, { ReactElement } from "react";
 
 export default function DesktopLink({
     href,
@@ -8,7 +7,7 @@ export default function DesktopLink({
     label,
   }: {
     href: string;
-    icon?: React.ReactNode;
+    icon?: ReactElement;
     label?: string;
   }) {
     const pageContext = usePageContext();
@@ -18,7 +17,7 @@ export default function DesktopLink({
       href === "/" ? urlPathname === href : urlPathname.startsWith(href);
   
     return (
-      <Link
+      <a
         href={href}
         className={`text-xl flex  flex-row group items-center gap-1 transition-all duration-500 ${
           isActive
@@ -33,6 +32,6 @@ export default function DesktopLink({
             }`,
           })}
         <span className="text-xs">{label}</span>
-      </Link>
+      </a>
     );
   }

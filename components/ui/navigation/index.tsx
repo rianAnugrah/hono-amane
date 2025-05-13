@@ -124,12 +124,12 @@ function MobileNavbar() {
               >
                 Contact
               </Link>
-              <Link
+              <a
                 href="/logout"
                 className="text-gray-800 hover:text-blue-600 text-left"
               >
                 Logout
-              </Link>
+              </a>
             </motion.div>
           </>
         )}
@@ -169,7 +169,13 @@ function DesktopNav() {
         </Link>
       </div>
       <div className="flex flex-grow flex-col"></div>
-      <DesktopLink href="/logout" icon={<LogOut />} label="Logout" />
+      <a
+        href="/logout"
+        className="text-white hover:bg-gray-700 hover:text-gray-200 py-2 px-4 transition-all duration-300 flex flex-row items-center justify-start gap-1 rounded-l-lg relative w-full"
+      >
+        <LogOut className="w-[1rem] h-[1rem]" />
+        <span className="text-xs">Logout</span>
+      </a>
     </nav>
   );
 }

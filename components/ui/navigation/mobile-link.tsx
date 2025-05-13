@@ -1,6 +1,5 @@
-import { Link } from "@/renderer/Link";
 import { usePageContext } from "@/renderer/usePageContext";
-import React from "react";
+import React, { ReactElement } from "react";
 
 export default function MobileLink({
     href,
@@ -8,7 +7,7 @@ export default function MobileLink({
     label,
   }: {
     href: string;
-    icon?: React.ReactNode;
+    icon?: ReactElement;
     label?: string;
   }) {
     const pageContext = usePageContext();
@@ -18,7 +17,7 @@ export default function MobileLink({
       href === "/" ? urlPathname === href : urlPathname.startsWith(href);
   
     return (
-      <Link
+      <a
         href={href}
         className={`text-xl flex flex-col items-center gap-1  active:scale-95 transition-all group w-[3rem] h-[3rem] justify-center rounded ${
           isActive ? "bg-gray-200 text-orange-500" : "bg-transparent  text-white"
@@ -31,7 +30,7 @@ export default function MobileLink({
             }`,
           })}
         <span className="text-xs">{label}</span>
-      </Link>
+      </a>
     );
   }
   

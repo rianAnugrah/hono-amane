@@ -3,4 +3,27 @@
   themes: light --default;
 }
 
+/* App styles go here */
+
+a.is-active {
+  color: #f59e0b;
+  font-weight: bold;
+}
+
+/* Page transition styles */
+.page-is-transitioning main {
+  opacity: 0.5;
+  transition: opacity 0.2s ease-in-out;
+}
+
+body {
+  /* Prevent content jumps during page transitions */
+  overflow-y: scroll;
+}
+
+/* Smooth transitions for content updates */
+#react-root > * {
+  transition: opacity 0.2s ease-in-out;
+}
+
 

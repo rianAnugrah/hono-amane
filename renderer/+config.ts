@@ -1,8 +1,9 @@
 import type { Config } from "vike/types";
 import vikeReact from "vike-react/config";
 
+// Basic configuration with client-side routing
 export default {
-  extends: vikeReact, // Uncomment this line!
+  extends: vikeReact,
   clientRouting: true,
   meta: {
     title: {
@@ -14,7 +15,6 @@ export default {
     guard: {
       env: { server: true, client: true },
     },
-    // Layout is already defined in vike-react, so you don't need to redefine it
   },
   hydrationCanBeAborted: true,
 } satisfies Config;
