@@ -14,7 +14,7 @@ interface Asset {
 
 export default function NewAssetAuditPage() {
   // Get current user from store
-  const { id: currentUserId , role } = useUserStore();
+  const { id: currentUserId, role } = useUserStore();
 
   // List state
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -28,6 +28,7 @@ export default function NewAssetAuditPage() {
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
   const [totalAssets, setTotalAssets] = useState<number>(0);
+  const [attachments, setAttachments] = useState<string[]>([]);
 
   const [users, setUsers] = useState<any[]>([]);
 
@@ -35,9 +36,10 @@ export default function NewAssetAuditPage() {
 
   const [form, setForm] = useState({
     assetId: "",
-    checkedById: currentUserId, // Set current user ID as default
+    checkedById: currentUserId,
     status: "OK",
     remarks: "",
+    attachments: [] as string[],
   });
 
   // Update form when currentUserId changes
@@ -46,6 +48,11 @@ export default function NewAssetAuditPage() {
       setForm((prev) => ({ ...prev, checkedById: currentUserId }));
     }
   }, [currentUserId]);
+
+  // Update form when attachments change
+  useEffect(() => {
+    setForm((prev) => ({ ...prev, attachments }));
+  }, [attachments]);
 
   useEffect(() => {
     Promise.all([
@@ -71,7 +78,7 @@ export default function NewAssetAuditPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-
+      
       if (res.ok) {
         navigate("/audit");
       } else {
@@ -83,8 +90,6 @@ export default function NewAssetAuditPage() {
       alert("Failed to submit audit due to a network error");
     }
   };
-
-  
 
   return (
     <motion.div
@@ -153,7 +158,16 @@ export default function NewAssetAuditPage() {
           />
         </div>
 
-        <InputUpload />
+        <div>
+          <label className="block text-sm font-medium mb-1">Photo Evidence</label>
+          <InputUpload 
+            useCamera={true}
+            cameraFacing="user" 
+            value={attachments} 
+            onChange={setAttachments} 
+          />
+          <p className="text-xs text-gray-500 mt-1">Click "Open Camera" to activate your camera. Use the blue expand button for fullscreen mode. Take photos with the circular button at the bottom.</p>
+        </div>
 
         <button
           type="submit"

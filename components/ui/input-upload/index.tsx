@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react"
 import { useDropzone } from "react-dropzone-esm"
 import  cn  from "@/components/utils/cn"
 import {
@@ -6,6 +6,10 @@ import {
   FileTextIcon,
   UploadIcon,
   TrashIcon,
+  CameraIcon,
+  SwitchCameraIcon,
+  XIcon,
+  MaximizeIcon,
 } from "lucide-react"
 
 import {
@@ -25,6 +29,8 @@ export interface DropzoneProps
   onChange?: (value: string[]) => void
   readOnly?: boolean
   preview?: boolean
+  useCamera?: boolean
+  cameraFacing?: "user" | "environment"
 }
 
 export type FileItemProps = {
@@ -95,6 +101,8 @@ export const InputUpload = ({
   onChange,
   readOnly,
   preview = true,
+  useCamera = false,
+  cameraFacing = "user",
   ...props
 }: DropzoneProps) => {
   // State:
@@ -103,12 +111,23 @@ export const InputUpload = ({
   const [files, setFiles] = useState<string[]>(
     value ? (Array.isArray(value) ? value : []) : [],
   )
+  const [facing, setFacing] = useState<"user" | "environment">(cameraFacing)
+  const [isCameraActive, setIsCameraActive] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  
+  // Refs
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const fullscreenVideoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  
   const display = useMemo(
     () => (value ? (Array.isArray(value) ? value : []) : []),
     [value],
   )
 
   const { url, onDelete, responseParser } = useUpload()
+  
   const onDrop = useCallback(
     async (files: File[]) => {
       for (let i = 0; i < files.length; i++) {
@@ -127,10 +146,24 @@ export const InputUpload = ({
         }
       }
     },
-    [setFiles],
+    [setFiles, url, responseParser],
   )
 
-  console.log("files", files)
+  const toggleFacing = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null
+    }
+    
+    setFacing(prev => prev === "user" ? "environment" : "user")
+    
+    // Restart camera with new facing mode
+    if (isCameraActive) {
+      setTimeout(() => {
+        startCamera()
+      }, 300)
+    }
+  }, [isCameraActive])
 
   const onRemove = useCallback(
     async (file: string) => {
@@ -140,43 +173,269 @@ export const InputUpload = ({
       const updated = files.filter((v) => !v.includes(file))
       setFiles(updated)
     },
-    [files, setFiles],
+    [files, setFiles, onDelete],
   )
 
   useEffect(() => {
     if (onChange) onChange(files)
-  }, [files])
+  }, [files, onChange])
+
+  // Clean up camera stream when component unmounts
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop())
+        streamRef.current = null
+      }
+    }
+  }, [])
+
+  // Start camera function
+  const startCamera = useCallback(async () => {
+    try {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop())
+      }
+      
+      const constraints = {
+        video: { facingMode: facing },
+        audio: false
+      }
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      streamRef.current = stream
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        videoRef.current.play()
+      }
+      
+      if (fullscreenVideoRef.current) {
+        fullscreenVideoRef.current.srcObject = stream
+        fullscreenVideoRef.current.play()
+      }
+      
+      setIsCameraActive(true)
+    } catch (err) {
+      console.error("Error accessing camera:", err)
+      alert("Could not access the camera. Please check permissions and try again.")
+      setIsCameraActive(false)
+      setIsFullscreen(false)
+    }
+  }, [facing])
+  
+  // Toggle camera
+  const toggleCamera = useCallback(() => {
+    if (isCameraActive) {
+      // Stop camera
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop())
+        streamRef.current = null
+      }
+      setIsCameraActive(false)
+      setIsFullscreen(false)
+    } else {
+      // Start camera
+      startCamera()
+    }
+  }, [isCameraActive, startCamera])
+  
+  // Take photo
+  const takePhoto = useCallback(async () => {
+    if (!videoRef.current || !canvasRef.current) return
+    
+    // Use the active video element (either thumbnail or fullscreen)
+    const video = isFullscreen && fullscreenVideoRef.current ? 
+      fullscreenVideoRef.current : videoRef.current
+    
+    const canvas = canvasRef.current
+    
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    
+    // Draw current video frame to canvas
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+    
+    // Convert canvas to blob
+    canvas.toBlob(async (blob) => {
+      if (!blob) return
+      
+      // Create file from blob
+      const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' })
+      
+      // Upload using existing onDrop function
+      onDrop([file])
+      
+      // Close fullscreen mode after taking photo
+      if (isFullscreen) {
+        setIsFullscreen(false)
+      }
+    }, 'image/jpeg', 0.95)
+  }, [onDrop, isFullscreen])
+
+  const toggleFullscreen = useCallback(() => {
+    setIsFullscreen(prev => !prev)
+  }, [])
 
   const dropzone = useDropzone({
     ...props,
     onDrop,
+    accept: { 'image/*': [] },
   })
 
   // Return:
   return (
-    <div className={cn("flex flex-row flex-wrap gap-2", containerClassName)}>
+    <div className={cn("flex flex-row flex-wrap gap-2", containerClassName || "")}>
       {!readOnly && (
-        <div
-          {...dropzone.getRootProps()}
-          className={cn(
-            "border-input bg-background hover:bg-accent hover:text-accent-foreground relative flex h-32 w-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-all select-none",
-            dropZoneClassName,
-          )}
-        >
-          <input {...dropzone.getInputProps()} />
-          <div className="flex flex-col items-center gap-1.5">
-            <div className="flex flex-col items-center gap-0.5 text-sm font-medium">
-              <UploadIcon
+        <>
+          {useCamera && (
+            <>
+              <div
                 className={cn(
-                  "mb-2 h-6 w-6",
-                  progress == 0 ? "" : "animate-bounce",
+                  "border-input bg-background hover:bg-accent hover:text-accent-foreground relative flex h-32 w-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-all select-none",
+                  dropZoneClassName,
+                  isCameraActive ? "border-blue-500" : ""
                 )}
-              />
-              <span>{progress == 0 ? "Upload files" : `${progress} %`}</span>
+                onClick={toggleCamera}
+              >
+                {isCameraActive ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative w-full h-full">
+                      <video 
+                        ref={videoRef} 
+                        className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                        playsInline
+                        muted
+                      />
+                      <div className="absolute bottom-1 left-0 right-0 flex justify-center">
+                        <button
+                          type="button"
+                          className="bg-blue-500 hover:bg-blue-400 text-white rounded-full w-8 h-8 flex items-center justify-center"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            takePhoto()
+                          }}
+                        >
+                          <div className="w-5 h-5 bg-white rounded-full"></div>
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        className="absolute top-1 left-1 z-10 bg-blue-500 p-1 rounded-full hover:bg-blue-400 text-white"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleFullscreen()
+                        }}
+                      >
+                        <MaximizeIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div className="flex flex-col items-center gap-0.5 text-sm font-medium">
+                      <CameraIcon
+                        className={cn(
+                          "mb-2 h-6 w-6",
+                          progress == 0 ? "" : "animate-bounce",
+                        )}
+                      />
+                      <span className="text-xs text-center">Open Camera</span>
+                    </div>
+                  </div>
+                )}
+
+                {isCameraActive && (
+                  <button
+                    type="button"
+                    className="absolute top-1 z-10 right-1 bg-red-500 p-1 rounded-full hover:bg-red-200 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleFacing()
+                    }}
+                    title={facing === "user" ? "Switch to back camera" : "Switch to front camera"}
+                  >
+                    <SwitchCameraIcon className="h-4 w-4 text-white" />
+                  </button>
+                )}
+                <span className="absolute top-0 left-1 text-xs">{info}</span>
+                
+                {/* Hidden canvas for taking snapshots */}
+                <canvas ref={canvasRef} style={{ display: 'none' }} />
+              </div>
+
+              {/* Fullscreen camera modal */}
+              {isFullscreen && isCameraActive && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+                  <div className="relative w-full max-w-2xl max-h-full bg-black rounded-lg overflow-hidden">
+                    <div className="absolute top-2 right-2 z-10 flex gap-2">
+                      <button
+                        type="button"
+                        className="bg-red-500 p-2 rounded-full hover:bg-red-400 text-white"
+                        onClick={toggleFacing}
+                        title={facing === "user" ? "Switch to back camera" : "Switch to front camera"}
+                      >
+                        <SwitchCameraIcon className="h-6 w-6" />
+                      </button>
+                      <button
+                        type="button"
+                        className="bg-gray-800 p-2 rounded-full hover:bg-gray-700 text-white"
+                        onClick={() => setIsFullscreen(false)}
+                      >
+                        <XIcon className="h-6 w-6" />
+                      </button>
+                    </div>
+                    
+                    <video 
+                      ref={fullscreenVideoRef}
+                      className="w-full h-full object-contain"
+                      playsInline
+                      muted
+                      autoPlay
+                    />
+                    
+                    <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                      <button
+                        type="button"
+                        className="bg-blue-500 hover:bg-blue-400 text-white rounded-full w-16 h-16 flex items-center justify-center"
+                        onClick={takePhoto}
+                      >
+                        <div className="w-12 h-12 bg-white rounded-full"></div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+          <div
+            {...dropzone.getRootProps()}
+            className={cn(
+              "border-input bg-background hover:bg-accent hover:text-accent-foreground relative flex h-32 w-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-all select-none",
+              dropZoneClassName,
+            )}
+          >
+            <input 
+              {...dropzone.getInputProps()} 
+            />
+            <div className="flex flex-col items-center gap-1.5">
+              <div className="flex flex-col items-center gap-0.5 text-sm font-medium">
+                <UploadIcon
+                  className={cn(
+                    "mb-2 h-6 w-6",
+                    progress == 0 ? "" : "animate-bounce",
+                  )}
+                />
+                <span>{progress == 0 ? "Upload files" : `${progress} %`}</span>
+              </div>
             </div>
+            <span className="absolute top-0 right-1 text-xs">{info}</span>
           </div>
-          <span className="absolute top-0 right-1 text-xs">{info}</span>
-        </div>
+        </>
       )}
       {files.length > 0 &&
         files.map((file, index) => (
