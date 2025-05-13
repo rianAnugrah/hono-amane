@@ -1,0 +1,144 @@
+# Cursor Rules
+
+These rules define coding standards and best practices for developing applications using a mix of front-end and backend technologies. The focus is on producing readable, maintainable, and bug-free code that adheres to modern development principles.
+
+## Coding Environment
+
+The following languages and technologies are supported:
+
+- **Front-End**:
+  - ReactJS
+  - Vite
+  - Vike
+  - JavaScript
+  - TypeScript
+  - TailwindCSS
+  - HTML
+  - CSS
+- **Back-End**:
+  - Hono (web framework)
+  - Node.js (backend runtime)
+  - Postgres (database)
+  - Prisma (ORM)
+  - Axios (HTTP client for API requests)
+- **API**:
+  - RESTful API design and consumption
+
+## Code Implementation Guidelines
+
+Follow these rules when writing code to ensure consistency, readability, and reliability across front-end and backend development.
+
+### General Principles
+- **Readability Over Performance**: Prioritize clear, maintainable code over micro-optimizations.
+- **DRY Principle**: Avoid code duplication by reusing components, utilities, and services.
+- **Early Returns**: Use early returns to reduce nesting and improve code clarity.
+- **Type Safety**: Use TypeScript for type definitions in both front-end and backend code.
+- **Descriptive Naming**: Use clear, meaningful names for variables, functions, and components. Event handlers should use the `handle` prefix (e.g., `handleClick`, `handleSubmit`).
+- **No Placeholders**: Avoid TODOs or incomplete implementations. All code must be fully functional.
+
+### Front-End Guidelines
+- **Styling**:
+  - Use **TailwindCSS** classes for all styling. Avoid raw CSS or `<style>` tags.
+  - Use `class:` instead of ternary operators for conditional classes whenever possible.
+- **Accessibility**:
+  - Add accessibility attributes to interactive elements (e.g., `tabindex="0"`, `aria-label`, `onClick`, `onKeyDown`).
+  - Ensure keyboard navigation support for all interactive components.
+- **Components**:
+  - Use `const` for functional components and hooks (e.g., `const MyComponent = () =>`).
+  - Define TypeScript interfaces or types for props and state.
+  - Keep components small and focused, following single-responsibility principles.
+- **Event Handling**:
+  - Name event handlers with the `handle` prefix (e.g., `handleClick`, `handleKeyDown`).
+  - Use arrow functions for event handlers to maintain consistent `this` binding.
+
+### Back-End Guidelines
+- **Hono Framework**:
+  - Structure routes in a modular way, grouping related endpoints (e.g., `/api/users`, `/api/products`).
+  - Use middleware for authentication, logging, and error handling.
+  - Define route handlers as `const` with clear names (e.g., `const getUsers = async (c) =>`).
+  - Use TypeScript for type-safe request/response handling.
+  - Return consistent JSON responses with status codes (e.g., `{ data, error, status }`).
+- **API Design**:
+  - Follow RESTful conventions (e.g., `GET /resources`, `POST /resources`, `PUT /resources/:id`).
+  - Validate input using libraries like `zod` or Hono’s built-in validator.
+  - Include API versioning (e.g., `/api/v1/`).
+  - Handle errors gracefully, returning appropriate HTTP status codes (e.g., 400 for bad requests, 500 for server errors).
+- **Postgres and Prisma**:
+  - Use **Prisma** as the ORM for all database interactions.
+  - Define clear Prisma schemas in `schema.prisma` with appropriate relations and indexes.
+  - Run migrations with `npx prisma migrate dev` to keep the database schema in sync.
+  - Use async/await for database queries and handle errors with try-catch blocks.
+  - Prevent SQL injection by relying on Prisma’s query builder (avoid raw queries unless necessary).
+  - Close database connections properly in production (e.g., using Prisma’s `$disconnect`).
+- **Axios**:
+  - Use Axios for HTTP requests in both front-end and backend (e.g., calling external APIs).
+  - Configure a reusable Axios instance with base URL and headers (e.g., `Authorization`).
+  - Handle errors using `.catch` or try-catch, providing user-friendly error messages.
+  - Type response data with TypeScript interfaces for safety.
+
+### Code Structure
+- **Front-End**:
+  - Organize React/NextJS projects with a clear folder structure:
+    - `components/`: Reusable UI components.
+    - `pages/`: NextJS pages or React routes.
+    - `hooks/`: Custom hooks.
+    - `utils/`: Utility functions and helpers.
+    - `types/`: TypeScript type definitions.
+  - Use absolute imports (e.g., `import { Button } from '@/components/Button'`) with configured `tsconfig.json` paths.
+- **Back-End**:
+  - Organize Hono projects with:
+    - `routes/`: Route handlers grouped by resource (e.g., `users.ts`, `products.ts`).
+    - `controllers/`: Business logic for routes.
+    - `services/`: Database and external API interactions.
+    - `middleware/`: Authentication, validation, and logging middleware.
+    - `prisma/`: Prisma schema and migrations.
+  - Use environment variables (via `.env`) for sensitive data (e.g., database URLs, API keys).
+
+### Error Handling
+- **Front-End**:
+  - Display user-friendly error messages using components like toasts or modals.
+  - Use error boundaries in React to catch rendering errors.
+- **Back-End**:
+  - Return structured error responses (e.g., `{ error: "Invalid input", status: 400 }`).
+  - Log errors to a logging service (e.g., console in development, external service in production).
+  - Use try-catch for async operations (e.g., database queries, API calls).
+
+### Testing
+- **Front-End**:
+  - Write unit tests for components and hooks using `jest` and `react-testing-library`.
+  - Test accessibility with tools like `axe`.
+- **Back-End**:
+  - Write integration tests for API endpoints using `jest` or `supertest`.
+  - Test database interactions with Prisma using a test database.
+
+### Example Code Snippets
+
+#### Front-End (React with TypeScript and TailwindCSS)
+```tsx
+import { FC } from 'react';
+
+interface ButtonProps {
+  label: string;
+  onClick: () => void;
+}
+
+const Button: FC<ButtonProps> = ({ label, onClick }) => {
+  const handleClick = () => onClick();
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') onClick();
+  };
+
+  return (
+    <button
+      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      aria-label={label}
+    >
+      {label}
+    </button>
+  );
+};
+
+export default Button;
