@@ -8,7 +8,7 @@ import authRoutes from "./routes/auth";
 import uploadRoutes from "./routes/upload";
 import { env } from "../config/env";
 import users from "./routes/users";
-import { adminOnly, authenticatedUser } from "./middleware/auth";
+import { authMiddleware, roleMiddleware } from "./middleware/auth";
 
 import detailsLocationRoute from "./routes/location-details";
 import projectCodeRoute from "./routes/project-codes";
@@ -33,14 +33,22 @@ if (isProduction) {
 // Public API routes (no authentication required)
 app.route("/api/auth", authRoutes);
 
-// Protected API routes (authentication required)
-app.route("/api/assets",  assetRoutes);
-app.route("/api/upload",  uploadRoutes);
-app.route("/api/users",  users);
-app.route("/api/locations",  locationRoute);
-app.route("/api/locations-details",  detailsLocationRoute);
-app.route("/api/project-codes",  projectCodeRoute);
-app.route("/api/stats",  statRoutes);
+// Create API group with authentication middleware
+const protectedApi = new Hono()
+  .use("*", authMiddleware);
+  // .use("*", roleMiddleware(["admin", "user", "read_only"]));
+
+// Protected API routes
+protectedApi.route("/assets", assetRoutes);
+protectedApi.route("/upload", uploadRoutes);
+protectedApi.route("/users", users);
+protectedApi.route("/locations", locationRoute);
+protectedApi.route("/locations-details", detailsLocationRoute);
+protectedApi.route("/project-codes", projectCodeRoute);
+protectedApi.route("/stats", statRoutes);
+
+// Mount the protected API group
+app.route("/api", protectedApi);
 
 // Serve uploaded files statically
 app.use('/uploads/*', serveStatic({ root: './' }));

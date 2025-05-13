@@ -36,6 +36,7 @@ function PageShell({
 }) {
   const parent = useRef(null);
   const { email, name, isAuth, set_user, location, role } = useUserStore();
+  const sessionCheckedRef = useRef(false);
   
   // Check if current page is public or requires auth
   const isAuthPage = pageContext.urlPathname?.includes('(auth)');
@@ -52,28 +53,74 @@ function PageShell({
     });
   }, [pageContext.urlPathname]);
 
-  // Redirect if not authenticated and trying to access protected page
+  // Check session on page load and navigation
   useEffect(() => {
-    if (isProtectedPage && !isAuth) {
+    const checkSession = async () => {
+      try {
+        // If already authenticated, don't recheck unnecessarily
+        if (isAuth && email) {
+          return;
+        }
+        
+        // Get session from cookie
+        const cookies = document.cookie.split(";");
+        const hcmlSessionCookie = cookies.find((cookie) =>
+          cookie.trim().startsWith("hcmlSession=")
+        );
+        const hcmlSessionValue = hcmlSessionCookie
+          ? hcmlSessionCookie.split("=")[1]
+          : null;
+        
+        if (hcmlSessionValue) {
+          // Verify token on server
+          const response = await fetch("/api/auth/verify", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include", // Important for cookies
+          });
+          
+          if (response.ok) {
+            const userData = await response.json();
+            if (userData && !userData.error) {
+              set_user({
+                email: userData.email || "",
+                name: userData.name || "",
+                isAuth: true,
+                role: userData.role || "",
+                location: userData.location || []
+              });
+              sessionCheckedRef.current = true;
+              return;
+            }
+          }
+        }
+        
+        if (isProtectedPage) {
+          // Only redirect if we're sure there's no session
+          sessionCheckedRef.current = true;
+          window.location.href = '/login';
+        }
+      } catch (error) {
+        console.error("Session verification error");
+        // Don't redirect on error to prevent logout loops
+      }
+    };
+    
+    checkSession();
+  }, [pageContext.urlPathname, isAuth, email, set_user, isProtectedPage]);
+  
+  // Only redirect if not authenticated and trying to access protected page
+  // after we've verified the session status
+  useEffect(() => {
+    if (sessionCheckedRef.current && isProtectedPage && !isAuth) {
       window.location.href = '/login';
     }
   }, [isProtectedPage, isAuth]);
   
   useEffect(() => {
     parent.current && autoAnimate(parent.current);
-
-    // Check for 'hcmlSession' cookie
-    const cookies = document.cookie.split(";");
-    const hcmlSessionCookie = cookies.find((cookie) =>
-      cookie.trim().startsWith("hcmlSession=")
-    );
-    const hcmlSessionValue = hcmlSessionCookie
-      ? hcmlSessionCookie.split("=")[1]
-      : null;
-    
-    if (hcmlSessionValue) {
-      checkCredential(hcmlSessionValue);
-    }
   }, [parent]);
 
   useEffect(() => {
@@ -81,29 +128,6 @@ function PageShell({
       checkUserProfile(email, name);
     }
   }, [email, isAuth]);
-
-  const checkCredential = async (token: string) => {
-    if (!token) return;
-
-    try {
-      const response = await fetch("/api/auth/decrypt", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to check credential");
-      }
-
-      const data = await response.json();
-      set_user({...data, isAuth: true});
-    } catch (error) {
-      console.error("Error checking credential");
-    }
-  };
 
   const checkUserProfile = async (email: string, name?: string) => {
     if (!email) return;

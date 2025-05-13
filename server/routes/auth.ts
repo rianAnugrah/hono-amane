@@ -72,6 +72,52 @@ authRoutes.post("/decrypt", async (c) => {
   }
 });
 
+// Verify session token from cookie
+authRoutes.post("/verify", async (c) => {
+  try {
+    // Get session cookie
+    const sessionToken = getCookie(c, "hcmlSession");
+    
+    if (!sessionToken) {
+      return c.json({ error: "No active session" }, 401);
+    }
+    
+    try {
+      // Decrypt the token
+      const decrypted = crypto.decrypt(sessionToken);
+      const userData = JSON.parse(decrypted);
+      
+      // Check token expiration if timestamp exists
+      if (userData.exp && new Date(userData.exp) < new Date()) {
+        // Clear invalid cookie
+        deleteCookie(c, "hcmlSession", {
+          path: "/",
+          secure: true,
+          domain: env.APP_DOMAIN,
+          httpOnly: true,
+        });
+        return c.json({ error: "Session expired" }, 401);
+      }
+      
+      // Add timestamp for session verification
+      userData.lastVerified = new Date().toISOString();
+      
+      return c.json(userData, 200);
+    } catch (error) {
+      // Clear invalid cookie
+      deleteCookie(c, "hcmlSession", {
+        path: "/",
+        secure: true,
+        domain: env.APP_DOMAIN,
+        httpOnly: true,
+      });
+      return c.json({ error: "Invalid session" }, 401);
+    }
+  } catch (error) {
+    return c.json({ error: "Session verification failed" }, 500);
+  }
+});
+
 // Logout endpoint
 authRoutes.get("/logout", async (c) => {
   deleteCookie(c, "hcmlSession", {

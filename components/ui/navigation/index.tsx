@@ -29,6 +29,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
 import { useUserStore } from "@/stores/store-user-login";
 import Logo from "@/components/svg/logo";
+
 export default function Navbar() {
   return (
     <>
@@ -40,9 +41,8 @@ export default function Navbar() {
 
 function MobileNavbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-
   const { role } = useUserStore();
-
+  
   return (
     <nav className="bg-gradient-to-br  from-cyan-950 to-blue-950 md:hidden border-t w-full bottom-0 fixed z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -109,28 +109,24 @@ function MobileNavbar() {
               <Link
                 href="/"
                 className="text-gray-800 hover:text-blue-600"
-                onClick={() => setMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 href="/about"
                 className="text-gray-800 hover:text-blue-600"
-                onClick={() => setMenuOpen(false)}
               >
                 About
               </Link>
               <Link
                 href="/contact"
                 className="text-gray-800 hover:text-blue-600"
-                onClick={() => setMenuOpen(false)}
               >
                 Contact
               </Link>
               <Link
-                href="/login"
-                className="text-gray-800 hover:text-blue-600"
-                onClick={() => setMenuOpen(false)}
+                href="/logout"
+                className="text-gray-800 hover:text-blue-600 text-left"
               >
                 Logout
               </Link>
@@ -144,6 +140,7 @@ function MobileNavbar() {
 
 function DesktopNav() {
   const { role } = useUserStore();
+  
   return (
     <nav className="hidden  md:flex flex-col  h-[100svh] gap-1 w-[10rem] pl-4 pb-4">
       <div className="h-[4.75rem] flex items-center justify-center">
@@ -172,7 +169,7 @@ function DesktopNav() {
         </Link>
       </div>
       <div className="flex flex-grow flex-col"></div>
-      <DesktopLink href="/login" icon={<LogOut />} label="Logout" />
+      <DesktopLink href="/logout" icon={<LogOut />} label="Logout" />
     </nav>
   );
 }
