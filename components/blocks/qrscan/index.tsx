@@ -32,13 +32,17 @@ const QrScannerComponent = () => {
   const [permissionState, setPermissionState] = useState("prompt");
   const [assetData, setAssetData] = useState<Asset | null>(null);
   const [isFetchingAsset, setIsFetchingAsset] = useState(false);
+  const [switchingCamera, setSwitchingCamera] = useState(false);
+  const [autoStartCamera, setAutoStartCamera] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      loadCameras();
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (autoStartCamera) {
+      const timer = setTimeout(() => {
+        loadCameras();
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [autoStartCamera]);
 
   const loadCameras = async () => {
     try {
@@ -49,19 +53,31 @@ const QrScannerComponent = () => {
         setIsLoading(false);
         return;
       }
-      await navigator.mediaDevices.getUserMedia({ video: true });
+
+      await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        } 
+      });
+      
       const availableCameras = await QrScanner.listCameras(true);
+      console.log("Available cameras:", availableCameras);
+      
       if (availableCameras.length === 0) {
         setError("Tidak ada kamera yang terdeteksi.");
         setPermissionState("granted");
         setIsLoading(false);
         return;
       }
+      
       setCameras(availableCameras);
       setPermissionState("granted");
+      
       setTimeout(() => {
         startCameraWithIndex(0);
-      }, 500);
+      }, 800);
     } catch (err) {
       handleCameraError(err);
     } finally {
@@ -78,9 +94,15 @@ const QrScannerComponent = () => {
       setError("Tidak ada kamera ditemukan.");
     } else if (err.name === "NotReadableError") {
       setError("Kamera sedang digunakan oleh aplikasi lain.");
+    } else if (err.name === "AbortError") {
+      setError("Operasi kamera dibatalkan.");
+    } else if (err.name === "OverconstrainedError") {
+      setError("Kamera tidak memenuhi batasan yang diminta.");
     } else {
       setError(`Gagal memuat kamera: ${err.message}`);
     }
+    setCameraOn(false);
+    setSwitchingCamera(false);
   };
 
   const requestCameraPermission = async () => {
@@ -102,14 +124,23 @@ const QrScannerComponent = () => {
       return;
     }
 
+    if (switchingCamera) {
+      console.log("Camera switching already in progress, ignoring request");
+      return;
+    }
+
     try {
       setIsLoading(true);
+      setSwitchingCamera(true);
+      
       if (scanner) {
-        scanner.stop();
-        setScanner(null);
+        await stopCameraInternal();
       }
 
-      const selectedCamera = cameras[index % cameras.length];
+      const safeIndex = index % cameras.length;
+      const selectedCamera = cameras[safeIndex];
+      console.log(`Starting camera: ${selectedCamera.label} (${selectedCamera.id})`);
+
       const qrScanner = new QrScanner(
         videoRef.current,
         (res) => {
@@ -119,43 +150,111 @@ const QrScannerComponent = () => {
           highlightScanRegion: true,
           highlightCodeOutline: true,
           returnDetailedScanResult: true,
+          preferredCamera: selectedCamera.id,
         }
       );
 
-      await qrScanner.setCamera(selectedCamera.id);
-      await qrScanner.start();
-
-      setScanner(qrScanner);
-      setCameraOn(true);
-      setCurrentCameraIndex(index % cameras.length);
+      try {
+        await qrScanner.setCamera(selectedCamera.id);
+        await qrScanner.start();
+        console.log("Camera started successfully");
+        
+        setScanner(qrScanner);
+        setCameraOn(true);
+        setCurrentCameraIndex(safeIndex);
+        setError("");
+      } catch (cameraErr) {
+        console.error("Failed to start specific camera, trying default", cameraErr);
+        
+        try {
+          await qrScanner.start();
+          setScanner(qrScanner);
+          setCameraOn(true);
+          setError("");
+        } catch (defaultErr) {
+          qrScanner.destroy();
+          throw defaultErr;
+        }
+      }
     } catch (err) {
       handleCameraError(err);
     } finally {
       setIsLoading(false);
+      setSwitchingCamera(false);
     }
   };
 
-  const stopCamera = () => {
-    scanner?.stop();
-    setScanner(null);
-    setCameraOn(false);
+  const stopCameraInternal = async () => {
+    if (scanner) {
+      try {
+        scanner.stop();
+        
+        // Give browser time to release camera resources
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        setScanner(null);
+      } catch (err) {
+        console.error("Error stopping camera:", err);
+      }
+    }
   };
 
-  const switchCamera = () => {
-    if (cameras.length <= 1) return setError("Hanya satu kamera tersedia.");
-    stopCamera();
-    setTimeout(() => startCameraWithIndex((currentCameraIndex + 1) % cameras.length), 300);
+  const stopCamera = async () => {
+    setIsLoading(true);
+    await stopCameraInternal();
+    setCameraOn(false);
+    setIsLoading(false);
+  };
+
+  const switchCamera = async () => {
+    if (cameras.length <= 1) {
+      return setError("Hanya satu kamera tersedia.");
+    }
+    
+    if (switchingCamera || isLoading) {
+      console.log("Operation already in progress, ignoring switch request");
+      return;
+    }
+    
+    setSwitchingCamera(true);
+    setIsLoading(true);
+    
+    try {
+      await stopCameraInternal();
+      
+      const nextIndex = (currentCameraIndex + 1) % cameras.length;
+      console.log(`Switching to camera index: ${nextIndex}`);
+      
+      setTimeout(() => {
+        startCameraWithIndex(nextIndex);
+      }, 500);
+    } catch (err) {
+      handleCameraError(err);
+    }
   };
 
   const refreshCameras = async () => {
     try {
       setIsLoading(true);
+      
+      if (scanner) {
+        await stopCameraInternal();
+        setCameraOn(false);
+      }
+      
       const availableCameras = await QrScanner.listCameras(true);
+      console.log("Refreshed cameras:", availableCameras);
       setCameras(availableCameras);
+      
       if (availableCameras.length === 0) {
         setError("Tidak ada kamera setelah penyegaran.");
+      } else {
+        setError("");
+        setTimeout(() => {
+          startCameraWithIndex(0);
+        }, 500);
       }
-    } catch (err) {
+    } catch (err: any) {
       setError("Gagal memperbarui kamera: " + err.message);
     } finally {
       setIsLoading(false);
@@ -189,7 +288,12 @@ const QrScannerComponent = () => {
   }, [result]);
 
   useEffect(() => {
-    return () => scanner?.stop();
+    return () => {
+      if (scanner) {
+        scanner.stop();
+        setScanner(null);
+      }
+    };
   }, [scanner]);
 
   return (
@@ -201,13 +305,13 @@ const QrScannerComponent = () => {
             {isLoading ? <p>Starting Camera...</p> : <p>Press Enable Camera</p>}
           </div>
         )}
-        {/* {error && (
+        {error && (
           <div className="absolute bottom-0 left-0 w-full p-2">
-            <p className="text-red-600 text-center bg-red-100 border border-red-600 rounded">
+            <p className="text-red-600 text-center bg-red-100 border border-red-600 rounded text-xs">
               {error}
             </p>
           </div>
-        )} */}
+        )}
       </div>
 
       <CameraButtons
@@ -215,7 +319,7 @@ const QrScannerComponent = () => {
         currentCameraIndex={currentCameraIndex}
         startCameraWithIndex={startCameraWithIndex}
         stopCamera={stopCamera}
-        isLoading={isLoading}
+        isLoading={isLoading || switchingCamera}
       />
 
       <ControlPanel
@@ -225,7 +329,7 @@ const QrScannerComponent = () => {
         stopCamera={stopCamera}
         requestCameraPermission={requestCameraPermission}
         cameraOn={cameraOn}
-        isLoading={isLoading}
+        isLoading={isLoading || switchingCamera}
         permissionState={permissionState}
         fileInputRef={fileInputRef}
         handleFileUpload={handleFileUpload}
