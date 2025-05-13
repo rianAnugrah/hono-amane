@@ -8,47 +8,80 @@ import {
   setSignedCookie,
   deleteCookie,
 } from "hono/cookie";
+
 const authRoutes = new Hono();
 
-// Create Asset - Changed endpoint to more appropriate route (optional)
+// Authentication route for login
 authRoutes.get("/login", async (c) => {
   const api_data_host = env.API_HOST;
   const endpoint = "api/azure/auth?redirect=";
   const redirect_url = `${env.VITE_URL}:${env.APP_PORT}`;
+  
   try {
-    // const url = urlCrypto.encrypt('https://api-data.hcml.co.id/api/azure/auth?redirect=https://dev.hcml.co.id:3000')
     const url = urlCrypto.encrypt(`${api_data_host}${endpoint}${redirect_url}`);
+    
+    // Clear any existing session
     deleteCookie(c, "hcmlSession", {
       path: "/",
       secure: true,
       domain: env.APP_DOMAIN,
+      httpOnly: true, // Add httpOnly flag for security
     });
-
-    console.log("url", `${api_data_host}${endpoint}${redirect_url}`, url);
 
     return c.redirect(url, 302);
   } catch (error) {
     return c.json(
       {
-        error: "Error login",
-        details: error instanceof Error ? error.message : String(error),
+        error: "Authentication failed",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       500
     );
   }
 });
 
+// Token decryption endpoint with validation
 authRoutes.post("/decrypt", async (c) => {
   try {
     const body = await c.req.json();
+    
+    if (!body.token) {
+      return c.json({ error: "Missing token" }, 400);
+    }
 
-    const descrypted = crypto.decrypt(body.token);
+    const decrypted = crypto.decrypt(body.token);
+    
+    // Parse and validate the decrypted data
+    const userData = JSON.parse(decrypted);
+    
+    // Check token expiration if timestamp exists
+    if (userData.exp && new Date(userData.exp) < new Date()) {
+      return c.json({ error: "Token expired" }, 401);
+    }
+    
+    // Add timestamp for when this token was used
+    userData.lastVerified = new Date().toISOString();
 
-    return c.json(JSON.parse(descrypted), 201);
+    return c.json(userData, 200);
   } catch (error) {
-    console.error("Error creating asset:", error);
-    return c.json({ error: "Failed to create asset" }, 500);
+    console.error("Error during token verification");
+    return c.json({ 
+      error: "Invalid token",
+      status: "unauthorized" 
+    }, 401);
   }
+});
+
+// Logout endpoint
+authRoutes.get("/logout", async (c) => {
+  deleteCookie(c, "hcmlSession", {
+    path: "/",
+    secure: true,
+    domain: env.APP_DOMAIN,
+    httpOnly: true,
+  });
+  
+  return c.json({ success: true, message: "Logged out successfully" });
 });
 
 export default authRoutes;

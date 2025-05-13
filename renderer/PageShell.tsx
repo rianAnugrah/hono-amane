@@ -13,6 +13,20 @@ import autoAnimate from "@formkit/auto-animate";
 import { useUserStore } from "@/stores/store-user-login";
 import axios from "axios";
 
+// Define protected URL patterns
+const PROTECTED_PATTERNS = [
+  '/asset',
+  '/category',
+  '/dashboard',
+  '/location',
+  '/qr-scanner',
+  '/report',
+  '/user',
+  '/audit',
+  '/testapi',
+  '/(protected)',
+];
+
 function PageShell({
   children,
   pageContext,
@@ -21,17 +35,34 @@ function PageShell({
   pageContext: PageContext;
 }) {
   const parent = useRef(null);
-
   const { email, name, isAuth, set_user, location, role } = useUserStore();
+  
+  // Check if current page is public or requires auth
+  const isAuthPage = pageContext.urlPathname?.includes('(auth)');
+  
+  // Check if URL is protected using multiple patterns
+  const isProtectedPage = React.useMemo(() => {
+    if (!pageContext.urlPathname) return false;
+    
+    return PROTECTED_PATTERNS.some(pattern => {
+      // Check for exact match or subdirectory of protected pattern
+      return pageContext.urlPathname === pattern || 
+             pageContext.urlPathname.startsWith(`${pattern}/`) ||
+             (pattern.includes('(') && pageContext.urlPathname.includes(pattern));
+    });
+  }, [pageContext.urlPathname]);
 
-  // if (!isAuth) {
-  //   throw redirect("/login");
-  // }
-
+  // Redirect if not authenticated and trying to access protected page
+  useEffect(() => {
+    if (isProtectedPage && !isAuth) {
+      window.location.href = '/login';
+    }
+  }, [isProtectedPage, isAuth]);
+  
   useEffect(() => {
     parent.current && autoAnimate(parent.current);
 
-    // Check for 'hcmlSession' cookie and log its value
+    // Check for 'hcmlSession' cookie
     const cookies = document.cookie.split(";");
     const hcmlSessionCookie = cookies.find((cookie) =>
       cookie.trim().startsWith("hcmlSession=")
@@ -39,13 +70,17 @@ function PageShell({
     const hcmlSessionValue = hcmlSessionCookie
       ? hcmlSessionCookie.split("=")[1]
       : null;
-    console.log("hcmlSession cookie value:", hcmlSessionValue);
-    checkCredential(hcmlSessionValue as string);
+    
+    if (hcmlSessionValue) {
+      checkCredential(hcmlSessionValue);
+    }
   }, [parent]);
 
   useEffect(() => {
-    userCheckAndRegistration(email, name);
-  }, [email, name]);
+    if (email && isAuth) {
+      checkUserProfile(email, name);
+    }
+  }, [email, isAuth]);
 
   const checkCredential = async (token: string) => {
     if (!token) return;
@@ -64,68 +99,40 @@ function PageShell({
       }
 
       const data = await response.json();
-      set_user(data);
-      console.log("Credential check response:", data);
+      set_user({...data, isAuth: true});
     } catch (error) {
-      console.error("Error checking credential:", error);
+      console.error("Error checking credential");
     }
   };
 
-  const userCheckAndRegistration = async (email: string, name?: string) => {
+  const checkUserProfile = async (email: string, name?: string) => {
     if (!email) return;
 
     try {
-      // 1. Cek apakah user sudah terdaftar
+      // Check if user exists in our system
       const { data } = await axios.get(
         `/api/users/by-email/${email.toLowerCase()}`
       );
 
-      // 2. Kalau ditemukan, simpan ke state
       if (data) {
-        const AuthData: any = {
+        const authData = {
           email: data.email,
           name: data.name,
           isAuth: true,
           location: data.userLocations,
           role: data.role,
         };
-        set_user(AuthData);
-        return;
+        set_user(authData);
       }
     } catch (err: any) {
-      if (err.response?.status !== 404) {
-        console.error("Error checking user:", err);
-        return;
+      if (err.response?.status === 404) {
+        // User not found - redirect to unauthorized page instead of auto-registering
+        window.location.href = '/unauthorized';
+      } else {
+        console.error("Error checking user profile");
       }
-      // Jika 404, lanjut ke registrasi
-    }
-
-    try {
-      // 3. Daftarkan user baru
-      const now = new Date().toISOString();
-      const defaultPassword = "changeme123"; // ganti sesuai strategi keamananmu
-
-      const newUser = {
-        email: email.toLowerCase(),
-        name: name,
-        role: "read_only",
-        locationId: 1,
-      };
-
-      const { data: registered } = await axios.post("/api/users", newUser);
-
-      // 4. Simpan user baru ke state
-      set_user(registered);
-    } catch (err) {
-      console.error("Error registering user:", err);
     }
   };
-
-  console.log("EMAIL", email);
-  console.log("Name", name);
-  console.log("isAuth", isAuth);
-  console.log("Location", location);
-  console.log("Role", role);
 
   return (
     <React.StrictMode>
@@ -154,8 +161,7 @@ function PageShell({
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    // <div className="w-full h-[100svh] relative flex bg-gradient-to-br  from-[#476f80] to-[#647c89]">
-    <div className="w-full h-[100svh] relative flex bg-gradient-to-br  from-cyan-950 to-blue-950">
+    <div className="w-full h-[100svh] relative flex bg-gradient-to-br from-cyan-950 to-blue-950">
       {children}
     </div>
   );
