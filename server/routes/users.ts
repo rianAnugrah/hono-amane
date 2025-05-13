@@ -4,6 +4,66 @@ import { Hono } from "hono";
 const users = new Hono();
 const prisma = new PrismaClient();
 
+// Handle user registration requests and auto-registration
+users.post("/register-request", async (c) => {
+  try {
+    const { email, name } = await c.req.json();
+    
+    if (!email) {
+      return c.json({ error: "Email is required" }, 400);
+    }
+
+    // Check if user already exists
+    const existingUser = await prisma.users.findUnique({
+      where: { email }
+    });
+
+    if (existingUser) {
+      return c.json({ 
+        message: "User already exists",
+        user: existingUser
+      }, 200);
+    }
+
+    // Get default location (first one)
+    const defaultLocation = await prisma.locationDesc.findFirst({
+      orderBy: { id: 'asc' }
+    });
+
+    if (!defaultLocation) {
+      return c.json({ error: "No default location found" }, 500);
+    }
+
+    // Auto-register user with read_only role
+    const newUser = await prisma.users.create({
+      data: {
+        email,
+        name: name || email.split('@')[0],
+        role: "read_only",
+        userLocations: {
+          create: [{ locationId: defaultLocation.id }]
+        }
+      },
+      include: {
+        userLocations: {
+          include: { location: true }
+        }
+      }
+    });
+
+    return c.json({
+      message: "User registered successfully",
+      user: {
+        ...newUser,
+        locations: newUser.userLocations.map(ul => ul.location)
+      }
+    }, 201);
+  } catch (error) {
+    console.error("Error processing registration request:", error);
+    return c.json({ error: "Failed to process registration request" }, 500);
+  }
+});
+
 users.get("/", async (c) => {
   try {
     const {

@@ -150,10 +150,35 @@ function PageShell({
       }
     } catch (err: any) {
       if (err.response?.status === 404) {
-        // User not found - redirect to unauthorized page instead of auto-registering
-        window.location.href = '/unauthorized';
+        // User not found - auto register with read_only permissions
+        try {
+          const response = await axios.post('/api/users/register-request', {
+            email: email.toLowerCase(),
+            name: name || '',
+          });
+          
+          if (response.status === 201 && response.data.user) {
+            const newUser = response.data.user;
+            // Set user data with the newly registered user
+            set_user({
+              email: newUser.email,
+              name: newUser.name,
+              isAuth: true,
+              location: newUser.userLocations,
+              role: newUser.role,
+            });
+            return;
+          }
+          
+          // If registration was unsuccessful, redirect to unauthorized
+          window.location.href = '/unauthorized';
+        } catch (registerError) {
+          console.error("Error during auto-registration", registerError);
+          window.location.href = '/unauthorized';
+        }
       } else {
         console.error("Error checking user profile");
+        window.location.href = '/unauthorized';
       }
     }
   };
