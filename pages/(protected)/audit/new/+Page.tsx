@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { navigate } from "vike/client/router";
 import { useUserStore } from "@/stores/store-user-login";
 import InputSelect from "@/components/ui/input-select";
+import { InputUpload } from "@/components/ui/input-upload";
 
 // Define the Asset type to fix the error
 interface Asset {
@@ -151,6 +152,8 @@ export default function NewAssetAuditPage() {
             className="w-full mt-1 p-2 border rounded"
           />
         </div>
+
+        <InputUpload />
 
         <button
           type="submit"
