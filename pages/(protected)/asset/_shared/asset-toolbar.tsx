@@ -129,14 +129,16 @@ export default function AssetToolbar({
           Filter
         </button>
 
-        <div className="hidden md:flex flex-grow"></div>
-
         <button
           onClick={() => setShowToolbar(!showToolbar)}
           className="hidden md:flex btn btn-soft btn-sm"
         >
           {!showToolbar ? <Filter size={14} /> : <FilterX size={14} />} Filter
         </button>
+
+        <div className="hidden md:flex flex-grow"></div>
+
+
         <div className="md:flex items-center justify-end gap-2 hidden">
           <AssetViewToggle
             currentView={currentView}

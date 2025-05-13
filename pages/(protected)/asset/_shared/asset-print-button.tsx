@@ -1,24 +1,24 @@
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
 import { Printer } from "lucide-react";
+import { printAssets } from "./asset-print-utils";
 
 export default function AssetPrintButton() {
   // Inside component
   const { selectedAssets } = useAssetSelectionStore();
 
-  const handleOpenSelected = () => {
-    const selectedIds = Object.keys(selectedAssets);
-    const url = `/asset/print?ids=${selectedIds.join(",")}`;
-    window.open(url, "_blank");
+  const handlePrint = () => {
+    printAssets(selectedAssets);
   };
+
   return (
     <>
       <div className="">
         <button
-          onClick={handleOpenSelected}
+          onClick={handlePrint}
           className="btn btn-neutral btn-sm "
-          disabled={Object.keys(selectedAssets).length <= 0}
+          disabled={selectedAssets.length <= 0}
         >
-          <Printer className="w-5 h-5"/> Print({Object.keys(selectedAssets).length})
+          <Printer className="w-5 h-5"/> Print({selectedAssets.length})
         </button>
       </div>
     </>

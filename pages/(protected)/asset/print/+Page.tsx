@@ -12,7 +12,6 @@ const SelectedAssetsPage = () => {
   const { selectedAssets, selectAsset, deselectAsset } = useAssetSelectionStore();
   
  
-
   const handlePrint = async () => {
     printAssets(selectedAssets);
   };
