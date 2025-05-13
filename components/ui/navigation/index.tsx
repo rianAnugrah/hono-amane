@@ -42,7 +42,7 @@ export default function Navbar() {
 function MobileNavbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { role } = useUserStore();
-  
+
   return (
     <nav className="bg-gradient-to-br  from-cyan-950 to-blue-950 md:hidden border-t w-full bottom-0 fixed z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,9 +62,16 @@ function MobileNavbar() {
               <div>&nbsp;</div>
             ) : (
               <>
-              <MobileLink href="/location" icon={<MapPin />} label="Location" />
-              <MobileLink href="/audit" icon={<SearchCheck />} label="Inspection" />
-              
+                <MobileLink
+                  href="/location"
+                  icon={<MapPin />}
+                  label="Location"
+                />
+                <MobileLink
+                  href="/audit"
+                  icon={<SearchCheck />}
+                  label="Inspection"
+                />
               </>
             )}
             {/* <button
@@ -106,16 +113,10 @@ function MobileNavbar() {
               >
                 ✕
               </button>
-              <Link
-                href="/"
-                className="text-gray-800 hover:text-blue-600"
-              >
+              <Link href="/" className="text-gray-800 hover:text-blue-600">
                 Home
               </Link>
-              <Link
-                href="/about"
-                className="text-gray-800 hover:text-blue-600"
-              >
+              <Link href="/about" className="text-gray-800 hover:text-blue-600">
                 About
               </Link>
               <Link
@@ -140,7 +141,7 @@ function MobileNavbar() {
 
 function DesktopNav() {
   const { role } = useUserStore();
-  
+
   return (
     <nav className="hidden  md:flex flex-col  h-[100svh] gap-1 w-[10rem] pl-4 pb-4">
       <div className="h-[4.75rem] flex items-center justify-center">
@@ -150,12 +151,17 @@ function DesktopNav() {
       </div>
       <DesktopLink href="/dashboard" icon={<HomeIcon />} label="Home" />
       <DesktopLink href="/asset" icon={<Archive />} label="Asset" />
-      {role === "admin" || role === "pic" && (
+      {role === "pic" && (
         <DesktopLink href="/audit" icon={<SearchCheck />} label="Inspection" />
       )}
 
       {role === "admin" && (
         <>
+          <DesktopLink
+            href="/audit"
+            icon={<SearchCheck />}
+            label="Inspection"
+          />
           <DesktopLink href="/category" icon={<BookCopy />} label="Category" />
           <DesktopLink href="/location" icon={<MapPin />} label="Location" />
           <DesktopLink href="/user" icon={<User2 />} label="User" />
