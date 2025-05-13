@@ -1,78 +1,104 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { File, PlusCircle } from 'lucide-react';
+// pages/asset-audits/+Page.tsx
+import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
+import { Link } from '@/renderer/Link'
 
-type ProjectCode = {
-  id: number;
-  code: string;
-};
+type AssetAudit = {
+  id: string
+  asset: { assetNo: string; assetName: string }
+  auditUsers: Array<{
+    user: {
+      id: string
+      name: string | null
+    }
+  }>
+  status: string
+  checkDate: string
+  locationId: number | null
+  location: { id: number; name: string } | null
+  remarks: string | null
+}
 
-export default function ProjectCodesPage() {
-  const [projectCodes, setProjectCodes] = useState<ProjectCode[]>([]);
-  const [newCode, setNewCode] = useState('');
-  const [editId, setEditId] = useState<number | null>(null);
-  const [editCode, setEditCode] = useState('');
-  const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('id');
-  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
-
-  const fetchProjectCodes = async () => {
-    const res = await axios.get('/api/project-codes', {
-      params: { search, sortBy, order },
-    });
-    setProjectCodes(res.data);
-  };
+export default function AssetAuditListPage() {
+  const [audits, setAudits] = useState<AssetAudit[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchProjectCodes();
-  }, [search, sortBy, order]);
-
-  const handleCreate = async () => {
-    if (!newCode.trim()) return;
-    await axios.post('/api/project-codes', { code: newCode });
-    setNewCode('');
-    fetchProjectCodes();
-  };
-
-  const handleUpdate = async (id: number) => {
-    if (!editCode.trim()) return;
-    await axios.put(`/api/project-codes/${id}`, { code: editCode });
-    setEditId(null);
-    setEditCode('');
-    fetchProjectCodes();
-  };
-
-  const handleDelete = async (id: number) => {
-    await axios.delete(`/api/project-codes/${id}`);
-    fetchProjectCodes();
-  };
+    fetch('/api/asset-audit')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to fetch audit data')
+        }
+        return res.json()
+      })
+      .then(setAudits)
+      .catch((err) => {
+        console.error('Error fetching audit data:', err)
+        setError('Failed to load audit data. Please try again later.')
+      })
+      .finally(() => setLoading(false))
+  }, [])
 
   return (
-    <div className="p-6 w-full mx-auto">
-        <div className='w-full flex gap-4 justify-between items-center'>
-
-      <h1 className="text-2xl font-bold mb-4">Audit</h1>
-
-      <div className='grid grid-cols-2 gap-2'>
-        <button className='btn'><PlusCircle />New Inspection</button>
-        <button className='btn'><File /> Report</button>
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Asset Audit Logs</h1>
+        <Link
+          href="/audit/new"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+        >
+          + New Audit
+        </Link>
       </div>
-        </div>
 
-     
-
-        {/* Table audit history */}
-        <div className='w-full h-6 flex border border-gray-700'>
-            <div>No</div>
-            <div>Date</div>
-            <div>Asset number</div>
-            <div>Asset name</div>
-            <div>Condition</div>
-            <div>Asset Type</div>
-            <div>Status</div>
-            <div>Action</div>
-
-        </div>
+      {loading ? (
+        <div>Loading...</div>
+      ) : error ? (
+        <div className="p-4 bg-red-50 text-red-600 rounded-lg">{error}</div>
+      ) : audits.length === 0 ? (
+        <div className="p-4 bg-gray-50 text-gray-600 rounded-lg">No audit records found.</div>
+      ) : (
+        <motion.div
+          className="grid gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          {audits.map((audit) => {
+            // Get the first user from auditUsers array or use a fallback
+            const userName = audit.auditUsers?.[0]?.user?.name || 'Unknown'
+            
+            return (
+              <div
+                key={audit.id}
+                className="p-4 border rounded-xl bg-white shadow hover:shadow-lg transition"
+              >
+                <h2 className="text-lg font-medium">
+                  {audit.asset.assetName} ({audit.asset.assetNo})
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Checked by: {userName} on{' '}
+                  {new Date(audit.checkDate).toLocaleDateString()}
+                </p>
+                <p className="mt-1">
+                  <span className="font-semibold">Status:</span>{' '}
+                  <span className="uppercase">{audit.status}</span>
+                </p>
+                {audit.location && (
+                  <p className="text-sm text-gray-600">
+                    Location: {audit.location.name}
+                  </p>
+                )}
+                {audit.remarks && (
+                  <p className="text-sm mt-2 text-gray-700">
+                    Remarks: {audit.remarks}
+                  </p>
+                )}
+              </div>
+            )
+          })}
+        </motion.div>
+      )}
     </div>
-  );
+  )
 }

@@ -17,6 +17,7 @@ model Users {
   updatedAt     DateTime       @updatedAt
   deletedAt     DateTime?
   userLocations UserLocation[]
+  auditUsers    AuditUser[]
 }
 
 model LocationDesc {
@@ -24,6 +25,7 @@ model LocationDesc {
   description   String         @unique @db.VarChar(255)
   assets        Asset[]
   userLocations UserLocation[]
+  assetAudits   AssetAudit[]
 }
 
 model UserLocation {
@@ -78,6 +80,7 @@ model Asset {
   detailsLocation    DetailsLocation? @relation(fields: [detailsLocation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_details_location")
   locationDesc       LocationDesc?    @relation(fields: [locationDesc_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location_desc")
   projectCode        ProjectCode?     @relation(fields: [projectCode_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_project_code")
+  assetAudits        AssetAudit[]
 
   @@index([assetNo, isLatest])
 }
@@ -112,4 +115,33 @@ model Asset_Copy {
   version         Int       @default(1)
 
   @@index([assetNo, isLatest])
+}
+
+
+model AssetAudit {
+  id            String         @id @default(uuid())
+  assetId       String
+  checkDate     DateTime       @default(now())
+  locationId    Int?
+  status        String
+  remarks       String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  asset         Asset          @relation(fields: [assetId], references: [id])
+  location      LocationDesc?  @relation(fields: [locationId], references: [id])
+  auditUsers    AuditUser[]    // Link to users who participated
+
+  @@index([assetId])
+  @@index([checkDate])
+}
+
+model AuditUser {
+  auditId String
+  userId  String
+
+  audit   AssetAudit @relation(fields: [auditId], references: [id])
+  user    Users      @relation(fields: [userId], references: [id])
+
+  @@id([auditId, userId])
 }

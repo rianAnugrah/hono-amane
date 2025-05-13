@@ -7,6 +7,7 @@ type User = {
   name: string;
   role: string;
   location: any;
+  id: string;
 };
 
 type UserState = User & {
@@ -21,14 +22,15 @@ const getInitialState = (): User => ({
   name: "",
   role: "",
   location: [],
+  id: "",
 });
 
 export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
       ...getInitialState(),
-      set_user: ({ email, name, isAuth, location, role }) =>
-        set(() => ({ email, isAuth, name, location, role })),
+      set_user: ({ email, name, isAuth, location, role, id }) =>
+        set(() => ({ email, isAuth, name, location, role, id })),
       clearUser: () => set(() => getInitialState()),
     }),
     {
@@ -41,6 +43,7 @@ export const useUserStore = create<UserState>()(
         name: state.name,
         role: state.role,
         location: state.location,
+        id: state.id,
       }),
     }
   )

@@ -89,7 +89,8 @@ function PageShell({
                 name: userData.name || "",
                 isAuth: true,
                 role: userData.role || "",
-                location: userData.location || []
+                location: userData.location || [],
+                id: userData.id || "",
               });
               sessionCheckedRef.current = true;
               return;
@@ -140,11 +141,12 @@ function PageShell({
 
       if (data) {
         const authData = {
-          email: data.email,
+          email: data.email.toLowerCase(),
           name: data.name,
           isAuth: true,
           location: data.userLocations,
           role: data.role,
+          id: data.id,
         };
         set_user(authData);
       }
@@ -161,11 +163,12 @@ function PageShell({
             const newUser = response.data.user;
             // Set user data with the newly registered user
             set_user({
-              email: newUser.email,
+              email: newUser.email.toLowerCase(),
               name: newUser.name,
               isAuth: true,
               location: newUser.userLocations,
               role: newUser.role,
+              id: newUser.id,
             });
             return;
           }

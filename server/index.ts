@@ -14,6 +14,7 @@ import detailsLocationRoute from "./routes/location-details";
 import projectCodeRoute from "./routes/project-codes";
 import locationRoute from "./routes/locations";
 import statRoutes from "./routes/stats";
+import assetAuditRoute from "./routes/asset-audit";
 
 const isProduction = process.env.NODE_ENV === "production";
 const port = Number(env.APP_PORT);
@@ -46,6 +47,7 @@ protectedApi.route("/locations", locationRoute);
 protectedApi.route("/locations-details", detailsLocationRoute);
 protectedApi.route("/project-codes", projectCodeRoute);
 protectedApi.route("/stats", statRoutes);
+protectedApi.route("/asset-audit", assetAuditRoute);
 
 // Mount the protected API group
 app.route("/api", protectedApi);
