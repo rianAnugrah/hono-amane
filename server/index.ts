@@ -5,9 +5,10 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { compress } from "hono/compress";
 import assetRoutes from "./routes/assets";
 import authRoutes from "./routes/auth";
-import uploadRoutes from "./routes/upload"; // Import route upload
+import uploadRoutes from "./routes/upload";
 import { env } from "../config/env";
 import users from "./routes/users";
+import { adminOnly, authenticatedUser } from "./middleware/auth";
 
 import detailsLocationRoute from "./routes/location-details";
 import projectCodeRoute from "./routes/project-codes";
@@ -29,15 +30,17 @@ if (isProduction) {
   );
 }
 
-// API routes
-app.route("/api/assets", assetRoutes);
+// Public API routes (no authentication required)
 app.route("/api/auth", authRoutes);
-app.route("/api/upload", uploadRoutes); // Tambahkan route upload
-app.route("/api/users", users); // Tambahkan route upload
-app.route("/api/locations", locationRoute); // Tambahkan route upload
-app.route("/api/locations-details", detailsLocationRoute); // Tambahkan route upload
-app.route("/api/project-codes", projectCodeRoute); // Tambahkan route upload
-app.route("/api/stats", statRoutes); // Tambahkan route upload
+
+// Protected API routes (authentication required)
+app.route("/api/assets",  assetRoutes);
+app.route("/api/upload",  uploadRoutes);
+app.route("/api/users",  users);
+app.route("/api/locations",  locationRoute);
+app.route("/api/locations-details",  detailsLocationRoute);
+app.route("/api/project-codes",  projectCodeRoute);
+app.route("/api/stats",  statRoutes);
 
 // Serve uploaded files statically
 app.use('/uploads/*', serveStatic({ root: './' }));
