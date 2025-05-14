@@ -32,6 +32,8 @@ import {
 import { ImageWithFallback, hasValidImages } from "@/components/utils/ImageUtils";
 import { Link } from "@/renderer/Link";
 import { motion } from "framer-motion";
+import InputSelect from "@/components/ui/input-select";
+import AuditForm from "@/components/audit/AuditForm";
 
 // Item component for displaying asset properties
 const DetailItem = ({ 
@@ -61,7 +63,7 @@ interface InspectionLog {
   id: string;
   date: string;
   inspector: string;
-  status: 'passed' | 'failed' | 'pending';
+  status: 'good' | 'broken' | 'pending' | 'x' | 'poor';
   notes: string;
   assetId?: string;
 }
@@ -74,12 +76,6 @@ export default function AssetDetailPage() {
   const [inspectionLogs, setInspectionLogs] = useState<InspectionLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
   const [showNewInspection, setShowNewInspection] = useState(false);
-  const [newInspection, setNewInspection] = useState<Partial<InspectionLog>>({
-    date: new Date().toISOString().split('T')[0],
-    status: 'pending',
-    notes: '',
-    inspector: 'Current User'
-  });
 
   // Fetch asset details
   useEffect(() => {
@@ -119,14 +115,23 @@ export default function AssetDetailPage() {
         // Transform audit data to match our InspectionLog interface
         console.log(`Fetched ${Array.isArray(data) ? data.length : 0} inspection logs for asset number: ${assetNumber}`);
         const formattedLogs: InspectionLog[] = Array.isArray(data) 
-          ? data.map(audit => ({
-              id: audit.id,
-              date: audit.auditDate || audit.createdAt,
-              inspector: audit.auditor || audit.createdBy || 'Unknown',
-              status: mapAuditStatus(audit.status || 'pending'),
-              notes: audit.notes || audit.description || '',
-              assetId: audit.assetId
-            }))
+          ? data.map(audit => {
+              // Get auditor name from auditUsers if available
+              let auditorName = 'Unknown';
+              if (audit.auditUsers && audit.auditUsers.length > 0 && audit.auditUsers[0].user) {
+                auditorName = audit.auditUsers[0].user.name || audit.auditUsers[0].user.email || 'Unknown';
+              }
+              
+              return {
+                id: audit.id,
+                date: audit.checkDate || audit.createdAt,
+                inspector: auditorName,
+                status: mapAuditStatus(audit.status || 'pending'),
+                notes: audit.remarks || '',
+                assetId: audit.assetId,
+                images: audit.images
+              };
+            })
           : [];
         
         setInspectionLogs(formattedLogs);
@@ -139,79 +144,18 @@ export default function AssetDetailPage() {
   };
 
   // Map audit status values to our standard status values
-  const mapAuditStatus = (auditStatus: string): 'passed' | 'failed' | 'pending' => {
+  const mapAuditStatus = (auditStatus: string): 'good' | 'broken' | 'pending' | 'x' | 'poor' => {
     const status = auditStatus.toLowerCase();
-    if (status === 'pass' || status === 'passed' || status === 'completed' || status === 'approved') {
-      return 'passed';
-    } else if (status === 'fail' || status === 'failed' || status === 'rejected') {
-      return 'failed';
+    if (status === 'pass' || status === 'passed' || status === 'completed' || status === 'approved' || status === 'good') {
+      return 'good';
+    } else if (status === 'fail' || status === 'failed' || status === 'rejected' || status === 'broken') {
+      return 'broken';
+    } else if (status === 'x') {
+      return 'x';
+    } else if (status === 'poor') {
+      return 'poor';
     }
     return 'pending';
-  };
-
-  // Handle saving new inspection
-  const handleSaveInspection = () => {
-    if (!asset?.id) return;
-
-    const newLog: InspectionLog = {
-      id: Date.now().toString(),
-      date: newInspection.date || new Date().toISOString().split('T')[0],
-      inspector: newInspection.inspector || 'Unknown',
-      status: newInspection.status as 'passed' | 'failed' | 'pending',
-      notes: newInspection.notes || '',
-      assetId: asset.id
-    };
-    
-    // Show loading state
-    setLogsLoading(true);
-    
-    // Post the new audit to the API using the correct endpoint
-    fetch('/api/asset-audit/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        assetNumber: asset.assetNo, // Use asset number instead of ID
-        auditDate: newLog.date,
-        auditor: newLog.inspector,
-        status: newLog.status,
-        notes: newLog.notes
-      }),
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to create audit log');
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Successfully created audit log:', data);
-        // If successful, add the newly created audit to the list
-        const createdAudit: InspectionLog = {
-          id: data.id || newLog.id,
-          date: data.auditDate || newLog.date,
-          inspector: data.auditor || newLog.inspector,
-          status: mapAuditStatus(data.status) || newLog.status,
-          notes: data.notes || newLog.notes,
-          assetId: data.assetId || asset.id
-        };
-        
-        setInspectionLogs([createdAudit, ...inspectionLogs]);
-        setShowNewInspection(false);
-        setNewInspection({
-          date: new Date().toISOString().split('T')[0],
-          status: 'pending',
-          notes: '',
-          inspector: 'Current User'
-        });
-        setLogsLoading(false);
-      })
-      .catch(error => {
-        console.error('Error creating audit log:', error);
-        alert('Failed to save inspection. Please try again.');
-        setLogsLoading(false);
-      });
   };
 
   const hasImages = asset && hasValidImages(asset.images);
@@ -489,93 +433,39 @@ export default function AssetDetailPage() {
                 </button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
-                  <input 
-                    type="date" 
-                    value={newInspection.date} 
-                    onChange={(e) => setNewInspection({...newInspection, date: e.target.value})}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Inspector</label>
-                  <input 
-                    type="text" 
-                    value={newInspection.inspector} 
-                    onChange={(e) => setNewInspection({...newInspection, inspector: e.target.value})}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                <div className="flex gap-4">
-                  <label className="inline-flex items-center">
-                    <input 
-                      type="radio" 
-                      name="status" 
-                      value="passed" 
-                      checked={newInspection.status === 'passed'}
-                      onChange={() => setNewInspection({...newInspection, status: 'passed'})}
-                      className="text-blue-600"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Passed</span>
-                  </label>
-                  <label className="inline-flex items-center">
-                    <input 
-                      type="radio" 
-                      name="status" 
-                      value="failed" 
-                      checked={newInspection.status === 'failed'}
-                      onChange={() => setNewInspection({...newInspection, status: 'failed'})}
-                      className="text-red-600"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Failed</span>
-                  </label>
-                  <label className="inline-flex items-center">
-                    <input 
-                      type="radio" 
-                      name="status" 
-                      value="pending" 
-                      checked={newInspection.status === 'pending'}
-                      onChange={() => setNewInspection({...newInspection, status: 'pending'})}
-                      className="text-yellow-600"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Pending</span>
-                  </label>
-                </div>
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-                <textarea 
-                  value={newInspection.notes} 
-                  onChange={(e) => setNewInspection({...newInspection, notes: e.target.value})}
-                  rows={3}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter inspection notes here..."
-                ></textarea>
-              </div>
-              
-              <div className="flex justify-end">
-                <button 
-                  onClick={() => setShowNewInspection(false)}
-                  className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-md mr-2 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={handleSaveInspection}
-                  disabled={logsLoading}
-                  className="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {logsLoading && <Loader2 size={14} className="animate-spin" />}
-                  Save Inspection
-                </button>
-              </div>
+              <AuditForm 
+                assetId={asset?.id}
+                onSubmit={async (formData) => {
+                 // setIsSubmitting(true);
+                  
+                  try {
+                    const res = await fetch("/api/asset-audit", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(formData),
+                    });
+                    
+                    if (!res.ok) {
+                      const errorData = await res.json();
+                      throw new Error(errorData.error || "Unknown error");
+                    }
+                    
+                    // Refresh logs
+                    fetchInspectionLogs(id);
+                    setShowNewInspection(false);
+                  } catch (error) {
+                    console.error("Error submitting audit:", error);
+                    throw error;
+                  } finally {
+                  //  setIsSubmitting(false);
+                  fetchInspectionLogs(id);
+                  }
+                }}
+                onCancel={() => setShowNewInspection(false)}
+                showAssetSelector={false}
+                isCompact={true}
+                submitButtonText="Save Inspection"
+              />
             </motion.div>
           )}
 
@@ -607,20 +497,49 @@ export default function AssetDetailPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span 
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              log.status === 'passed' 
+                              log.status === 'good' 
                                 ? 'bg-green-100 text-green-800' 
-                                : log.status === 'failed'
+                                : log.status === 'broken'
                                 ? 'bg-red-100 text-red-800'
-                                : 'bg-yellow-100 text-yellow-800'
+                                : log.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : log.status === 'x'
+                                ? 'bg-gray-100 text-gray-800'
+                                : log.status === 'poor'
+                                ? 'bg-orange-100 text-orange-800'
+                                : 'bg-gray-100 text-gray-800'
                             }`}
                           >
-                            {log.status === 'passed' && <CheckCircle size={12} className="mr-1" />}
-                            {log.status === 'failed' && <XCircle size={12} className="mr-1" />}
+                            {log.status === 'good' && <CheckCircle size={12} className="mr-1" />}
+                            {log.status === 'broken' && <XCircle size={12} className="mr-1" />}
                             {log.status === 'pending' && <AlertTriangle size={12} className="mr-1" />}
+                            {log.status === 'x' && <Hash size={12} className="mr-1" />}
+                            {log.status === 'poor' && <AlertTriangle size={12} className="mr-1" />}
                             {log.status.charAt(0).toUpperCase() + log.status.slice(1)}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-700">{log.notes}</td>
+                        <td className="px-6 py-4">
+                          {log.images && log.images.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {log.images.map((img, index) => (
+                                <a 
+                                  key={index} 
+                                  href={img} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="block w-10 h-10 rounded overflow-hidden border"
+                                >
+                                  <img 
+                                    src={img} 
+                                    alt={`Inspection image ${index + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </td>
                       </tr>
                     ))
                   ) : (
