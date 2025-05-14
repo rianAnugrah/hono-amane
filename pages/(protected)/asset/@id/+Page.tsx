@@ -22,7 +22,12 @@ import {
   Calendar as CalendarIcon,
   ArrowLeft,
   Loader2,
-  Download 
+  Download,
+  ClipboardCheck,
+  Plus,
+  PlusCircle,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { ImageWithFallback, hasValidImages } from "@/components/utils/ImageUtils";
 import { Link } from "@/renderer/Link";
@@ -51,12 +56,32 @@ const DetailItem = ({
   </div>
 );
 
+// Inspection log data interface
+interface InspectionLog {
+  id: string;
+  date: string;
+  inspector: string;
+  status: 'passed' | 'failed' | 'pending';
+  notes: string;
+  assetId?: string;
+}
+
 export default function AssetDetailPage() {
   const pageContext = usePageContext();
   const { id } = pageContext.routeParams;
   const [asset, setAsset] = useState<Asset | null>(null);
   const [loading, setLoading] = useState(true);
+  const [inspectionLogs, setInspectionLogs] = useState<InspectionLog[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [showNewInspection, setShowNewInspection] = useState(false);
+  const [newInspection, setNewInspection] = useState<Partial<InspectionLog>>({
+    date: new Date().toISOString().split('T')[0],
+    status: 'pending',
+    notes: '',
+    inspector: 'Current User'
+  });
 
+  // Fetch asset details
   useEffect(() => {
     setLoading(true);
     fetch(`/api/assets/by-asset-number/${id}`)
@@ -70,6 +95,124 @@ export default function AssetDetailPage() {
         setLoading(false);
       });
   }, [id]);
+
+  // Fetch audit logs once the page loads, using the asset number from the route
+  useEffect(() => {
+    if (id) {
+      fetchInspectionLogs(id);
+    }
+  }, [id]);
+
+  // Function to fetch inspection logs from the audit API
+  const fetchInspectionLogs = (assetNumber: string) => {
+    setLogsLoading(true);
+    // Use the assetNo (which is the route parameter) directly
+    fetch(`/api/asset-audit/by-asset-number/${assetNumber}`)
+      .then(res => {
+        console.log(`Fetching inspection logs for asset number: ${assetNumber}`);
+        if (!res.ok) {
+          throw new Error(`Error fetching audit logs: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        // Transform audit data to match our InspectionLog interface
+        console.log(`Fetched ${Array.isArray(data) ? data.length : 0} inspection logs for asset number: ${assetNumber}`);
+        const formattedLogs: InspectionLog[] = Array.isArray(data) 
+          ? data.map(audit => ({
+              id: audit.id,
+              date: audit.auditDate || audit.createdAt,
+              inspector: audit.auditor || audit.createdBy || 'Unknown',
+              status: mapAuditStatus(audit.status || 'pending'),
+              notes: audit.notes || audit.description || '',
+              assetId: audit.assetId
+            }))
+          : [];
+        
+        setInspectionLogs(formattedLogs);
+        setLogsLoading(false);
+      })
+      .catch(error => {
+        console.error("Error fetching audit logs:", error);
+        setLogsLoading(false);
+      });
+  };
+
+  // Map audit status values to our standard status values
+  const mapAuditStatus = (auditStatus: string): 'passed' | 'failed' | 'pending' => {
+    const status = auditStatus.toLowerCase();
+    if (status === 'pass' || status === 'passed' || status === 'completed' || status === 'approved') {
+      return 'passed';
+    } else if (status === 'fail' || status === 'failed' || status === 'rejected') {
+      return 'failed';
+    }
+    return 'pending';
+  };
+
+  // Handle saving new inspection
+  const handleSaveInspection = () => {
+    if (!asset?.id) return;
+
+    const newLog: InspectionLog = {
+      id: Date.now().toString(),
+      date: newInspection.date || new Date().toISOString().split('T')[0],
+      inspector: newInspection.inspector || 'Unknown',
+      status: newInspection.status as 'passed' | 'failed' | 'pending',
+      notes: newInspection.notes || '',
+      assetId: asset.id
+    };
+    
+    // Show loading state
+    setLogsLoading(true);
+    
+    // Post the new audit to the API using the correct endpoint
+    fetch('/api/asset-audit/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        assetNumber: asset.assetNo, // Use asset number instead of ID
+        auditDate: newLog.date,
+        auditor: newLog.inspector,
+        status: newLog.status,
+        notes: newLog.notes
+      }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to create audit log');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Successfully created audit log:', data);
+        // If successful, add the newly created audit to the list
+        const createdAudit: InspectionLog = {
+          id: data.id || newLog.id,
+          date: data.auditDate || newLog.date,
+          inspector: data.auditor || newLog.inspector,
+          status: mapAuditStatus(data.status) || newLog.status,
+          notes: data.notes || newLog.notes,
+          assetId: data.assetId || asset.id
+        };
+        
+        setInspectionLogs([createdAudit, ...inspectionLogs]);
+        setShowNewInspection(false);
+        setNewInspection({
+          date: new Date().toISOString().split('T')[0],
+          status: 'pending',
+          notes: '',
+          inspector: 'Current User'
+        });
+        setLogsLoading(false);
+      })
+      .catch(error => {
+        console.error('Error creating audit log:', error);
+        alert('Failed to save inspection. Please try again.');
+        setLogsLoading(false);
+      });
+  };
 
   const hasImages = asset && hasValidImages(asset.images);
 
@@ -313,6 +456,183 @@ export default function AssetDetailPage() {
                 />
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Inspection Log Section */}
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <ClipboardCheck size={20} className="text-gray-400" />
+              Inspection Log
+            </h2>
+            <button 
+              onClick={() => setShowNewInspection(true)}
+              className="inline-flex items-center gap-1 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+            >
+              <PlusCircle size={16} />
+              New Inspection
+            </button>
+          </div>
+
+          {/* New Inspection Form */}
+          {showNewInspection && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-lg"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-blue-800">New Inspection Entry</h3>
+                <button onClick={() => setShowNewInspection(false)} className="text-blue-600 p-1 hover:bg-blue-100 rounded-full">
+                  <XCircle size={16} />
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
+                  <input 
+                    type="date" 
+                    value={newInspection.date} 
+                    onChange={(e) => setNewInspection({...newInspection, date: e.target.value})}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Inspector</label>
+                  <input 
+                    type="text" 
+                    value={newInspection.inspector} 
+                    onChange={(e) => setNewInspection({...newInspection, inspector: e.target.value})}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                <div className="flex gap-4">
+                  <label className="inline-flex items-center">
+                    <input 
+                      type="radio" 
+                      name="status" 
+                      value="passed" 
+                      checked={newInspection.status === 'passed'}
+                      onChange={() => setNewInspection({...newInspection, status: 'passed'})}
+                      className="text-blue-600"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Passed</span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input 
+                      type="radio" 
+                      name="status" 
+                      value="failed" 
+                      checked={newInspection.status === 'failed'}
+                      onChange={() => setNewInspection({...newInspection, status: 'failed'})}
+                      className="text-red-600"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Failed</span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input 
+                      type="radio" 
+                      name="status" 
+                      value="pending" 
+                      checked={newInspection.status === 'pending'}
+                      onChange={() => setNewInspection({...newInspection, status: 'pending'})}
+                      className="text-yellow-600"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Pending</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
+                <textarea 
+                  value={newInspection.notes} 
+                  onChange={(e) => setNewInspection({...newInspection, notes: e.target.value})}
+                  rows={3}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter inspection notes here..."
+                ></textarea>
+              </div>
+              
+              <div className="flex justify-end">
+                <button 
+                  onClick={() => setShowNewInspection(false)}
+                  className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-md mr-2 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleSaveInspection}
+                  disabled={logsLoading}
+                  className="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {logsLoading && <Loader2 size={14} className="animate-spin" />}
+                  Save Inspection
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Inspection Log Table */}
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            {logsLoading && !showNewInspection ? (
+              <div className="py-10 text-center">
+                <Loader2 className="w-6 h-6 text-blue-500 animate-spin mx-auto mb-2" />
+                <p className="text-sm text-gray-500">Loading inspection logs...</p>
+              </div>
+            ) : (
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inspector</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {inspectionLogs.length > 0 ? (
+                    inspectionLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                          {new Date(log.date).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{log.inspector}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span 
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              log.status === 'passed' 
+                                ? 'bg-green-100 text-green-800' 
+                                : log.status === 'failed'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                          >
+                            {log.status === 'passed' && <CheckCircle size={12} className="mr-1" />}
+                            {log.status === 'failed' && <XCircle size={12} className="mr-1" />}
+                            {log.status === 'pending' && <AlertTriangle size={12} className="mr-1" />}
+                            {log.status.charAt(0).toUpperCase() + log.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-700">{log.notes}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">
+                        No inspection logs found for this asset.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>

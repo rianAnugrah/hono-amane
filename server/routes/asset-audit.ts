@@ -97,6 +97,39 @@ assetAuditRoute.get('/', async (c) => {
   }
 })
 
+
+// GET /api/asset-audit/by-asset-number/:assetNumber
+assetAuditRoute.get('/by-asset-number/:assetNumber', async (c) => {
+  const assetNumber = c.req.param('assetNumber')
+
+  try {
+    const audits = await prisma.assetAudit.findMany({
+      where: {
+        asset: {
+          assetNo: assetNumber,
+        },
+      },
+      orderBy: { checkDate: 'desc' },
+      include: {
+        asset: true,
+        location: true,
+        auditUsers: {
+          include: {
+            user: true
+          }
+        }
+      },
+    })
+
+    console.log(`Retrieved ${audits.length} audit records for asset number: ${assetNumber}`)
+    return c.json(audits)
+  } catch (err: any) {
+    console.error('Error fetching audits by asset number:', err)
+    return c.json({ error: 'Failed to fetch audit records by asset number', details: err.message }, 500)
+  }
+});
+
+
 // Get single audit by ID
 assetAuditRoute.get('/:id', async (c) => {
   const id = c.req.param('id')
