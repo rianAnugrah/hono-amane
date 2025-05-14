@@ -6,11 +6,11 @@ interface SelectFieldProps {
   name: string;
   label?: string;
   placeholder?: string;
-  value: string;
-  options: { value: string; label: string }[];
+  value: string | number | null;
+  options: { value: string | number; label: string }[];
   onChange: (e: any) => void;
   onBlur?: (e: any) => void;
-  validation?: "valid" | "invalid" | "empty" | undefined;
+  validation?: "valid" | "invalid" | "empty" | "untouched" | undefined;
   touched?: boolean;
   errorMessage?: string;
   icon?: React.ReactNode;
@@ -37,6 +37,7 @@ export const SelectField = ({
 }: SelectFieldProps) => {
   const isValid = validation === "valid";
   const isInvalid = validation === "invalid" || validation === "empty";
+  const isUntouched = validation === "untouched" || validation === undefined;
   
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,6 +47,7 @@ export const SelectField = ({
   
   const containerRef = useRef<HTMLDivElement>(null);
   const selectRef = useRef<HTMLSelectElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -62,6 +64,13 @@ export const SelectField = ({
     };
   }, [name, onBlur]);
 
+  // Focus search input when dropdown opens
+  useEffect(() => {
+    if (isOpen && searchable && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isOpen, searchable]);
+
   // Update selected option when value changes externally
   useEffect(() => {
     const matchingOption = options.find(option => option.value === value);
@@ -70,9 +79,10 @@ export const SelectField = ({
     }
   }, [value, options]);
 
-  const handleSelect = (option: { value: string; label: string }) => {
+  const handleSelect = (option: { value: string | number; label: string }) => {
     setSelectedOption(option);
     setIsOpen(false);
+    setSearchTerm(''); // Clear search term after selection
     
     // Create a synthetic event-like object
     const event = {
@@ -104,6 +114,23 @@ export const SelectField = ({
     ? selectedOption.label 
     : placeholder || "Select an option";
 
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Handle dropdown toggle
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+    if (!isOpen) {
+      // Reset search when opening dropdown
+      setSearchTerm('');
+    } else {
+      // Trigger blur validation when closing
+      onBlur && onBlur({ target: { name } });
+    }
+  };
+
   return (
     <motion.div 
       className="relative mb-4"
@@ -116,7 +143,7 @@ export const SelectField = ({
       <select 
         ref={selectRef}
         name={name}
-        value={value} 
+        value={value !== null ? String(value) : ''} 
         onChange={onChange}
         onBlur={onBlur}
         className="sr-only"
@@ -131,34 +158,32 @@ export const SelectField = ({
       
       {/* Custom select UI */}
       <div className="flex items-center relative flex-grow">
-
-       
-        <div className="relative w-full">
-          <div 
-            className={`w-full pl-4 pr-10 py-2 bg-white border rounded-lg focus:outline-none cursor-pointer flex items-center ${
-              isInvalid 
-                ? "border-red-500" 
-                : isValid 
-                  ? "border-green-500" 
-                  : "border-gray-300"
-            }`}
-            onClick={() => setIsOpen(!isOpen)}
+        <div 
+          className={`w-full pl-4 pr-10 py-2 bg-white border rounded-lg focus:outline-none cursor-pointer flex items-center ${
+            isInvalid 
+              ? "border-red-500" 
+              : isValid 
+                ? "border-green-500" 
+                : "border-gray-300"
+          }`}
+          onClick={toggleDropdown}
+        >
+          <span className={`block truncate ${selectedOption ? "text-gray-800" : "text-gray-400"}`}>
+            {displayText}
+          </span>
+        </div>
+        
+        {/* Custom dropdown arrow */}
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+          <motion.div
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
           >
-            <span className={`block truncate ${selectedOption ? "text-gray-800" : "text-gray-400"}`}>
-              {displayText}
-            </span>
-          </div>
-          
-          {/* Custom dropdown arrow */}
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <motion.div
-              animate={{ rotate: isOpen ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChevronDown size={18} className="text-gray-500" />
-            </motion.div>
-          </div>
-          {(label || placeholder) &&         
+            <ChevronDown size={18} className="text-gray-500" />
+          </motion.div>
+        </div>
+        
+        {(label || placeholder) && (        
           <label
             className={`absolute pointer-events-none items-center rounded-full h-6 flex gap-0 transition-all duration-200 ${
               true
@@ -172,38 +197,36 @@ export const SelectField = ({
               </div>
             )}
             {label || placeholder}
-          </label>}
-          
-          {touched && (
-            <div className="absolute right-8 top-1/2 -translate-y-1/2">
-              <AnimatePresence>
-                {isValid && (
-                  <motion.span 
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
-                    className="text-green-500 flex items-center"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                  </motion.span>
-                )}
-                {isInvalid && (
-                  <motion.span 
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
-                    className="text-red-500 flex items-center"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
+          </label>
+        )}
+        
+        <div className="absolute right-8 top-1/2 -translate-y-1/2">
+          <AnimatePresence>
+            {isValid && (
+              <motion.span 
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                className="text-green-500 flex items-center"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </motion.span>
+            )}
+            {isInvalid && (
+              <motion.span 
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                className="text-red-500 flex items-center"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
       </div>
       
@@ -221,11 +244,12 @@ export const SelectField = ({
               {searchable && (
                 <div className="sticky top-0 w-full bg-white p-2 border-b border-gray-100">
                   <input
+                    ref={searchInputRef}
                     type="text"
                     className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                     placeholder={searchPlaceholder}
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={handleSearchChange}
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>

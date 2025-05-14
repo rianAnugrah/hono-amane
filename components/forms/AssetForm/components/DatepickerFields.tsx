@@ -9,7 +9,7 @@ interface DatePickerProps {
   value: string;
   onChange: (e: any) => void;
   onBlur?: (e: any) => void;
-  validation?: "valid" | "invalid" | "empty" | undefined;
+  validation?: "valid" | "invalid" | "empty" | "untouched" | undefined;
   touched?: boolean;
   errorMessage?: string;
   icon?: React.ReactNode;

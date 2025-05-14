@@ -11,13 +11,15 @@ export default function AssetList({
   handleEdit,
   handleDelete,
   handleCheckboxChange,
-  currentView
+  currentView,
+  toggleSelectAll
 }: {
   assets: Asset[];
   currentView: string;
   handleEdit: (asset: Asset) => void;
   handleDelete: (id: string) => void;
   handleCheckboxChange: (asset: Asset) => void;
+  toggleSelectAll: () => void;
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const itemRefs = useRef<Map<string, HTMLElement>>(new Map());

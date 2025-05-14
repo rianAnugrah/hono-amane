@@ -33,6 +33,7 @@ interface Asset {
   projectCode_id?: number | null;
   locationDesc_id?: number | null;
   detailsLocation_id?: number | null;
+  images?: string[];  // Making this optional to avoid TypeScript errors
 
   // Relations (optional for when they are included)
   projectCode?: any;
@@ -259,34 +260,53 @@ assetRoutes.get("/by-asset-number/:id", async (c) => {
 // CREATE asset
 assetRoutes.post("/", async (c) => {
   try {
-    const body: Partial<Asset> = await c.req.json();
+    const body = await c.req.json();
 
-    const asset = await prisma.asset.create({
-      data: {
-        version: 1,
-        isLatest: true,
-        assetNo: body.assetNo!,
-        lineNo: body.lineNo!,
-        assetName: body.assetName!,
-        remark: body.remark ?? null,
-        condition: body.condition!,
-        pisDate: new Date(body.pisDate!),
-        transDate: new Date(body.transDate!),
-        categoryCode: body.categoryCode!,
-        afeNo: body.afeNo ?? null,
-        adjustedDepre: parseFloat(body.adjustedDepre as any),
-        poNo: body.poNo ?? null,
-        acqValueIdr: parseFloat(body.acqValueIdr as any),
-        acqValue: parseFloat(body.acqValue as any),
-        accumDepre: parseFloat(body.accumDepre as any),
-        ytdDepre: parseFloat(body.ytdDepre as any),
-        bookValue: parseFloat(body.bookValue as any),
-        taggingYear: body.taggingYear ?? null,
-        projectCode_id: body.projectCode_id ?? null,
-        locationDesc_id: body.locationDesc_id ?? null,
-        detailsLocation_id: body.detailsLocation_id ?? null,
-      },
-    });
+    // Prepare the data for Prisma - using any to bypass TypeScript checks
+    const createData: any = {
+      version: 1,
+      isLatest: true,
+      assetNo: body.assetNo,
+      lineNo: body.lineNo,
+      assetName: body.assetName,
+      remark: body.remark ?? null,
+      condition: body.condition,
+      pisDate: new Date(body.pisDate),
+      transDate: new Date(body.transDate),
+      categoryCode: body.categoryCode,
+      afeNo: body.afeNo ?? null,
+      adjustedDepre: parseFloat(body.adjustedDepre as any),
+      poNo: body.poNo ?? null,
+      acqValueIdr: parseFloat(body.acqValueIdr as any),
+      acqValue: parseFloat(body.acqValue as any),
+      accumDepre: parseFloat(body.accumDepre as any),
+      ytdDepre: parseFloat(body.ytdDepre as any),
+      bookValue: parseFloat(body.bookValue as any),
+      taggingYear: body.taggingYear ?? null,
+      images: body.images || [], // Set images with a default empty array
+    };
+    
+    // Add relation connections
+    if (body.projectCode_id) {
+      createData.projectCode = {
+        connect: { id: Number(body.projectCode_id) }
+      };
+    }
+    
+    if (body.locationDesc_id) {
+      createData.locationDesc = {
+        connect: { id: Number(body.locationDesc_id) }
+      };
+    }
+    
+    if (body.detailsLocation_id) {
+      createData.detailsLocation = {
+        connect: { id: Number(body.detailsLocation_id) }
+      };
+    }
+
+    // Send to Prisma
+    const asset = await prisma.asset.create({ data: createData });
 
     return c.json(asset, 201);
   } catch (error: any) {
@@ -320,7 +340,7 @@ assetRoutes.post("/", async (c) => {
 assetRoutes.put("/:id", async (c) => {
   try {
     const id = c.req.param("id");
-    const body: Partial<Asset> = await c.req.json();
+    const body = await c.req.json();
 
     const old = await prisma.asset.findUnique({ where: { id } });
     if (!old || old.deletedAt || !old.isLatest) {
@@ -332,45 +352,63 @@ assetRoutes.put("/:id", async (c) => {
       where: { id: old.id },
       data: { isLatest: false },
     });
+    
+    // Prepare the data for Prisma - using any to bypass TypeScript checks
+    const createData: any = {
+      version: old.version + 1,
+      isLatest: true,
+      parentId: old.parentId || old.id,
+      assetNo: body.assetNo ?? old.assetNo,
+      lineNo: body.lineNo ?? old.lineNo,
+      assetName: body.assetName ?? old.assetName,
+      remark: body.remark ?? old.remark,
+      condition: body.condition ?? old.condition,
+      pisDate: body.pisDate ? new Date(body.pisDate) : old.pisDate,
+      transDate: body.transDate ? new Date(body.transDate) : old.transDate,
+      categoryCode: body.categoryCode ?? old.categoryCode,
+      afeNo: body.afeNo ?? old.afeNo,
+      adjustedDepre: body.adjustedDepre ?? old.adjustedDepre,
+      poNo: body.poNo ?? old.poNo,
+      acqValueIdr: body.acqValueIdr ?? old.acqValueIdr,
+      acqValue: body.acqValue ?? old.acqValue,
+      accumDepre: body.accumDepre ?? old.accumDepre,
+      ytdDepre: body.ytdDepre ?? old.ytdDepre,
+      bookValue: body.bookValue ?? old.bookValue,
+      taggingYear: body.taggingYear ?? old.taggingYear,
+      images: Array.isArray(body.images) ? body.images : (old as any).images || [], // Default to old images or empty array
+    };
+    
+    // Add relation connections, keeping old connections if not changed
+    if (body.projectCode_id || old.projectCode_id) {
+      createData.projectCode = {
+        connect: { id: Number(body.projectCode_id ?? old.projectCode_id) }
+      };
+    }
+    
+    if (body.locationDesc_id || old.locationDesc_id) {
+      createData.locationDesc = {
+        connect: { id: Number(body.locationDesc_id ?? old.locationDesc_id) }
+      };
+    }
+    
+    if (body.detailsLocation_id || old.detailsLocation_id) {
+      createData.detailsLocation = {
+        connect: { id: Number(body.detailsLocation_id ?? old.detailsLocation_id) }
+      };
+    }
 
-    // Create new version
-    const newAsset = await prisma.asset.create({
-      data: {
-        version: old.version + 1,
-        isLatest: true,
-        parentId: old.parentId || old.id,
-        assetNo: body.assetNo ?? old.assetNo,
-        lineNo: body.lineNo ?? old.lineNo,
-        assetName: body.assetName ?? old.assetName,
-        remark: body.remark ?? old.remark,
-        condition: body.condition ?? old.condition,
-        pisDate: body.pisDate ? new Date(body.pisDate) : old.pisDate,
-        transDate: body.transDate ? new Date(body.transDate) : old.transDate,
-        categoryCode: body.categoryCode ?? old.categoryCode,
-        afeNo: body.afeNo ?? old.afeNo,
-        adjustedDepre: body.adjustedDepre ?? old.adjustedDepre,
-        poNo: body.poNo ?? old.poNo,
-        acqValueIdr: body.acqValueIdr ?? old.acqValueIdr,
-        acqValue: body.acqValue ?? old.acqValue,
-        accumDepre: body.accumDepre ?? old.accumDepre,
-        ytdDepre: body.ytdDepre ?? old.ytdDepre,
-        bookValue: body.bookValue ?? old.bookValue,
-        taggingYear: body.taggingYear ?? old.taggingYear,
-        projectCode_id: body.projectCode_id ?? old.projectCode_id,
-        locationDesc_id: body.locationDesc_id ?? old.locationDesc_id,
-        detailsLocation_id: body.detailsLocation_id ?? old.detailsLocation_id,
-      },
-    });
+    // Send to Prisma
+    const newAsset = await prisma.asset.create({ data: createData });
 
     return c.json(newAsset);
   } catch (error: any) {
-    console.error("Error update asset:", error);
+    console.error("Error updating asset:", error);
 
     const isPrismaError = error.code && error.meta;
 
     return c.json(
       {
-        error: "Failed to create asset",
+        error: "Failed to update asset",
         message: error.message,
         ...(isPrismaError && {
           prisma: {

@@ -10,8 +10,20 @@ import { NavigationButtons } from "./components/NavigationButtons";
 import { FormSection } from "./components/FormSection";
 import { SelectField } from "./components/SelectField";
 import { DatePickerFields } from "./components/DatepickerFields";
+import { InputUpload } from "@/components/ui/input-upload";
 import axios from "axios";
 import { X } from "lucide-react";
+
+// Define interfaces for location and project code data
+interface LocationOption {
+  id: number;
+  description: string;
+}
+
+interface ProjectCode {
+  id: number;
+  code: string;
+}
 
 interface AssetFormProps {
   editingId: string | null;
@@ -30,8 +42,8 @@ export default function AssetForm({
 }: AssetFormProps) {
   const [activeSection, setActiveSection] = useState("basic");
   const [direction, setDirection] = useState(0);
-  const [locationOptions, setLocationOptions] = useState([]);
-  const [projectCodes, setProjectCodes] = useState([]);
+  const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
+  const [projectCodes, setProjectCodes] = useState<ProjectCode[]>([]);
 
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -39,7 +51,7 @@ export default function AssetForm({
   const { touchedFields, validation, sectionStatus, handleBlur, isFormValid, validateAllFields } =
     useFormValidation(form);
 
-  const sections = ["basic", "location", "financial", "depreciation", "dates"];
+  const sections = ["basic", "location", "financial", "depreciation", "dates", "images"];
 
   const navigateSection = (next: boolean) => {
     const currentIndex = sections.indexOf(activeSection);
@@ -135,7 +147,7 @@ export default function AssetForm({
   }, [editingId, validateAllFields]);
 
   // Function to display object as formatted JSON
-  const formatObject = (obj) => {
+  const formatObject = (obj: any) => {
     return JSON.stringify(obj, null, 2);
   };
 
@@ -263,6 +275,8 @@ export default function AssetForm({
                     value: loc.id,
                   })),
                 ]}
+                searchable={true}
+                searchPlaceholder="Search locations..."
                 validation={validation.locationDesc_id}
                 touched={touchedFields.has("locationDesc_id")}
                 errorMessage={getErrorMessage(
@@ -395,7 +409,6 @@ export default function AssetForm({
                 name="pisDate"
                 label="PIS Date"
                 placeholder="YYYY-MM-DD"
-                type="date"
                 value={form.pisDate}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -407,7 +420,6 @@ export default function AssetForm({
                 name="transDate"
                 label="Transaction Date"
                 placeholder="YYYY-MM-DD"
-                type="date"
                 value={form.transDate}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -418,6 +430,35 @@ export default function AssetForm({
                   validation.transDate
                 )}
               />
+            </FormSection>
+          )}
+
+          {activeSection === "images" && (
+            <FormSection direction={direction}>
+              <div className="bg-gray-50 rounded-xl p-3 relative">
+                <label className="block text-sm text-gray-500 mb-2">Asset Images</label>
+                <div className="mt-1">
+                  <InputUpload
+                    useCamera={true} 
+                    value={form.images || []}
+                    onChange={(newImages) => {
+                      if (handleChange && typeof handleChange === 'function') {
+                        // Create a synthetic event to match the handler's expected signature
+                        const syntheticEvent = {
+                          target: {
+                            name: 'images',
+                            value: newImages
+                          }
+                        } as unknown as React.ChangeEvent<HTMLInputElement>;
+                        handleChange(syntheticEvent);
+                      }
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Upload images of the asset for documentation purposes. You can use your camera or upload existing files.
+                </p>
+              </div>
             </FormSection>
           )}
         </AnimatePresence>

@@ -1,12 +1,15 @@
 export interface Asset {
   id: string;
-  projectCode: AssetProjectCode;
+  projectCode: AssetProjectCode | null;
+  projectCode_id?: number | null;
   assetNo: string;
   lineNo: string;
   assetName: string;
   remark?: string | null;
-  locationDesc: string;
-  detailsLocation?: string | null;
+  locationDesc: LocationDesc | null;
+  locationDesc_id?: number | null;
+  detailsLocation?: DetailsLocation | null;
+  detailsLocation_id?: number | null;
   condition: string;
   pisDate: string;
   transDate: string;
@@ -23,10 +26,20 @@ export interface Asset {
   version: number;
   isLatest: boolean;
   deletedAt?: string | null;
+  images?: string[];
 }
 
-
 export interface AssetProjectCode {
-  id : string;
-  code : string;
+  id: number;
+  code: string;
+}
+
+export interface LocationDesc {
+  id: number;
+  description: string;
+}
+
+export interface DetailsLocation {
+  id: number;
+  description: string;
 }

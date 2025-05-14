@@ -5,13 +5,14 @@ export type ValidationStatus = "empty" | "invalid" | "valid" | "untouched";
 
 // Interface for form values with proper typing
 export interface AssetFormValues {
-  [key: string]: string | number | null;
-  projectCode: string;
+  [key: string]: string | number | null | string[];
+  projectCode_id: number | null;
   assetNo: string;
   lineNo: string;
   assetName: string;
   categoryCode: string;
-  locationDesc: string;
+  locationDesc_id: number | null;
+  detailsLocation_id: number | null;
   condition: string;
   acqValue: number | null;
   acqValueIdr: number | null;
@@ -21,6 +22,7 @@ export interface AssetFormValues {
   ytdDepre: number | null;
   pisDate: string;
   transDate: string;
+  images: string[];
 }
 
 // Interface for validation state
@@ -38,6 +40,7 @@ export interface SectionStatusState {
   financial: SectionStatus;
   depreciation: SectionStatus;
   dates: SectionStatus;
+  images: SectionStatus;
 }
 
 // Props for the form field component
@@ -86,4 +89,14 @@ export interface NavigationButtonsProps {
 export interface FormSectionProps {
   children: ReactNode;
   direction: number;
+}
+
+export interface FormSectionStatus {
+  [key: string]: "incomplete" | "complete" | "error";
+  basic: "incomplete" | "complete" | "error";
+  location: "incomplete" | "complete" | "error";
+  financial: "incomplete" | "complete" | "error";
+  depreciation: "incomplete" | "complete" | "error";
+  dates: "incomplete" | "complete" | "error";
+  images: "incomplete" | "complete" | "error";
 }

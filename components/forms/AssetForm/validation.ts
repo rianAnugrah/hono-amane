@@ -1,16 +1,30 @@
 import { ValidationStatus, AssetFormValues } from './types';
 
 // Validation rules
-export const validateField = (name: string, value: string | number | null): ValidationStatus => {
+export const validateField = (name: string, value: string | number | null | string[]): ValidationStatus => {
   // Check for empty or null values first
-  if (value === null || value === "" || value === undefined) return "empty";
+  if (value === null || value === undefined) return "empty";
+
+  // Handle array type for images field
+  if (name === "images" && Array.isArray(value)) {
+    return "valid"; // Images are optional, so an array (even empty) is valid
+  }
   
-  // Convert value to string for length checks
+  // Handle empty string
+  if (value === "") return "empty";
+  
+  // Special handling for ID fields
+  if ((name === "locationDesc_id" || name === "projectCode_id" || name === "detailsLocation_id") && 
+      (typeof value === 'number' || (!isNaN(Number(value)) && String(value).trim() !== ""))) {
+    return "valid"; // IDs are valid as numbers or numeric strings
+  }
+  
+  // Convert value to string for length checks (for non-array values)
   const strValue = String(value).trim();
   if (strValue === "") return "empty";
   
   switch (name) {
-    case "projectCode":
+    case "projectCode_id":
     case "assetNo":
     case "lineNo":
     case "categoryCode":
@@ -18,7 +32,6 @@ export const validateField = (name: string, value: string | number | null): Vali
       return /^[a-zA-Z0-9-]+$/.test(strValue) ? "valid" : "invalid";
     
     case "assetName":
-    case "locationDesc":
     case "condition":
       // Required and should be at least 3 characters
       return strValue.length >= 3 ? "valid" : "invalid";
@@ -55,15 +68,18 @@ export const getErrorMessage = (name: string, status: ValidationStatus): string 
   if (status === "empty") return "This field is required";
   if (status !== "invalid") return "";
   
+  // Special handling for ID fields
+  if (name === "locationDesc_id" || name === "projectCode_id" || name === "detailsLocation_id") {
+    return "Please select a valid option";
+  }
+  
   switch (name) {
-    case "projectCode":
     case "assetNo":
     case "lineNo":
     case "categoryCode":
       return "Only alphanumeric characters and hyphens allowed";
     
     case "assetName":
-    case "locationDesc":
     case "condition":
       return "Minimum 3 characters required";
     

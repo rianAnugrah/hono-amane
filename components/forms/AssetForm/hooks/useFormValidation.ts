@@ -20,6 +20,7 @@ export const useFormValidation = (form: AssetFormValues) => {
     ytdDepre: "untouched",
     pisDate: "untouched",
     transDate: "untouched",
+    images: "valid", // Images are optional, so they're always valid
   });
 
   const [sectionStatus, setSectionStatus] = useState<SectionStatusState>({
@@ -28,6 +29,7 @@ export const useFormValidation = (form: AssetFormValues) => {
     financial: "incomplete",
     depreciation: "incomplete",
     dates: "incomplete",
+    images: "complete", // Images are optional, so the section is always complete
   });
 
   // Handle field blur
@@ -58,7 +60,8 @@ export const useFormValidation = (form: AssetFormValues) => {
       location: ["categoryCode", "locationDesc_id", "condition"],
       financial: ["acqValue", "acqValueIdr", "bookValue"],
       depreciation: ["accumDepre", "adjustedDepre", "ytdDepre"],
-      dates: ["pisDate", "transDate"]
+      dates: ["pisDate", "transDate"],
+      images: ["images"]
     };
 
     const newSectionStatus = Object.entries(sections).reduce((acc, [section, fields]) => {
@@ -84,14 +87,14 @@ export const useFormValidation = (form: AssetFormValues) => {
   // Validate all fields for edit mode
   const validateAllFields = () => {
     // Mark all fields as touched
-    const allFieldNames = Object.keys(form) as Array<keyof AssetFormValues>;
-    const allTouchedFields = new Set(allFieldNames);
+    const allFieldNames = Object.keys(form);
+    const allTouchedFields = new Set<string>(allFieldNames);
     setTouchedFields(allTouchedFields);
     
     // Validate all fields
     const newValidation = { ...validation };
     allFieldNames.forEach(fieldName => {
-      newValidation[fieldName] = validateField(fieldName, form[fieldName]);
+      newValidation[fieldName] = validateField(fieldName, form[fieldName as keyof AssetFormValues]);
     });
     
     // Update validation state

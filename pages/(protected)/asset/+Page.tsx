@@ -8,12 +8,31 @@ import AssetToolbar from "./_shared/asset-toolbar";
 import AssetPagination from "./_shared/asset-pagination";
 import AssetList from "./_shared/asset-list";
 import AssetForm from "@/components/forms/AssetForm";
+import { AssetFormValues } from "@/components/forms/AssetForm/types";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
 import { useUserStore } from "@/stores/store-user-login";
 
 const AssetCrudPage = () => {
   // Form and edit state
-  const [form, setForm] = useState<Partial<Asset>>({});
+  const [form, setForm] = useState<AssetFormValues>({
+    assetNo: "",
+    lineNo: "",
+    assetName: "",
+    projectCode_id: null,
+    locationDesc_id: null,
+    detailsLocation_id: null,
+    condition: "",
+    acqValue: null,
+    acqValueIdr: null,
+    bookValue: null,
+    accumDepre: null,
+    adjustedDepre: null,
+    ytdDepre: null,
+    pisDate: "",
+    transDate: "",
+    categoryCode: "",
+    images: []
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState<boolean>(false);
   const { location } = useUserStore();
@@ -65,7 +84,14 @@ const AssetCrudPage = () => {
 
   // Form handlers
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    // Handle array values (like images)
+    if (name === 'images') {
+      setForm(prev => ({ ...prev, [name]: Array.isArray(value) ? value : [] }));
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -75,7 +101,25 @@ const AssetCrudPage = () => {
       } else {
         await axios.post("/api/assets", form);
       }
-      setForm({});
+      setForm({
+        assetNo: "",
+        lineNo: "",
+        assetName: "",
+        projectCode_id: null,
+        locationDesc_id: null,
+        detailsLocation_id: null,
+        condition: "",
+        acqValue: null,
+        acqValueIdr: null,
+        bookValue: null,
+        accumDepre: null,
+        adjustedDepre: null,
+        ytdDepre: null,
+        pisDate: "",
+        transDate: "",
+        categoryCode: "",
+        images: []
+      });
       setEditingId(null);
       setShowForm(false);
       fetchAssets();
@@ -85,7 +129,28 @@ const AssetCrudPage = () => {
   };
 
   const handleEdit = (asset: Asset) => {
-    setForm(asset);
+    // Convert the Asset object to the expected AssetFormValues structure
+    const formValues: AssetFormValues = {
+      assetNo: asset.assetNo || "",
+      lineNo: asset.lineNo || "",
+      assetName: asset.assetName || "",
+      projectCode_id: asset.projectCode_id || null,
+      locationDesc_id: asset.locationDesc_id || null,
+      detailsLocation_id: asset.detailsLocation_id || null,
+      condition: asset.condition || "",
+      acqValue: asset.acqValue || null,
+      acqValueIdr: asset.acqValueIdr || null,
+      bookValue: asset.bookValue || null,
+      accumDepre: asset.accumDepre || null,
+      adjustedDepre: asset.adjustedDepre || null,
+      ytdDepre: asset.ytdDepre || null,
+      pisDate: asset.pisDate || "",
+      transDate: asset.transDate || "",
+      categoryCode: asset.categoryCode || "",
+      images: asset.images || []
+    };
+    
+    setForm(formValues);
     setEditingId(asset.id);
     setShowForm(true);
   };
@@ -131,7 +196,25 @@ const AssetCrudPage = () => {
 
   // Reset form
   const handleCancel = () => {
-    setForm({});
+    setForm({
+      assetNo: "",
+      lineNo: "",
+      assetName: "",
+      projectCode_id: null,
+      locationDesc_id: null,
+      detailsLocation_id: null,
+      condition: "",
+      acqValue: null,
+      acqValueIdr: null,
+      bookValue: null,
+      accumDepre: null,
+      adjustedDepre: null,
+      ytdDepre: null,
+      pisDate: "",
+      transDate: "",
+      categoryCode: "",
+      images: []
+    });
     setEditingId(null);
     setShowForm(false);
   };
@@ -152,7 +235,7 @@ const AssetCrudPage = () => {
     }
   };
 
-  const toggleSelectAll = () => {
+  const toggleSelectAll = (e?: React.ChangeEvent<HTMLInputElement>) => {
     const allSelected = assets.every((asset) =>
       selectedAssets.some((a) => a.id === asset.id)
     );
@@ -195,7 +278,7 @@ const AssetCrudPage = () => {
         setShowForm={setShowForm}
         showForm={showForm}
         currentView={currentView}
-        setCurrentView={setCurrentView}
+        setCurrentView={(view) => setCurrentView(view)}
         search={search}
         handleSearchChange={handleSearchChange}
         condition={condition}

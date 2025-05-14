@@ -49,7 +49,7 @@ export default function AssetToolbar({
   handleSortOrderChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   toggleSelectAll: (e: React.ChangeEvent<HTMLInputElement>) => void;
   currentView: "table" | "card" | "compact";
-  setCurrentView: () => void;
+  setCurrentView: (view: "table" | "card" | "compact") => void;
   allSelected: any;
 }) {
   const [showToolbar, setShowToolbar] = useState<boolean>(false);

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { InputUpload } from "@/components/ui/input-upload";
 
 // Define validation types
 type ValidationStatus = "empty" | "invalid" | "valid" | "untouched";
 
 // Interface for form values with proper typing
 interface AssetFormValues {
-  [key: string]: string | number | null;
+  [key: string]: string | number | null | string[];
   projectCode: string;
   assetNo: string;
   lineNo: string;
@@ -22,6 +23,7 @@ interface AssetFormValues {
   ytdDepre: number | null;
   pisDate: string;
   transDate: string;
+  images: string[];
 }
 
 // Interface for validation state
@@ -66,6 +68,7 @@ export default function AssetForm({
     ytdDepre: "untouched",
     pisDate: "untouched",
     transDate: "untouched",
+    images: "valid", // Images are optional, so they're always valid
   });
 
   // Track section completion status
@@ -75,14 +78,26 @@ export default function AssetForm({
     financial: "incomplete" as "incomplete" | "complete" | "error",
     depreciation: "incomplete" as "incomplete" | "complete" | "error",
     dates: "incomplete" as "incomplete" | "complete" | "error",
+    images: "complete" as "incomplete" | "complete" | "error", // Images are optional
   });
 
   // Validation rules
-  const validateField = (name: string, value: string | number | null): ValidationStatus => {
+  const validateField = (name: string, value: string | number | null | string[]): ValidationStatus => {
     // Check for empty or null values first
     if (value === null || value === "" || value === undefined) return "empty";
     
-    // Convert value to string for length checks
+    // Handle array type for images field
+    if (name === "images" && Array.isArray(value)) {
+      return "valid"; // Images are optional, so an array (even empty) is valid
+    }
+    
+    // Special handling for ID fields
+    if ((name === "locationDesc_id" || name === "projectCode_id" || name === "detailsLocation_id") && 
+        (typeof value === 'number' || (!isNaN(Number(value)) && String(value).trim() !== ""))) {
+      return "valid"; // IDs are valid as numbers or numeric strings
+    }
+    
+    // Convert value to string for length checks (for non-array values)
     const strValue = String(value).trim();
     if (strValue === "") return "empty";
     
@@ -131,6 +146,11 @@ export default function AssetForm({
   const getErrorMessage = (name: string, status: ValidationStatus): string => {
     if (status === "empty") return "This field is required";
     if (status !== "invalid") return "";
+    
+    // Special handling for ID fields
+    if (name === "locationDesc_id" || name === "projectCode_id" || name === "detailsLocation_id") {
+      return "Please select a valid option";
+    }
     
     switch (name) {
       case "projectCode":
@@ -208,7 +228,8 @@ export default function AssetForm({
       location: ["categoryCode", "locationDesc", "condition"],
       financial: ["acqValue", "acqValueIdr", "bookValue"],
       depreciation: ["accumDepre", "adjustedDepre", "ytdDepre"],
-      dates: ["pisDate", "transDate"]
+      dates: ["pisDate", "transDate"],
+      images: ["images"]
     };
 
     const newSectionStatus = Object.entries(sections).reduce((acc, [section, fields]) => {
@@ -228,7 +249,7 @@ export default function AssetForm({
   }, [validation, touchedFields]);
 
   // Helper function to render a form field with validation
-  const renderField = (name: keyof AssetFormValues, label: string, placeholder: string, type: string = "text") => {
+  const renderField = (name: string, label: string, placeholder: string, type: string = "text") => {
     const status = touchedFields.has(name) ? validation[name] : "untouched";
     const isValid = status === "valid";
     const isInvalid = status === "invalid" || status === "empty";
@@ -285,7 +306,7 @@ export default function AssetForm({
                 ? "border-green-500" 
                 : "border-gray-300"
           }`}
-          value={form[name] ?? ""}
+          value={form[name as keyof AssetFormValues] ?? ""}
           onChange={handleChange}
           onBlur={handleBlur}
         />
@@ -342,7 +363,7 @@ export default function AssetForm({
     return (
       <motion.button
         onClick={() => {
-          const sections = ["basic", "location", "financial", "depreciation", "dates"];
+          const sections = ["basic", "location", "financial", "depreciation", "dates", "images"];
           const currentIndex = sections.indexOf(activeSection);
           const newIndex = sections.indexOf(id);
           setDirection(newIndex > currentIndex ? 1 : -1);
@@ -386,7 +407,7 @@ export default function AssetForm({
 
   // Section navigation
   const navigateSection = (next: boolean) => {
-    const sections = ["basic", "location", "financial", "depreciation", "dates"];
+    const sections = ["basic", "location", "financial", "depreciation", "dates", "images"];
     const currentIndex = sections.indexOf(activeSection);
     const newIndex = next ? currentIndex + 1 : currentIndex - 1;
     
@@ -437,6 +458,7 @@ export default function AssetForm({
         {renderTab("financial", "Values")}
         {renderTab("depreciation", "Depreciation")}
         {renderTab("dates", "Dates")}
+        {renderTab("images", "Images")}
       </motion.div>
       
       {/* Form Sections */}
@@ -499,6 +521,41 @@ export default function AssetForm({
                 {renderField("transDate", "Transaction Date", "YYYY-MM-DD", "date")}
               </div>
             )}
+            
+            {/* Images Section */}
+            {activeSection === "images" && (
+              <div className="space-y-4">
+                <motion.div
+                  className="bg-gray-50 rounded-xl p-3 relative"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <label className="block text-sm text-gray-500 mb-2">Asset Images</label>
+                  <div className="mt-1">
+                    <InputUpload
+                      useCamera={true} 
+                      value={form.images}
+                      onChange={(newImages) => {
+                        if (handleChange && typeof handleChange === 'function') {
+                          // Create a synthetic event to match the handler's expected signature
+                          const syntheticEvent = {
+                            target: {
+                              name: 'images',
+                              value: newImages
+                            }
+                          } as unknown as React.ChangeEvent<HTMLInputElement>;
+                          handleChange(syntheticEvent);
+                        }
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Upload images of the asset for documentation purposes. You can use your camera or upload existing files.
+                  </p>
+                </motion.div>
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -511,13 +568,13 @@ export default function AssetForm({
         transition={{ delay: 0.4 }}
       >
         <div className="flex items-center space-x-1">
-          {["basic", "location", "financial", "depreciation", "dates"].map((section, index) => (
+          {["basic", "location", "financial", "depreciation", "dates", "images"].map((section, index) => (
             <div key={section} className="flex items-center">
               <motion.div 
                 className={`w-3 h-3 rounded-full cursor-pointer ${getProgressColor(section)}`}
                 whileHover={{ scale: 1.2 }}
                 onClick={() => {
-                  const sections = ["basic", "location", "financial", "depreciation", "dates"];
+                  const sections = ["basic", "location", "financial", "depreciation", "dates", "images"];
                   const currentIndex = sections.indexOf(activeSection);
                   const newIndex = sections.indexOf(section);
                   setDirection(newIndex > currentIndex ? 1 : -1);
@@ -526,7 +583,7 @@ export default function AssetForm({
                 animate={section === activeSection ? { scale: [1, 1.2, 1] } : {}}
                 transition={{ duration: 0.5 }}
               />
-              {index < 4 && (
+              {index < 5 && (
                 <motion.div 
                   className={`w-8 h-0.5 ${
                     sectionStatus[section as keyof typeof sectionStatus] === "complete" 
@@ -558,7 +615,7 @@ export default function AssetForm({
             </motion.button>
           )}
           
-          {activeSection !== "dates" && (
+          {activeSection !== "images" && (
             <motion.button
               onClick={() => navigateSection(true)}
               className="flex-1 bg-gray-200 text-gray-700 px-4 py-3 rounded-xl font-medium active:bg-gray-300"
@@ -570,7 +627,7 @@ export default function AssetForm({
         </div>
         
         <div className="flex space-x-3 flex-1">
-          {activeSection === "dates" && (
+          {(activeSection === "dates" || activeSection === "images") && (
             <motion.button
               onClick={handleSubmit}
               disabled={!isFormValid()}
