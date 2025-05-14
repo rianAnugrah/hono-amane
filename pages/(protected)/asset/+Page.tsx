@@ -52,6 +52,7 @@ const AssetCrudPage = () => {
   const [currentView, setCurrentView] = useState<"table" | "card" | "compact">(
     "card"
   );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   console.log("location", location);
   // useEffect(() => {
@@ -61,6 +62,7 @@ const AssetCrudPage = () => {
   // Fetch assets with filters
   const fetchAssets = async () => {
     try {
+      setIsLoading(true);
       const { data } = await axios.get(
         `/api/assets?page=${page}&pageSize=${pageSize}&search=${search}&locationDesc_id=${locationDesc_id}&condition=${condition}&sortBy=${sortBy}&sortOrder=${sortOrder}`
       );
@@ -75,6 +77,10 @@ const AssetCrudPage = () => {
       }
     } catch (error) {
       console.error("Failed to fetch assets:", error);
+      setAssets([]);
+      setTotalAssets(0);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -301,15 +307,18 @@ const AssetCrudPage = () => {
         currentView={currentView}
         handleCheckboxChange={handleCheckboxChange}
         toggleSelectAll={toggleSelectAll}
+        isLoading={isLoading}
       />
 
-      <AssetPagination
-        page={page}
-        pageSize={pageSize}
-        totalAssets={totalAssets}
-        handlePageChange={handlePageChange}
-        handlePageSizeChange={handlePageSizeChange}
-      />
+      {!isLoading && assets.length > 0 && (
+        <AssetPagination
+          page={page}
+          pageSize={pageSize}
+          totalAssets={totalAssets}
+          handlePageChange={handlePageChange}
+          handlePageSizeChange={handlePageSizeChange}
+        />
+      )}
     </div>
   );
 };
