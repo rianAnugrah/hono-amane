@@ -7,13 +7,17 @@ import {
   ExternalLink,
   Pencil,
   Trash,
-  Heart,
+  MapPin,
+  Package,
+  Hash,
+  Tag,
+  Info
 } from "lucide-react";
 import Checkbox from "@/components/ui/checkbox";
 import { formatIDR } from "@/components/utils/formatting";
 import AssetDetail from "./asset-detail";
-import NoImagePlaceholder from "./NoImagePlaceholder";
 import { ImageWithFallback, hasValidImages } from "@/components/utils/ImageUtils";
+import { motion } from "framer-motion";
 
 const CardItem = ({
   asset,
@@ -46,12 +50,16 @@ const CardItem = ({
 
   // Function to truncate text
   const truncate = (text: string, length: number) => {
+    if (!text) return "";
     return text.length > length ? text.substring(0, length) + "..." : text;
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-100 hover:shadow-md border-blue-500 relative ${checked ? "border-4" : "border-none"}`}>
-      {/* Top Action - Favorite/Select */}
+    <div 
+      className={`relative bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md ${checked ? "ring-2 ring-blue-500" : "border border-gray-100"}`}
+      style={{ height: "380px" }}
+    >
+      {/* Top Action - Select */}
       <div className="absolute top-3 left-3 z-10">
         <Checkbox
           checked={checked}
@@ -59,8 +67,8 @@ const CardItem = ({
         />
       </div>
 
-      {/* Image Container */}
-      <div className="relative bg-gray-100 aspect-square">
+      {/* Image Container - Fixed height */}
+      <div className="relative bg-gray-100" style={{ height: "180px" }}>
         <ImageWithFallback
           src={getAssetImageUrl()}
           alt={asset.assetName}
@@ -74,7 +82,7 @@ const CardItem = ({
                 ? "bg-green-500 text-white"
                 : asset.condition === "Broken"
                 ? "bg-red-500 text-white"
-                : "bg-gray-500 text-white"
+                : "bg-yellow-500 text-white"
             }`}
           >
             {asset.condition}
@@ -82,68 +90,103 @@ const CardItem = ({
         </div>
       </div>
 
-      {/* Content Container */}
-      <div className="p-4">
-        {/* Product Name & ID */}
-        <div className="mb-2">
-          <h3 className="font-medium text-gray-900">
-            {truncate(asset.assetName, 28)}
+      {/* Content Container - Fixed layout */}
+      <div className="p-4 flex flex-col" style={{ height: "200px" }}>
+        {/* Asset ID */}
+        <div className="flex items-center text-xs text-gray-500 mb-1">
+          <Hash size={12} className="mr-1 flex-shrink-0" />
+          <span className="truncate">{asset.assetNo}</span>
+        </div>
+        
+        {/* Product Name */}
+        <div className="mb-2" style={{ height: "42px" }}>
+          <h3 className="font-medium text-gray-900 line-clamp-2" title={asset.assetName}>
+            {asset.assetName}
           </h3>
-          <p className="text-xs text-gray-500">{asset.assetNo}</p>
         </div>
 
-        {/* Project & Location */}
-        <div className="text-xs text-gray-500 mb-3">
-          <p>
-            {asset.projectCode?.code || "N/A"} •{" "}
-            {asset.locationDesc?.description || "N/A"}
-          </p>
-        </div>
+        {/* Description/Remark */}
+        <div className="flex-grow flex flex-col justify-start overflow-hidden">
+          {asset.remark && (
+            <div className="flex items-start text-xs text-gray-600 mb-2">
+              <Info size={12} className="mr-1 mt-0.5 flex-shrink-0" />
+              <p className="line-clamp-2" title={asset.remark}>
+                {truncate(asset.remark, 65)}
+              </p>
+            </div>
+          )}
 
-        {/* Price and Action Button */}
-        <div className="flex items-center justify-between">
-          <p className="font-bold text-gray-900">
-            {formatIDR(asset.acqValueIdr)}
-          </p>
-
-          <div className="flex gap-1">
-            <Link
-              href={`/asset/${asset.assetNo}`}
-              className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
-            >
-              <ExternalLink size={18} />
-            </Link>
-            <button
-              onClick={() => handleEdit(asset)}
-              className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
-            >
-              <Pencil size={18} />
-            </button>
-            <button
-              onClick={() => handleDelete(asset.id)}
-              className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-            >
-              <Trash size={18} />
-            </button>
+          {/* Project & Location with icons */}
+          <div className="flex items-center text-xs text-gray-600 mb-1">
+            <Tag size={12} className="mr-1 flex-shrink-0" />
+            <span className="truncate">{asset.projectCode?.code || "N/A"}</span>
+          </div>
+          
+          <div className="flex items-center text-xs text-gray-600 mb-1">
+            <Package size={12} className="mr-1 flex-shrink-0" />
+            <span className="truncate">{asset.categoryCode || "N/A"}</span>
+          </div>
+          
+          <div className="flex items-center text-xs text-gray-600">
+            <MapPin size={12} className="mr-1 flex-shrink-0" />
+            <span className="truncate">
+              {asset.locationDesc?.description || "N/A"}
+              {asset.detailsLocation?.description && 
+                ` - ${truncate(asset.detailsLocation.description, 15)}`}
+            </span>
           </div>
         </div>
 
-        {/* Details Toggle Button */}
-        <button
-          onClick={() => {
-            const modal = document.getElementById("my_modal_2");
-            if (modal instanceof HTMLDialogElement) {
-              modal.showModal();
-            }
-          }}
-          className="w-full flex items-center justify-center gap-1 mt-3 pt-2 border-t border-gray-100 text-sm text-gray-500 hover:text-blue-600"
-        >
-          {isExpanded ? "Less details" : "More details"}
-          {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-        </button>
+        {/* Price and Action Button - Fixed at bottom */}
+        <div className="mt-auto pt-2 border-t border-gray-100">
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-bold text-gray-900">
+              {formatIDR(asset.acqValueIdr)}
+            </p>
+
+            <div className="flex gap-1">
+              <Link
+                href={`/asset/${asset.assetNo}`}
+                className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+              >
+                <ExternalLink size={16} />
+              </Link>
+              {role !== "read_only" && (
+                <>
+                  <button
+                    onClick={() => handleEdit(asset)}
+                    className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(asset.id)}
+                    className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash size={16} />
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Details Toggle Button */}
+          <button
+            onClick={() => {
+              const modal = document.getElementById(`asset_modal_${asset.id}`);
+              if (modal instanceof HTMLDialogElement) {
+                modal.showModal();
+              }
+            }}
+            className="w-full flex items-center justify-center gap-1 mt-1 text-xs font-medium text-blue-500 hover:text-blue-600 transition-colors"
+          >
+            More details
+            <ChevronRight size={14} />
+          </button>
+        </div>
 
         {/* Modal dialog for asset details */}
-        <dialog id="my_modal_2" className="modal">
+        <dialog id={`asset_modal_${asset.id}`} className="modal">
           <div className="modal-box w-11/12 max-w-5xl">
             <AssetDetail isExpanded={true} asset={asset} />
           </div>
