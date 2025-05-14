@@ -272,186 +272,151 @@ export const DatePickerFields = ({
       transition={{ duration: 0.2 }}
       ref={containerRef}
     >
-      <div className="flex items-center relative flex-grow">
-        <div className="relative w-full">
-          <input
-            ref={inputRef}
-            type="text"
-            name={name}
-            className={`w-full pl-4 pr-10 py-2 bg-white border rounded-lg focus:outline-none cursor-pointer ${
-              isInvalid 
-                ? "border-red-500" 
-                : isValid 
-                  ? "border-green-500" 
-                  : "border-gray-300"
-            }`}
-            placeholder={placeholder}
-            value={displayValue}
-            readOnly
-            onClick={() => setIsOpen(!isOpen)}
-          />
-          
-          {/* Clear button */}
-          {value && (
-            <button
-              type="button"
-              className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              onClick={clearDate}
-            >
-              <X size={16} />
-            </button>
-          )}
-          
-          {/* Calendar icon */}
-          <div 
-            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <Calendar size={16} />
-          </div>
-          
-          <label
-            className={`absolute pointer-events-none items-center rounded-full h-6 flex gap-0 transition-all duration-200 ${
-             true
-                ? "text-xs -top-3 bg-white px-2 left-2 " + (isInvalid ? "text-red-500" : isValid ? "text-green-500" : "text-gray-800")
-                : "text-gray-400 top-1/2 -translate-y-1/2 px-4 left-0"
-            }`}
-          >
-            {icon && (
-              <div className="w-4 h-4 mr-2 text-gray-500 inset-y-0 left-0 flex items-center">
-                {icon}
-              </div>
-            )}
-            {label || placeholder}
-          </label>
-          
-          {touched && (
-            <div className="absolute right-16 top-1/2 -translate-y-1/2">
-              <AnimatePresence>
-                {isValid && (
-                  <motion.span 
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
-                    className="text-green-500 flex items-center"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                  </motion.span>
-                )}
-                {isInvalid && (
-                  <motion.span 
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
-                    className="text-red-500 flex items-center"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
+      {/* Label */}
+      {label && (
+        <label 
+          className={`text-sm font-medium mb-1 block ${isInvalid ? 'text-red-500' : isValid ? 'text-green-500' : 'text-gray-700'}`}
+          htmlFor={name}
+        >
+          {label}
+        </label>
+      )}
+      
+      {/* Custom input UI */}
+      <div className="relative">
+        <input
+          type="text"
+          ref={inputRef}
+          name={name}
+          value={displayValue}
+          placeholder={placeholder}
+          onChange={onChange}
+          className={`
+            w-full px-4 py-2.5 pl-9
+            bg-gray-50 
+            border ${isInvalid ? 'border-red-500' : isValid ? 'border-green-500' : 'border-gray-200'} 
+            rounded-lg
+            transition-colors duration-200
+            focus:outline-none focus:border-blue-500
+          `}
+          readOnly
+          onClick={() => setIsOpen(!isOpen)}
+        />
+        
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+          {icon}
         </div>
+        
+        {displayValue && (
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            onClick={clearDate}
+            aria-label="Clear date"
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
+      
+      {/* Error message */}
+      <AnimatePresence>
+        {isInvalid && errorMessage && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="text-red-500 text-xs mt-1 pl-1"
+          >
+            {errorMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Calendar dropdown */}
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ opacity: 0, y: -10, height: 0 }}
+            initial={{ opacity: 0, y: -5, height: 0 }}
             animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -10, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-3"
+            exit={{ opacity: 0, y: -5, height: 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-30 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden w-64"
           >
             {/* Calendar header */}
-            <div className="flex items-center justify-between mb-2">
-              <button 
+            <div className="flex items-center justify-between border-b border-gray-100 p-2">
+              <button
                 type="button"
-                className="p-1 rounded-full hover:bg-gray-100"
                 onClick={goToPreviousMonth}
+                className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Previous month"
               >
-                <ChevronLeft size={20} className="text-gray-600" />
+                <ChevronLeft size={18} className="text-gray-600" />
               </button>
-              <div className="font-medium">
-                {monthNames[viewMonth]} {viewYear}
-              </div>
-              <button 
+              
+              <h3 className="text-sm font-medium text-gray-800">
+                {new Date(viewYear, viewMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </h3>
+              
+              <button
                 type="button"
-                className="p-1 rounded-full hover:bg-gray-100"
                 onClick={goToNextMonth}
+                className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Next month"
               >
-                <ChevronRight size={20} className="text-gray-600" />
+                <ChevronRight size={18} className="text-gray-600" />
               </button>
             </div>
             
             {/* Day names */}
-            <div className="grid grid-cols-7 gap-1 mb-1">
-              {dayNames.map((day, index) => (
-                <div key={index} className="text-center text-xs font-medium text-gray-500 py-1">
+            <div className="grid grid-cols-7 text-center border-b border-gray-100">
+              {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day, index) => (
+                <div key={day} className="text-xs font-medium text-gray-500 py-2">
                   {day}
                 </div>
               ))}
             </div>
             
             {/* Calendar days */}
-            <div className="grid grid-cols-7 gap-1">
-              {calendarDays.map((item, index) => {
-                const { date, isCurrentMonth } = item;
-                const isSelected = isDateSelected(date);
-                const isTodayDate = isToday(date);
-                
-                // Check if date is outside allowed range
-                const formattedDate = formatDate(date, 'yyyy-MM-dd');
-                const isDisabled = (min && formattedDate < min) || (max && formattedDate > max);
+            <div className="grid grid-cols-7 gap-1 p-2">
+              {calendarDays.map((day, index) => {
+                const isSelectable = !(
+                  (min && formatDate(day.date) < min) || 
+                  (max && formatDate(day.date) > max)
+                );
                 
                 return (
-                  <motion.div
+                  <motion.button
                     key={index}
-                    whileHover={!isDisabled ? { backgroundColor: '#f3f4f6' } : {}}
+                    type="button"
                     className={`
-                      text-center py-1 rounded-full text-sm cursor-pointer
-                      ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700'}
-                      ${isSelected ? 'bg-blue-500 text-white hover:bg-blue-600' : ''}
-                      ${isTodayDate && !isSelected ? 'border border-blue-500' : ''}
-                      ${isDisabled ? 'cursor-not-allowed opacity-50' : ''}
+                      w-8 h-8 flex items-center justify-center text-sm rounded-full
+                      ${!day.isCurrentMonth && 'text-gray-400'} 
+                      ${!isSelectable && 'opacity-30 cursor-not-allowed'}
+                      ${isDateSelected(day.date) ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}
+                      ${isToday(day.date) && !isDateSelected(day.date) ? 'border border-blue-400' : ''}
                     `}
-                    onClick={() => !isDisabled && handleSelectDate(date)}
+                    onClick={() => isSelectable && handleSelectDate(day.date)}
+                    disabled={!isSelectable}
+                    whileHover={isSelectable ? { scale: 1.05 } : {}}
+                    whileTap={isSelectable ? { scale: 0.95 } : {}}
                   >
-                    {date.getDate()}
-                  </motion.div>
+                    {day.date.getDate()}
+                  </motion.button>
                 );
               })}
             </div>
             
-            {/* Today button */}
-            <div className="mt-2 text-center">
+            {/* Footer with today button */}
+            <div className="border-t border-gray-100 p-2 flex justify-end">
               <button
                 type="button"
-                className="text-xs text-blue-600 hover:text-blue-800"
+                className="text-xs font-medium text-blue-500 hover:text-blue-700 transition-colors py-1 px-2"
                 onClick={() => handleSelectDate(new Date())}
               >
                 Today
               </button>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
-      {/* Error message */}
-      <AnimatePresence>
-        {isInvalid && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="text-red-500 text-xs mt-1 pl-4"
-          >
-            {hasPlaceholder ? "Please enter a valid date" : errorMessage}
           </motion.div>
         )}
       </AnimatePresence>

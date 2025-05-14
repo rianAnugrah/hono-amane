@@ -3,7 +3,7 @@ import { FormSectionProps } from '../types';
 
 const variants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? 250 : -250,
+    x: direction > 0 ? 200 : -200,
     opacity: 0,
   }),
   center: {
@@ -11,7 +11,7 @@ const variants = {
     opacity: 1,
   },
   exit: (direction: number) => ({
-    x: direction < 0 ? 250 : -250,
+    x: direction < 0 ? 200 : -200,
     opacity: 0,
   }),
 };
@@ -28,7 +28,7 @@ export const FormSection = ({ children, direction }: FormSectionProps) => {
         x: { type: "spring", stiffness: 300, damping: 30 },
         opacity: { duration: 0.2 }
       }}
-      className="space-y-4 absolute w-full py-4"
+      className="space-y-6 absolute w-full py-6 px-1"
     >
       {children}
     </motion.div>

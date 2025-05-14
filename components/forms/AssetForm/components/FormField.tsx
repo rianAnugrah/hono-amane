@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { FormFieldProps } from '../types';
+import { Check, X } from "lucide-react";
 
 export const FormField = ({
   name,
@@ -26,18 +27,20 @@ export const FormField = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="flex items-center relative flex-grow">
-        <div className="relative w-full">
+      <div className="flex flex-col w-full">
+        <div className="relative">
           <input
             type={type}
             name={name}
-            className={`w-full pl-4 pr-4 py-2 bg-white border rounded-lg focus:outline-none ${
-              isInvalid 
-                ? "border-red-500" 
-                : isValid 
-                  ? "border-green-500" 
-                  : "border-gray-300 focus:border-gray-700"
-            }`}
+            className={`
+              w-full px-4 py-2.5 
+              bg-gray-50 
+              border 
+              ${isInvalid ? "border-red-500" : isValid ? "border-green-500" : isFocused ? "border-blue-500" : "border-gray-200"} 
+              rounded-lg
+              transition-colors duration-200
+              focus:outline-none
+            `}
             value={value ?? ""}
             onChange={onChange}
             onBlur={(e) => {
@@ -47,16 +50,25 @@ export const FormField = ({
             onFocus={() => setIsFocused(true)}
           />
           <label
-            className={`absolute pointer-events-none items-center rounded-full h-6 flex gap-0 transition-all duration-200 ${
-              value || isFocused
-                ? "text-xs -top-3 bg-white px-2 left-2 " + (isInvalid ? "text-red-500" : isValid ? "text-green-500" : "text-gray-800")
-                : "text-gray-400 top-1/2 -translate-y-1/2 px-4 left-0"
-            }`}
+            className={`
+              absolute pointer-events-none
+              transition-all duration-200 ease-in-out
+              flex items-center gap-1.5
+              ${value || isFocused
+                ? "text-xs -top-2.5 left-2 bg-white px-1 font-medium " + 
+                  (isInvalid 
+                    ? "text-red-500" 
+                    : isValid 
+                      ? "text-green-500" 
+                      : "text-blue-500")
+                : "text-gray-500 top-1/2 -translate-y-1/2 left-4 text-sm"
+              }
+            `}
           >
             {icon && (
-              <div className="w-4 h-4 mr-2 text-gray-500 inset-y-0 left-0 flex items-center">
+              <span className="w-4 h-4 flex items-center justify-center">
                 {icon}
-              </div>
+              </span>
             )}
             {placeholder || label}
           </label>
@@ -66,26 +78,22 @@ export const FormField = ({
               <AnimatePresence>
                 {isValid && (
                   <motion.span 
-                    initial={{ opacity: 0, scale: 0.5 }}
+                    initial={{ opacity: 0, scale: 0.7 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
                     className="text-green-500 flex items-center"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
+                    <Check size={16} />
                   </motion.span>
                 )}
                 {isInvalid && (
                   <motion.span 
-                    initial={{ opacity: 0, scale: 0.5 }}
+                    initial={{ opacity: 0, scale: 0.7 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
                     className="text-red-500 flex items-center"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
+                    <X size={16} />
                   </motion.span>
                 )}
               </AnimatePresence>
@@ -100,7 +108,7 @@ export const FormField = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="text-red-500 text-xs mt-1 pl-4"
+            className="text-red-500 text-xs mt-1 pl-1"
           >
             {errorMessage}
           </motion.div>

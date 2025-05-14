@@ -2,18 +2,43 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 
-interface InputSelectProps {
+interface Option {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: { value: string; label: string }[];
-  label?: string;
-  searchInput?:any;
+  label: string;
 }
 
-export default function InputSelect({ value, onChange, options, label = "" , searchInput}: InputSelectProps) {
+interface InputSelectProps {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement> | string) => void;
+  options: Option[];
+  label?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  error?: string;
+  searchInput?: React.ReactNode;
+  name?: string;
+  required?: boolean;
+  id?: string;
+  fullWidth?: boolean;
+}
+
+export default function InputSelect({
+  value,
+  onChange,
+  options,
+  label = "",
+  placeholder = "Select an option",
+  disabled = false,
+  error,
+  searchInput,
+  name,
+  required = false,
+  id,
+  fullWidth = true,
+}: InputSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(() => {
-    return options.find(option => option.value === value) || options[0];
+  const [selectedOption, setSelectedOption] = useState<Option | null>(() => {
+    return options.find(option => option.value === value) || null;
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const selectRef = useRef<HTMLSelectElement>(null);
@@ -37,10 +62,12 @@ export default function InputSelect({ value, onChange, options, label = "" , sea
     const matchingOption = options.find(option => option.value === value);
     if (matchingOption) {
       setSelectedOption(matchingOption);
+    } else {
+      setSelectedOption(null);
     }
   }, [value, options]);
 
-  const handleSelect = (option: { value: string; label: string }) => {
+  const handleSelect = (option: Option) => {
     setSelectedOption(option);
     setIsOpen(false);
     
@@ -70,14 +97,20 @@ export default function InputSelect({ value, onChange, options, label = "" , sea
   };
 
   return (
-    <div className="relative w-full" ref={containerRef}>
+    <div className={`relative ${fullWidth ? 'w-full' : ''}`} ref={containerRef}>
       {/* Hidden native select for form compatibility */}
       <select 
         ref={selectRef}
-        value={selectedOption.value} 
+        value={selectedOption?.value || ''}
         onChange={(e) => onChange(e)}
         className="sr-only"
+        name={name}
+        id={id}
+        required={required}
+        disabled={disabled}
+        aria-hidden="true"
       >
+        <option value="" disabled hidden>{placeholder}</option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
@@ -85,51 +118,83 @@ export default function InputSelect({ value, onChange, options, label = "" , sea
         ))}
       </select>
       
-      {/* Custom select UI */}
-      <div className="flex items-center relative mb-1">
-        <label className="text-xs font-medium absolute rounded-full -top-2 left-2 px-2 text-gray-500 bg-white z-10">
-          {label}
-        </label>
-        
-        <div 
-          className="w-full px-2 py-1 text-xs bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer flex justify-between items-center"
-          onClick={() => setIsOpen(!isOpen)}
+      {/* Label */}
+      {label && (
+        <label 
+          className={`text-sm font-medium mb-1 block ${error ? 'text-red-500' : 'text-gray-700'} ${disabled ? 'opacity-50' : ''}`}
+          htmlFor={id}
         >
-          <span className="text-gray-800">{selectedOption.label}</span>
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </label>
+      )}
+      
+      {/* Custom select UI */}
+      <div 
+        className={`
+          relative w-full px-3 py-2.5 
+          bg-gray-50 border
+          ${error ? 'border-red-500' : 'border-gray-200'} 
+          ${isOpen ? 'border-blue-400 ring-2 ring-blue-100' : ''} 
+          ${disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'cursor-pointer'}
+          rounded-lg transition-all duration-150
+        `}
+        onClick={disabled ? undefined : () => setIsOpen(!isOpen)}
+      >
+        <div className="flex justify-between items-center">
+          <span className={selectedOption ? 'text-gray-900' : 'text-gray-500'}>
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
           <motion.div
             animate={{ rotate: isOpen ? 180 : 0 }}
             transition={{ duration: 0.2 }}
+            className={`ml-2 ${disabled ? 'opacity-50' : ''}`}
           >
             <ChevronDown size={18} className="text-gray-500" />
           </motion.div>
         </div>
       </div>
       
+      {/* Error message */}
+      {error && (
+        <p className="mt-1 text-xs text-red-500">{error}</p>
+      )}
+      
       {/* Dropdown options with animation */}
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && !disabled && (
           <motion.div 
-            initial={{ opacity: 0, y: -10, height: 0 }}
+            initial={{ opacity: 0, y: -5, height: 0 }}
             animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -10, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+            exit={{ opacity: 0, y: -5, height: 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+            style={{ maxHeight: '250px' }}
           >
-            <div className="max-h-60 overflow-y-auto py-0 relative">
-              <div className='sticky top-0 w-full bg-white'>
-
-              {searchInput}
-              </div>
-              {options.map((option) => (
-                <motion.div
-                  key={option.value}
-                  whileHover={{ backgroundColor: '#f3f4f6' }}
-                  className={`px-4 py-2 cursor-pointer ${selectedOption.value === option.value ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}`}
-                  onClick={() => handleSelect(option)}
-                >
-                  {option.label}
-                </motion.div>
-              ))}
+            <div className="max-h-60 overflow-y-auto relative">
+              {searchInput && (
+                <div className='sticky top-0 w-full bg-white p-2 border-b border-gray-100'>
+                  {searchInput}
+                </div>
+              )}
+              
+              {options.length > 0 ? (
+                options.map((option) => (
+                  <motion.div
+                    key={option.value}
+                    whileHover={{ backgroundColor: '#f3f4f6' }}
+                    className={`
+                      px-4 py-2.5 cursor-pointer transition-colors duration-150
+                      ${selectedOption?.value === option.value ? 'bg-blue-50 text-blue-700' : 'text-gray-800'}
+                    `}
+                    onClick={() => handleSelect(option)}
+                  >
+                    {option.label}
+                  </motion.div>
+                ))
+              ) : (
+                <div className="px-4 py-2.5 text-gray-500 text-sm">No options available</div>
+              )}
             </div>
           </motion.div>
         )}

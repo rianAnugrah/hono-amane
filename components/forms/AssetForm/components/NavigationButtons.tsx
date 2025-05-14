@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { NavigationButtonsProps } from "../types";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Save } from "lucide-react";
+import Button from "../../../ui/button";
 
 export const NavigationButtons = ({
   activeSection,
@@ -13,46 +14,48 @@ export const NavigationButtons = ({
 }: NavigationButtonsProps) => {
   return (
     <motion.div
-      className="grid grid-cols-2 gap-2 "
+      className="grid grid-cols-2 gap-4 mt-6"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5 }}
+      transition={{ delay: 0.2 }}
     >
       {activeSection !== "basic" ? (
-        <motion.button
+        <Button 
           onClick={onPrevious}
-          className="flex items-center btn btn-ghost"
-          whileTap={{ scale: 0.95 }}
+          variant="secondary"
+          icon={<ChevronLeft size={16} />}
+          iconPosition="left"
         >
-          <ChevronLeft/> Previous
-        </motion.button>
+          Previous
+        </Button>
       ) : (
-        <motion.button className="block">&nbsp;</motion.button>
-      )}
-
-      {activeSection !== "dates" && (
-        <motion.button
-          onClick={onNext}
-           className="flex items-center btn btn-ghost"
-          whileTap={{ scale: 0.95 }}
+        <Button 
+          onClick={onCancel}
+          variant="tertiary"
         >
-          Next <ChevronRight />
-        </motion.button>
+          Cancel
+        </Button>
       )}
 
-      {activeSection === "dates" && (
-        <motion.button
+      {activeSection !== "dates" ? (
+        <Button
+          onClick={onNext}
+          variant="primary"
+          icon={<ChevronRight size={16} />}
+          iconPosition="right"
+        >
+          Next
+        </Button>
+      ) : (
+        <Button
           onClick={onSubmit}
           disabled={!isFormValid}
-          className={`btn btn-ghost ${
-            isFormValid
-              ? "bg-blue-500 text-white hover:bg-blue-600"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
-          whileTap={isFormValid ? { scale: 0.95 } : {}}
+          variant={isFormValid ? "success" : "secondary"}
+          icon={<Save size={16} />}
+          iconPosition="left"
         >
-           {editingId ? "Update Asset" : "Create Asset"} 
-        </motion.button>
+          {editingId ? "Update Asset" : "Create Asset"}
+        </Button>
       )}
     </motion.div>
   );

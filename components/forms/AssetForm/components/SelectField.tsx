@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Check, X, Search } from 'lucide-react';
 
 interface SelectFieldProps {
   name: string;
@@ -17,12 +17,13 @@ interface SelectFieldProps {
   searchable?: boolean;
   searchPlaceholder?: string;
   searchInput?:any;
+  disabled?: boolean;
 }
 
 export const SelectField = ({
   name,
   label,
-  placeholder,
+  placeholder = "Select an option",
   value,
   options = [],
   onChange,
@@ -33,7 +34,8 @@ export const SelectField = ({
   icon,
   searchInput,
   searchable = false,
-  searchPlaceholder = "Search..."
+  searchPlaceholder = "Search...",
+  disabled = false,
 }: SelectFieldProps) => {
   const isValid = validation === "valid";
   const isInvalid = validation === "invalid" || validation === "empty";
@@ -42,7 +44,7 @@ export const SelectField = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOption, setSelectedOption] = useState(() => {
-    return options.find(option => option.value === value) || (options.length > 0 ? options[0] : null);
+    return options.find(option => option.value === value) || null;
   });
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -76,6 +78,8 @@ export const SelectField = ({
     const matchingOption = options.find(option => option.value === value);
     if (matchingOption) {
       setSelectedOption(matchingOption);
+    } else {
+      setSelectedOption(null);
     }
   }, [value, options]);
 
@@ -109,11 +113,6 @@ export const SelectField = ({
         option.label.toLowerCase().includes(searchTerm.toLowerCase()))
     : options;
 
-  // Determine display text
-  const displayText = selectedOption 
-    ? selectedOption.label 
-    : placeholder || "Select an option";
-
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -121,6 +120,8 @@ export const SelectField = ({
 
   // Handle dropdown toggle
   const toggleDropdown = () => {
+    if (disabled) return;
+    
     setIsOpen(!isOpen);
     if (!isOpen) {
       // Reset search when opening dropdown
@@ -147,8 +148,9 @@ export const SelectField = ({
         onChange={onChange}
         onBlur={onBlur}
         className="sr-only"
+        disabled={disabled}
       >
-        <option value="" disabled>{placeholder || "Select an option"}</option>
+        <option value="" disabled>{placeholder}</option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
@@ -156,102 +158,109 @@ export const SelectField = ({
         ))}
       </select>
       
+      {/* Label */}
+      {label && (
+        <label 
+          className={`text-sm font-medium mb-1 block ${isInvalid ? 'text-red-500' : isValid ? 'text-green-500' : 'text-gray-700'} ${disabled ? 'opacity-50' : ''}`}
+          htmlFor={name}
+        >
+          {label}
+        </label>
+      )}
+      
       {/* Custom select UI */}
-      <div className="flex items-center relative flex-grow">
+      <div className="relative">
         <div 
-          className={`w-full pl-4 pr-10 py-2 bg-white border rounded-lg focus:outline-none cursor-pointer flex items-center ${
-            isInvalid 
-              ? "border-red-500" 
-              : isValid 
-                ? "border-green-500" 
-                : "border-gray-300"
-          }`}
+          className={`
+            relative w-full px-3 py-2.5 
+            bg-gray-50 border
+            ${isInvalid ? 'border-red-500' : isValid ? 'border-green-500' : isOpen ? 'border-blue-400 ring-2 ring-blue-100' : 'border-gray-200'} 
+            ${disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'cursor-pointer'}
+            rounded-lg transition-all duration-150
+          `}
           onClick={toggleDropdown}
         >
-          <span className={`block truncate ${selectedOption ? "text-gray-800" : "text-gray-400"}`}>
-            {displayText}
-          </span>
-        </div>
-        
-        {/* Custom dropdown arrow */}
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-          <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ChevronDown size={18} className="text-gray-500" />
-          </motion.div>
-        </div>
-        
-        {(label || placeholder) && (        
-          <label
-            className={`absolute pointer-events-none items-center rounded-full h-6 flex gap-0 transition-all duration-200 ${
-              true
-                ? "text-xs -top-3 bg-white px-2 left-2 " + (isInvalid ? "text-red-500" : isValid ? "text-green-500" : "text-gray-800")
-                : "text-gray-400 top-1/2 -translate-y-1/2 px-4 left-0"
-            }`}
-          >
-            {icon && (
-              <div className="w-4 h-4 mr-2 text-gray-500 inset-y-0 left-0 flex items-center">
-                {icon}
-              </div>
-            )}
-            {label || placeholder}
-          </label>
-        )}
-        
-        <div className="absolute right-8 top-1/2 -translate-y-1/2">
-          <AnimatePresence>
-            {isValid && (
-              <motion.span 
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                className="text-green-500 flex items-center"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-              </motion.span>
-            )}
-            {isInvalid && (
-              <motion.span 
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                className="text-red-500 flex items-center"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              </motion.span>
-            )}
-          </AnimatePresence>
+          <div className="flex justify-between items-center">
+            <span className={selectedOption ? 'text-gray-900' : 'text-gray-500'}>
+              {selectedOption ? selectedOption.label : placeholder}
+            </span>
+            <motion.div
+              animate={{ rotate: isOpen ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+              className={`ml-2 ${disabled ? 'opacity-50' : ''}`}
+            >
+              <ChevronDown size={18} className="text-gray-500" />
+            </motion.div>
+          </div>
+          
+          {touched && !isOpen && (
+            <div className="absolute right-8 top-1/2 -translate-y-1/2">
+              <AnimatePresence>
+                {isValid && (
+                  <motion.span 
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
+                    className="text-green-500 flex items-center"
+                  >
+                    <Check size={16} />
+                  </motion.span>
+                )}
+                {isInvalid && (
+                  <motion.span 
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
+                    className="text-red-500 flex items-center"
+                  >
+                    <X size={16} />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
         </div>
       </div>
       
+      {/* Error message */}
+      <AnimatePresence>
+        {isInvalid && errorMessage && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="text-red-500 text-xs mt-1 pl-1"
+          >
+            {errorMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
       {/* Dropdown with search and options */}
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && !disabled && (
           <motion.div 
-            initial={{ opacity: 0, y: -10, height: 0 }}
+            initial={{ opacity: 0, y: -5, height: 0 }}
             animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -10, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+            exit={{ opacity: 0, y: -5, height: 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+            style={{ maxHeight: '250px' }}
           >
-            <div className="max-h-60 overflow-y-auto py-0 relative">
+            <div className="max-h-60 overflow-y-auto relative">
               {searchable && (
-                <div className="sticky top-0 w-full bg-white p-2 border-b border-gray-100">
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder={searchPlaceholder}
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    onClick={(e) => e.stopPropagation()}
-                  />
+                <div className='sticky top-0 w-full bg-white p-2 border-b border-gray-100'>
+                  <div className="relative">
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
+                      placeholder={searchPlaceholder}
+                      value={searchTerm}
+                      onChange={handleSearchChange}
+                    />
+                    <Search size={14} className="absolute left-2.5 top-2 text-gray-400" />
+                  </div>
                 </div>
               )}
               
@@ -260,34 +269,19 @@ export const SelectField = ({
                   <motion.div
                     key={option.value}
                     whileHover={{ backgroundColor: '#f3f4f6' }}
-                    className={`px-4 py-2 cursor-pointer ${
-                      selectedOption && selectedOption.value === option.value 
-                        ? 'bg-blue-50 text-blue-600' 
-                        : 'text-gray-700'
-                    }`}
+                    className={`
+                      px-4 py-2.5 cursor-pointer transition-colors duration-150
+                      ${selectedOption?.value === option.value ? 'bg-blue-50 text-blue-700' : 'text-gray-800'}
+                    `}
                     onClick={() => handleSelect(option)}
                   >
                     {option.label}
                   </motion.div>
                 ))
               ) : (
-                <div className="px-4 py-2 text-gray-500 text-sm">No options found</div>
+                <div className="px-4 py-3 text-gray-500 text-sm italic">No options available</div>
               )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
-      {/* Error message */}
-      <AnimatePresence>
-        {isInvalid && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="text-red-500 text-xs mt-1 pl-4"
-          >
-            {errorMessage}
           </motion.div>
         )}
       </AnimatePresence>
