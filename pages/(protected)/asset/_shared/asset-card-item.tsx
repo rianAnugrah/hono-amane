@@ -12,6 +12,8 @@ import {
 import Checkbox from "@/components/ui/checkbox";
 import { formatIDR } from "@/components/utils/formatting";
 import AssetDetail from "./asset-detail";
+import NoImagePlaceholder from "./NoImagePlaceholder";
+import { ImageWithFallback, hasValidImages } from "@/components/utils/ImageUtils";
 
 const CardItem = ({
   asset,
@@ -34,9 +36,12 @@ const CardItem = ({
   location: any;
   onSelectAsset: (asset: Asset) => void;
 }) => {
-  // Function to get asset image based on type
-  const getAssetImage = () => {
-    return `https://picsum.photos/seed/${asset.assetNo}/400/300`; // Placeholder image
+  // Function to check if the asset has images
+  const hasImages = hasValidImages(asset.images);
+
+  // Function to get asset image URL
+  const getAssetImageUrl = (): string | undefined => {
+    return hasImages ? asset.images[0] : undefined;
   };
 
   // Function to truncate text
@@ -47,19 +52,19 @@ const CardItem = ({
   return (
     <div className={`bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-100 hover:shadow-md border-blue-500 relative ${checked ? "border-4" : "border-none"}`}>
       {/* Top Action - Favorite/Select */}
-      <div className="absolute top-3 left-3 z-1">
+      <div className="absolute top-3 left-3 z-10">
         <Checkbox
           checked={checked}
           onChange={() => onSelectAsset(asset)}
-          className="h-5 w-5 bg-white/80 backdrop-blur-sm rounded-full"
         />
       </div>
 
       {/* Image Container */}
       <div className="relative bg-gray-100 aspect-square">
-        <img
-          src={getAssetImage()}
+        <ImageWithFallback
+          src={getAssetImageUrl()}
           alt={asset.assetName}
+          assetName={asset.assetName}
           className="w-full h-full object-cover"
         />
         <div className="absolute bottom-2 right-2">
@@ -101,55 +106,46 @@ const CardItem = ({
             {formatIDR(asset.acqValueIdr)}
           </p>
 
-          {/* {location?.id === asset.locationDesc_id && role !== "read_only" && ( */}
-            <div className="flex gap-1">
-              <Link
-                href={`/asset/${asset.assetNo}`}
-                className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
-              >
-                <ExternalLink size={18} />
-              </Link>
-              <button
-                onClick={() => handleEdit(asset)}
-                className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
-              >
-                <Pencil size={18} />
-              </button>
-              <button
-                onClick={() => handleDelete(asset.id)}
-                className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-              >
-                <Trash size={18} />
-              </button>
-            </div>
-          {/* )} */}
+          <div className="flex gap-1">
+            <Link
+              href={`/asset/${asset.assetNo}`}
+              className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+            >
+              <ExternalLink size={18} />
+            </Link>
+            <button
+              onClick={() => handleEdit(asset)}
+              className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+            >
+              <Pencil size={18} />
+            </button>
+            <button
+              onClick={() => handleDelete(asset.id)}
+              className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+            >
+              <Trash size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Details Toggle Button */}
         <button
-        //   onClick={() => onToggle(asset.id)}
-          onClick={() => document.getElementById("my_modal_2").showModal()}
+          onClick={() => {
+            const modal = document.getElementById("my_modal_2");
+            if (modal instanceof HTMLDialogElement) {
+              modal.showModal();
+            }
+          }}
           className="w-full flex items-center justify-center gap-1 mt-3 pt-2 border-t border-gray-100 text-sm text-gray-500 hover:text-blue-600"
         >
           {isExpanded ? "Less details" : "More details"}
           {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
         </button>
 
-        {/* Expandable Asset Details */}
-        <div
-          className={`transition-all duration-300 overflow-hidden ${
-            isExpanded ? "max-h-96 opacity-100 mt-3" : "max-h-0 opacity-0"
-          }`}
-        >
-          <div className="pt-2 border-t border-gray-100">
-            {/* <AssetDetail isExpanded={isExpanded} asset={asset} /> */}
-          </div>
-        </div>
-
-     
-        <dialog id="my_modal_2" className="modal ">
+        {/* Modal dialog for asset details */}
+        <dialog id="my_modal_2" className="modal">
           <div className="modal-box w-11/12 max-w-5xl">
-          <AssetDetail isExpanded={true} asset={asset} />
+            <AssetDetail isExpanded={true} asset={asset} />
           </div>
           <form method="dialog" className="modal-backdrop">
             <button>close</button>

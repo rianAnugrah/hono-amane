@@ -26,7 +26,7 @@ export interface Asset {
   version: number;
   isLatest: boolean;
   deletedAt?: string | null;
-  images?: string[];
+  images: string[];
 }
 
 export interface AssetProjectCode {

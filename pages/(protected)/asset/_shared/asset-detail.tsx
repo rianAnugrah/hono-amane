@@ -6,29 +6,21 @@ import {
   formatIDR,
   formatUSD,
 } from "@/components/utils/formatting";
+import { ImageWithFallback, hasValidImages } from "@/components/utils/ImageUtils";
 
-function DetailItem({
-  label,
-  value,
-  highlight = false,
-}: {
+type DetailItemProps = {
   label: string;
-  value: string | number | React.ReactNode;
+  value: React.ReactNode;
   highlight?: boolean;
-}) {
-  return (
-    <div className="flex justify-between items-center bg-gray-50 px-4 py-2 rounded-lg shadow-sm">
-      <span className="text-sm text-gray-600 font-medium">{label}</span>
-      <span
-        className={`text-sm font-semibold ${
-          highlight ? "text-indigo-600" : "text-gray-800"
-        }`}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
+};
+
+// Detail item component for asset properties
+const DetailItem = ({ label, value, highlight }: DetailItemProps) => (
+  <div className="grid grid-cols-3 gap-4 border-b border-gray-100 py-2 text-sm">
+    <dt className="font-medium text-gray-500">{label}</dt>
+    <dd className={`col-span-2 ${highlight ? "text-blue-700 font-semibold" : "text-gray-900"}`}>{value}</dd>
+  </div>
+);
 
 export default function AssetDetail({
   isExpanded,
@@ -37,6 +29,8 @@ export default function AssetDetail({
   isExpanded: boolean;
   asset: Asset;
 }) {
+  const hasImages = hasValidImages(asset.images);
+  
   return (
     <AnimatePresence>
       {isExpanded && (
@@ -142,6 +136,33 @@ export default function AssetDetail({
               </div>
             </div>
           </div>
+          
+          {/* Image Gallery Section */}
+          {hasImages && (
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                Asset Images
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {asset.images.map((image, index) => (
+                  <a 
+                    key={index} 
+                    href={image} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-blue-500 transition-colors"
+                  >
+                    <ImageWithFallback
+                      src={image}
+                      alt={`${asset.assetName} - Image ${index + 1}`}
+                      assetName={asset.assetName}
+                      className="w-full h-full object-cover"
+                    />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>

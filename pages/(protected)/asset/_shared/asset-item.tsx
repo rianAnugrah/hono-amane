@@ -18,6 +18,8 @@ import { formatIDR } from "@/components/utils/formatting";
 import AssetDetail from "./asset-detail";
 import { useUserStore } from "@/stores/store-user-login";
 import CardItem from "./asset-card-item";
+import NoImagePlaceholder from "./NoImagePlaceholder";
+import { ImageWithFallback, hasValidImages } from "@/components/utils/ImageUtils";
 
 /**
  * Interface untuk objek lokasi
@@ -51,6 +53,7 @@ export default function AssetItem({
   onSelectAsset: (asset: Asset) => void;
 }) {
   const { location, role } = useUserStore();
+  const hasImages = hasValidImages(asset.images);
 
   // console.log("LCOATION ITEM", location);
 
@@ -116,6 +119,15 @@ export default function AssetItem({
                 />
               </div>
               <div className="flex flex-col">
+                {/* Show image thumbnail */}
+                <div className="w-10 h-10 rounded overflow-hidden mr-2 mb-1">
+                  <ImageWithFallback
+                    src={hasImages ? asset.images[0] : undefined}
+                    alt={asset.assetName}
+                    assetName={asset.assetName}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <div>{asset.assetName}</div>
                 <span className="text-gray-500">{asset.assetNo}</span>
               </div>
@@ -143,7 +155,7 @@ export default function AssetItem({
               {formatIDR(asset.acqValueIdr)}
             </div>
             {role !== "read_only" &&
-              renderEditButton(location, asset.locationDesc_id)}
+              renderEditButton(location, asset.locationDesc_id || 0)}
           </div>
           <AssetDetail isExpanded={isExpanded} asset={asset} />
         </div>
