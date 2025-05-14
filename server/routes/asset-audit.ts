@@ -7,16 +7,24 @@ const prisma = new PrismaClient()
 
 // Create Audit Record
 assetAuditRoute.post('/', async (c) => {
-  const {
-    assetId,
-    checkedById,
-    checkDate,
-    locationId,
-    status,
-    remarks,
-  } = await c.req.json()
-
   try {
+    const body = await c.req.json()
+    console.log('Received audit data:', JSON.stringify(body, null, 2))
+    
+    const {
+      assetId,
+      checkedById,
+      checkDate,
+      locationId,
+      status,
+      remarks,
+      images,
+    } = body
+
+    // Validate images is an array
+    const imageArray = Array.isArray(images) ? images : []
+    console.log('Processed image array:', imageArray)
+
     // Create the audit record
     const audit = await prisma.assetAudit.create({
       data: {
@@ -25,6 +33,7 @@ assetAuditRoute.post('/', async (c) => {
         locationId,
         status,
         remarks,
+        images: imageArray,
         // Connect the user through the AuditUser relation
         auditUsers: {
           create: {
@@ -42,9 +51,11 @@ assetAuditRoute.post('/', async (c) => {
         }
       }
     })
+
+    console.log('Created audit record:', JSON.stringify(audit, null, 2))
     return c.json(audit, 201)
-  } catch (err) {
-    console.error(err)
+  } catch (err: any) {
+    console.error('Error creating audit:', err)
     return c.json({ error: 'Failed to create asset audit', details: err.message }, 500)
   }
 })
@@ -73,9 +84,15 @@ assetAuditRoute.get('/', async (c) => {
       },
     })
 
+    console.log(`Retrieved ${audits.length} audit records`)
+    // Log the first audit to check the structure
+    if (audits.length > 0) {
+      console.log('First audit record:', JSON.stringify(audits[0], null, 2))
+    }
+
     return c.json(audits)
-  } catch (err) {
-    console.error(err)
+  } catch (err: any) {
+    console.error('Error fetching audits:', err)
     return c.json({ error: 'Failed to fetch audit records', details: err.message }, 500)
   }
 })
@@ -103,8 +120,8 @@ assetAuditRoute.get('/:id', async (c) => {
     }
 
     return c.json(audit)
-  } catch (err) {
-    console.error(err)
+  } catch (err: any) {
+    console.error('Error fetching audit:', err)
     return c.json({ error: 'Failed to fetch audit record', details: err.message }, 500)
   }
 })
@@ -112,16 +129,24 @@ assetAuditRoute.get('/:id', async (c) => {
 // Update audit
 assetAuditRoute.put('/:id', async (c) => {
   const id = c.req.param('id')
-  const {
-    assetId,
-    checkedById,
-    checkDate,
-    locationId,
-    status,
-    remarks,
-  } = await c.req.json()
-
+  
   try {
+    const body = await c.req.json()
+    console.log('Updating audit data:', JSON.stringify(body, null, 2))
+    
+    const {
+      assetId,
+      checkedById,
+      checkDate,
+      locationId,
+      status,
+      remarks,
+      images,
+    } = body
+
+    // Validate images is an array
+    const imageArray = Array.isArray(images) ? images : []
+
     // First delete existing audit user connections
     await prisma.auditUser.deleteMany({
       where: { auditId: id }
@@ -136,6 +161,7 @@ assetAuditRoute.put('/:id', async (c) => {
         locationId,
         status,
         remarks,
+        images: imageArray,
         auditUsers: {
           create: {
             userId: checkedById
@@ -152,9 +178,11 @@ assetAuditRoute.put('/:id', async (c) => {
         }
       }
     })
+
+    console.log('Updated audit record:', JSON.stringify(updated, null, 2))
     return c.json(updated)
-  } catch (err) {
-    console.error(err)
+  } catch (err: any) {
+    console.error('Error updating audit:', err)
     return c.json({ error: 'Failed to update asset audit', details: err.message }, 500)
   }
 })
@@ -172,8 +200,8 @@ assetAuditRoute.delete('/:id', async (c) => {
     // Then delete the audit
     await prisma.assetAudit.delete({ where: { id } })
     return c.json({ message: 'Deleted successfully' })
-  } catch (err) {
-    console.error(err)
+  } catch (err: any) {
+    console.error('Error deleting audit:', err)
     return c.json({ error: 'Failed to delete asset audit', details: err.message }, 500)
   }
 })

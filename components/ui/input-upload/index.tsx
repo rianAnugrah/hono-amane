@@ -134,10 +134,16 @@ export const InputUpload = ({
         const file = files[i]
         setInfo(`${i + 1} of ${files.length}`)
         if (url) {
+          console.log("InputUpload: Uploading file:", file.name);
           const resp = await uploadFile(url, file, setProgress)
           const uploaded = responseParser(resp)
-          console.log("upload", uploaded)
-          setFiles((files) => [...files, uploaded])
+          console.log("InputUpload: Upload response:", resp);
+          console.log("InputUpload: Parsed URL:", uploaded);
+          setFiles((prevFiles) => {
+            const newFiles = [...prevFiles, uploaded];
+            console.log("InputUpload: Updated files state:", newFiles);
+            return newFiles;
+          })
           setProgress(0)
         }
 
@@ -177,7 +183,10 @@ export const InputUpload = ({
   )
 
   useEffect(() => {
-    if (onChange) onChange(files)
+    if (onChange) {
+      console.log("InputUpload: Updating parent with files:", files);
+      onChange(files);
+    }
   }, [files, onChange])
 
   // Clean up camera stream when component unmounts

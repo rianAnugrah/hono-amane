@@ -29,17 +29,16 @@ export default function NewAssetAuditPage() {
   const [pageSize, setPageSize] = useState<number>(20);
   const [totalAssets, setTotalAssets] = useState<number>(0);
   const [attachments, setAttachments] = useState<string[]>([]);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [users, setUsers] = useState<any[]>([]);
-
-  console.log("users", users);
 
   const [form, setForm] = useState({
     assetId: "",
     checkedById: currentUserId,
     status: "OK",
     remarks: "",
-    attachments: [] as string[],
+    images: [] as string[],
   });
 
   // Update form when currentUserId changes
@@ -51,7 +50,10 @@ export default function NewAssetAuditPage() {
 
   // Update form when attachments change
   useEffect(() => {
-    setForm((prev) => ({ ...prev, attachments }));
+    if (Array.isArray(attachments)) {
+      setForm((prev) => ({ ...prev, images: attachments }));
+      console.log("Attachments updated:", attachments);
+    }
   }, [attachments]);
 
   useEffect(() => {
@@ -72,21 +74,36 @@ export default function NewAssetAuditPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
+    
+    // Ensure images are properly set in the form
+    const formData = {
+      ...form,
+      images: Array.isArray(form.images) ? form.images : []
+    };
+    
+    console.log("Submitting form data:", formData);
+    
     try {
       const res = await fetch("/api/asset-audit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(formData),
       });
       
       if (res.ok) {
+        const data = await res.json();
+        console.log("Response data:", data);
         navigate("/audit");
       } else {
         const errorData = await res.json();
+        console.error("API error:", errorData);
+        setSubmitError(errorData.error || "Unknown error");
         alert(`Failed to submit audit: ${errorData.error || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error submitting audit:", error);
+      setSubmitError("Network error");
       alert("Failed to submit audit due to a network error");
     }
   };
@@ -98,6 +115,13 @@ export default function NewAssetAuditPage() {
       animate={{ opacity: 1, y: 0 }}
     >
       <h1 className="text-2xl font-bold mb-4">New Asset Audit</h1>
+      
+      {submitError && (
+        <div className="mb-4 p-3 bg-red-50 text-red-600 rounded border border-red-200">
+          {submitError}
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium">Asset</label>
@@ -159,14 +183,24 @@ export default function NewAssetAuditPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Photo Evidence</label>
+          <label className="block text-sm font-medium mb-1">Images</label>
           <InputUpload 
             useCamera={true}
             cameraFacing="user" 
             value={attachments} 
-            onChange={setAttachments} 
+            onChange={(newAttachments) => {
+              console.log("InputUpload onChange:", newAttachments);
+              setAttachments(newAttachments);
+            }} 
           />
           <p className="text-xs text-gray-500 mt-1">Click "Open Camera" to activate your camera. Use the blue expand button for fullscreen mode. Take photos with the circular button at the bottom.</p>
+          
+          {/* Display current images for debugging */}
+          {form.images && form.images.length > 0 && (
+            <div className="mt-2">
+              <p className="text-xs text-gray-500">Images to upload: {form.images.length}</p>
+            </div>
+          )}
         </div>
 
         <button

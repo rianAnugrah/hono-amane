@@ -17,6 +17,7 @@ type AssetAudit = {
   locationId: number | null
   location: { id: number; name: string } | null
   remarks: string | null
+  images: string[]
 }
 
 export default function AssetAuditListPage() {
@@ -93,6 +94,28 @@ export default function AssetAuditListPage() {
                   <p className="text-sm mt-2 text-gray-700">
                     Remarks: {audit.remarks}
                   </p>
+                )}
+                {audit.images && audit.images.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-sm font-medium mb-1">Images:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {audit.images.map((img, index) => (
+                        <a 
+                          key={index} 
+                          href={img} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="block w-16 h-16 rounded overflow-hidden border"
+                        >
+                          <img 
+                            src={img} 
+                            alt={`Audit image ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             )

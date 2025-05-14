@@ -77,6 +77,7 @@ model Asset {
   projectCode_id     Int?
   locationDesc_id    Int?
   detailsLocation_id Int?
+  images             String[]       @default([])
   detailsLocation    DetailsLocation? @relation(fields: [detailsLocation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_details_location")
   locationDesc       LocationDesc?    @relation(fields: [locationDesc_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location_desc")
   projectCode        ProjectCode?     @relation(fields: [projectCode_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_project_code")
@@ -125,6 +126,7 @@ model AssetAudit {
   locationId    Int?
   status        String
   remarks       String?
+  images        String[]       @default([])
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
