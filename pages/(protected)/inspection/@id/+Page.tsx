@@ -876,9 +876,7 @@ export default function InspectionDetailPage() {
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Condition
                   </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
-                  </th>
+                 
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Version
                   </th>
@@ -895,14 +893,7 @@ export default function InspectionDetailPage() {
                     </td>
                     <td className="px-4 py-2">{item.asset.assetName}</td>
                     <td className="px-4 py-2">{item.asset.condition}</td>
-                    <td className="px-4 py-2">
-                      {item.asset.locationDesc?.description || "N/A"}
-                      {item.asset.detailsLocation && (
-                        <span className="text-xs text-gray-500 block">
-                          {item.asset.detailsLocation.description}
-                        </span>
-                      )}
-                    </td>
+                   
                     <td className="px-4 py-2">{item.assetVersion}</td>
                     <td className="px-4 py-2">
                       <button
