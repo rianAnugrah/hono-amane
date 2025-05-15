@@ -14,8 +14,8 @@ import { useUserStore } from "@/stores/store-user-login";
 
 export default function TopBar() {
   return (
-    <nav className="w-full  relative z-[1] ">
-      <div className=" mx-auto px-4 hidden md:flex justify-between h-20 items-center w-full border-b border-gray-200">
+    <nav className="w-full  relative z-[2] ">
+      <div className=" mx-auto px-4 hidden md:flex justify-between h-20 items-center w-full  border-gray-200">
         <div className="flex-grow  items-center gap-2 justify-start ">
           {/* <div className="h-[2rem] w-[2rem]">
               <Logo />
@@ -29,7 +29,7 @@ export default function TopBar() {
         <UserDropDown />
       
       </div>
-      <div className="hidden md:flex border-b border-gray-200 p-4">
+      <div className="hidden md:flex  border-gray-200 py-0 px-4">
         <LocationDisplay size={3} />
       </div>
 
@@ -61,6 +61,7 @@ const LocationDisplay = ({ size = 2 }: { size: number }) => {
       {location.slice(0, size).map((loc: any, index: number) => (
         <Badge
           key={index}
+          variant="outline"
           text={
             <span className="flex gap-1 items-center">
               <MapPin size={12} />

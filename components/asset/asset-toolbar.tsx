@@ -1,12 +1,7 @@
 import InputSelect from "@/components/ui/input-select";
 import InputText from "@/components/ui/input-text";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Filter,
-  FilterX,
-  PlusCircle,
-  Search,
-} from "lucide-react";
+import { Filter, FilterX, PlusCircle, Search } from "lucide-react";
 import { useState } from "react";
 import Checkbox from "@/components/ui/checkbox";
 import SelectedAssetsPage from "@/pages/(protected)/asset/print/+Page";
@@ -59,7 +54,7 @@ export default function AssetToolbar({
   const renderFIlter = () => {
     return (
       <>
-        <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-5 gap-4 px-4 pt-4 pb-1 rounded-lg">
+        <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-5 gap-4  pb-2 rounded-lg">
           {/* Filter Controls */}
 
           <div className="md:col-span-2">
@@ -103,7 +98,7 @@ export default function AssetToolbar({
         </div>
         <button
           onClick={handleResetFilters}
-          className="btn btn-lg w-[calc(100%_-_2rem)] md:w-auto md:btn-xs text-blue-400 mx-4 mb-4"
+          className="btn btn-lg w-[calc(100%_-_2rem)] md:w-auto md:btn-sm text-blue-400 mb-4"
         >
           Reset Filter
         </button>
@@ -112,8 +107,8 @@ export default function AssetToolbar({
   };
 
   return (
-    <div className="bg-gray-100 z-[2] rounded-none shadow-none pb-4 md:pb-0 border-b md:border-none px-4  border-gray-300 mb-0 sticky top-0">
-      <div className="flex justify-between items-center  gap-2 pt-4">
+    <div className="bg-gray-100 z-[2] rounded-none shadow-none pb-4 md:pb-0 border-b md:border-none px-4  border-gray-300 mb-0 sticky top-0 ">
+      <div className="grid grid-cols-3 items-center py-3  gap-3">
         <InputText
           value={search}
           onChange={handleSearchChange}
@@ -129,15 +124,14 @@ export default function AssetToolbar({
           Filter
         </button>
 
-        <button
-          onClick={() => setShowToolbar(!showToolbar)}
-          className="hidden md:flex btn btn-soft btn-sm"
-        >
-          {!showToolbar ? <Filter size={14} /> : <FilterX size={14} />} Filter
-        </button>
-
-        <div className="hidden md:flex flex-grow"></div>
-
+        <div>
+          <button
+            onClick={() => setShowToolbar(!showToolbar)}
+            className="hidden md:flex btn btn-soft btn-sm"
+          >
+            {!showToolbar ? <Filter size={14} /> : <FilterX size={14} />} Filter
+          </button>
+        </div>
 
         <div className="md:flex items-center justify-end gap-2 hidden">
           <AssetViewToggle
@@ -149,7 +143,7 @@ export default function AssetToolbar({
             <>
               <button
                 onClick={() => setShowForm(!showForm)}
-                className="btn  btn-sm btn-primary"
+                className="btn  btn-sm btn-primary btn-soft"
               >
                 <PlusCircle className="w-5 h-5" /> New Asset
               </button>
@@ -157,6 +151,7 @@ export default function AssetToolbar({
           )}
         </div>
       </div>
+
       <AnimatePresence>
         {showToolbar && (
           <motion.div
@@ -164,7 +159,7 @@ export default function AssetToolbar({
             animate={{ height: "auto", opacity: 1, overflow: "visible" }}
             exit={{ height: 0, opacity: 0, overflow: "hidden" }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="border rounded-lg border-gray-200 bg-white"
+            className="bg-gray-100 relative border- border-gray-200"
           >
             {renderFIlter()}
           </motion.div>
@@ -183,12 +178,7 @@ export default function AssetToolbar({
         <div className="hidden mt-4 w-full md:grid grid-cols-12 items-center font-bold text-xs bg-white px-4 py-2 text-gray-500 rounded-t-lg border border-gray-200">
           <div className="col-span-4 pr-4 py-2 flex items-center gap-2">
             <Checkbox checked={allSelected} onChange={toggleSelectAll} />
-            <InputText
-              value={search}
-              onChange={handleSearchChange}
-              icon={<Search />}
-              placeholder="Search by name"
-            />
+           Asset Name
           </div>
           <div className="px-4 py-2 flex items-center">Condition</div>
           <div className="px-4 py-2 flex items-center"> Code</div>

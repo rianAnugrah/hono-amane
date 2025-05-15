@@ -22,10 +22,10 @@ const AssetViewToggle = ({
         {/* Table View Button */}
         <button
           onClick={() => onChange("table")}
-          className={`relative flex items-center justify-center w-8 h-8 transition-all ${
+          className={`btn btn-sm  btn-ghost rounded-none ${
             currentView === "table"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-600 hover:bg-gray-50"
+               ? " bg-blue-300 "
+                : " text-gray-500"
           }`}
           title="Taable View"
         >
@@ -38,10 +38,10 @@ const AssetViewToggle = ({
         {/* Card View Button */}
         <button
           onClick={() => onChange("card")}
-          className={`relative flex items-center justify-center w-8 h-8 transition-all ${
+          className={`btn btn-sm  btn-ghost rounded-none${
             currentView === "card"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-600 hover:bg-gray-50"
+              ? " bg-blue-300 "
+                : " text-gray-500"
           }`}
           title="Card View"
         >
@@ -57,8 +57,8 @@ const AssetViewToggle = ({
             onClick={() => onChange("compact")}
             className={`relative flex items-center justify-center w-8 h-8 transition-all ${
               currentView === "compact"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-600 hover:bg-gray-50"
+                ? "btn-soft btn btn-neutral"
+                : "btn-soft btn btn-primary"
             }`}
             title="Compact View"
           >

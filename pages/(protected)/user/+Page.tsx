@@ -114,7 +114,7 @@ export default function Page() {
       </motion.div> */}
 
       {/* Main Content */}
-      <div className="flex-1 p-4 overflow-y-auto relative h-[calc(100vh_-_11rem)]">
+      <div className="flex-1 p-4 overflow-y-auto relative ">
         <div className="flex justify-between items-center gap-4 mb-4 ">
           <div className="flex items-center gap-4">
             {/* <button
@@ -161,7 +161,7 @@ export default function Page() {
             <div className="text-sm font-medium text-gray-500">Actions</div>
           </div>
           
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 overflow-y-auto h-[calc(100vh_-_460px)]">
             <AnimatePresence mode="popLayout">
               {users.map((user, index) => (
                 <motion.div

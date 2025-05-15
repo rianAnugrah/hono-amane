@@ -44,7 +44,7 @@ export function UserFilterToolbar({
   };
 
   return (
-    <div className="w-full grid grid-cols-1 lg:grid-cols-6 gap-4 items-center mb-4 py-4 bg-white sticky top-0 px-4 rounded-xl shadow-xs">
+    <div className="w-full grid grid-cols-1 lg:grid-cols-5 gap-4 items-end-safe mb-4  sticky top-0 ">
       <div className="col-span-2">
         <InputText
           placeholder="Name or email"
@@ -95,7 +95,7 @@ export function UserFilterToolbar({
       />
       {/* Action Buttons */}
 
-      <button onClick={handleReset} className="btn w-full btn-ghost">
+      <button onClick={handleReset} className="btn w-full  btn-soft">
         Reset
       </button>
     </div>

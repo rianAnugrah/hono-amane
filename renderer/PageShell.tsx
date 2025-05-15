@@ -213,7 +213,7 @@ function PageShell({
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-full h-[100svh] relative flex bg-gradient-to-br from-cyan-950 to-blue-950">
+    <div className="w-full h-[100svh] relative flex bg-gray-100">
       {children}
     </div>
   );

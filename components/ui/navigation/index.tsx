@@ -143,8 +143,8 @@ function DesktopNav() {
   const { role } = useUserStore();
 
   return (
-    <nav className="hidden  md:flex flex-col  h-[100svh] gap-1 w-[10rem] pl-4 pb-4">
-      <div className="h-[4.75rem] flex items-center justify-center">
+    <nav className="hidden  md:flex flex-col  h-[100svh] gap-1 w-[15rem] pl-12 pr-7 pb-4">
+      <div className="h-[8.75rem] flex items-center justify-center">
         <div className="h-[3rem] w-[3rem]">
           <Logo />
         </div>
@@ -173,7 +173,7 @@ function DesktopNav() {
           href="/qr-scanner"
           className=" bg-orange-600 group hover:bg-orange-200 hover:text-orange-600 py-2 px-4 transition-all duration-300 flex flex-row items-center justify-start gap-1 rounded shadow relative w-full   text-white"
         >
-          <ScanQrCode className="w-[1rem] h-[1rem] group-hover:scale-[1.2] transition-all duration-300" />
+          <ScanQrCode className="w-[1.5rem] h-[1.5rem] group-hover:scale-[1.2] transition-all duration-300" />
           <span className="text-xs font-bold">Scan QR</span>
         </Link>
       </div>

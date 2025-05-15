@@ -1,3 +1,4 @@
+import { ImageIcon } from 'lucide-react';
 import React from 'react';
 
 interface NoImagePlaceholderProps {
@@ -36,49 +37,44 @@ const NoImagePlaceholder: React.FC<NoImagePlaceholderProps> = ({
   const initials = getInitials(assetName);
 
   return (
-    <svg
-      className={className}
-      viewBox="0 0 200 200"
-      xmlns="http://www.w3.org/2000/svg"
-      preserveAspectRatio="xMidYMid meet"
+    <div
+      className={`${className} flex items-center flex-col justify-center relative`}
+      style={{backgroundColor:bgColor}}
+     
+      
     >
       {/* Background */}
       <rect width="200" height="200" fill={bgColor} />
       
-      {/* Icon */}
-      <g transform="translate(55, 55)">
-        <path
-          d="M75 70v10c0 8.3-6.7 15-15 15H15c-8.3 0-15-6.7-15-15V70H75zM15 10h45c8.3 0 15 6.7 15 15v35H0V25c0-8.3 6.7-15 15-15zm50 25c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z"
-          fill="#ffffff"
-          fillOpacity="0.3"
-        />
-      </g>
+
+      <ImageIcon size={120} className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/10'  />
       
       {/* Asset initials */}
-      <text
+      <div
         x="100"
         y="115"
         fontFamily="sans-serif"
         fontSize="40"
         fontWeight="bold"
         textAnchor="middle"
-        fill={textColor}
+       
+        className='text-5xl font-extrabold text-gray-400'
       >
         {initials}
-      </text>
+      </div>
       
       {/* "No Image" label */}
-      <text
+      <div
         x="100"
         y="145"
         fontFamily="sans-serif"
         fontSize="12"
         textAnchor="middle"
-        fill={textColor}
+        className={`text-xl text-gray-400 leading-10`}
       >
         No Image Available
-      </text>
-    </svg>
+      </div> 
+    </div>
   );
 };
 

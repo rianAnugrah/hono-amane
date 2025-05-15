@@ -56,11 +56,11 @@ const CardItem = ({
 
   return (
     <div 
-      className={`relative bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md ${checked ? "ring-2 ring-blue-500" : "border border-gray-100"}`}
+      className={`relative bg-white rounded-lg  overflow-hidden transition-all duration-200  ${checked ? "ring-2 ring-blue-500" : "border border-gray-300"}`}
       style={{ height: "380px" }}
     >
       {/* Top Action - Select */}
-      <div className="absolute top-3 left-3 z-10">
+      <div className="absolute top-3 left-3 z-1">
         <Checkbox
           checked={checked}
           onChange={() => onSelectAsset(asset)}
