@@ -12,6 +12,16 @@ interface AssetVersion extends Asset {
   updatedAt: string;
 }
 
+// Define interface for the change object
+interface ChangeItem {
+  old: any;
+  new: any;
+  removedCount?: number;
+  addedCount?: number;
+  currentCount?: number;
+  previousCount?: number;
+}
+
 const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
   const [versions, setVersions] = useState<AssetVersion[]>([]);
   const [loading, setLoading] = useState(false);
@@ -48,14 +58,14 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
   };
 
   // Helper function to find changes between versions
-  const getChanges = (currentVersion: AssetVersion, index: number): Record<string, { old: any, new: any }> => {
+  const getChanges = (currentVersion: AssetVersion, index: number): Record<string, ChangeItem> => {
     if (index === versions.length - 1) {
       // This is the first version, so everything is new
       return {};
     }
     
     const previousVersion = versions[index + 1];
-    const changes: Record<string, { old: any, new: any }> = {};
+    const changes: Record<string, ChangeItem> = {};
     
     // Fields to compare (excluding metadata fields)
     const fieldsToCompare = [
@@ -100,11 +110,33 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
       };
     }
     
+    // Check for image changes
+    const currentImages = currentVersion.images || [];
+    const previousImages = previousVersion.images || [];
+    
+    // Compare image arrays
+    if (JSON.stringify(currentImages) !== JSON.stringify(previousImages)) {
+      // Find added images
+      const addedImages = currentImages.filter(img => !previousImages.includes(img));
+      
+      // Find removed images
+      const removedImages = previousImages.filter(img => !currentImages.includes(img));
+      
+      changes['images'] = {
+        old: removedImages.length > 0 ? removedImages : null,
+        new: addedImages.length > 0 ? addedImages : null,
+        removedCount: removedImages.length,
+        addedCount: addedImages.length,
+        currentCount: currentImages.length,
+        previousCount: previousImages.length
+      };
+    }
+    
     return changes;
   };
 
   // Format the change in a user-friendly way
-  const formatChange = (fieldName: string, change: { old: any, new: any }) => {
+  const formatChange = (fieldName: string, change: ChangeItem) => {
     const formatValue = (value: any) => {
       if (value === null || value === undefined) return 'N/A';
       if (value instanceof Date || (typeof value === 'string' && value.includes('T'))) {
@@ -136,9 +168,69 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
       'location': 'Location',
       'detailedLocation': 'Detailed Location',
       'projectCode': 'Project Code',
+      'images': 'Images',
     };
 
     const friendlyName = fieldLabels[fieldName] || fieldName;
+
+    // Special handling for images
+    if (fieldName === 'images') {
+      return (
+        <div key={fieldName} className="py-2 border-b border-gray-100 last:border-0">
+          <span className="font-medium">{friendlyName}:</span>
+          <div className="mt-1">
+            {change.removedCount && change.removedCount > 0 ? (
+              <div className="text-red-500">Removed {change.removedCount} image{change.removedCount !== 1 ? 's' : ''}</div>
+            ) : null}
+            {change.addedCount && change.addedCount > 0 ? (
+              <div className="text-green-500">Added {change.addedCount} image{change.addedCount !== 1 ? 's' : ''}</div>
+            ) : null}
+            <div className="text-gray-500 text-sm">
+              Total images: {change.currentCount} (Previously: {change.previousCount})
+            </div>
+            
+            {/* Preview of added images */}
+            {Array.isArray(change.new) && change.new.length > 0 && (
+              <div className="mt-2">
+                <div className="text-sm font-medium mb-1">Added images:</div>
+                <div className="flex flex-wrap gap-2">
+                  {change.new.slice(0, 3).map((img: string, i: number) => (
+                    <div key={i} className="border border-green-200 rounded overflow-hidden w-16 h-16">
+                      <img src={img} alt={`Added ${i+1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                  {change.new.length > 3 && (
+                    <div className="flex items-center justify-center w-16 h-16 border border-green-200 rounded bg-green-50 text-green-700">
+                      +{change.new.length - 3}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Preview of removed images */}
+            {Array.isArray(change.old) && change.old.length > 0 && (
+              <div className="mt-2">
+                <div className="text-sm font-medium mb-1">Removed images:</div>
+                <div className="flex flex-wrap gap-2">
+                  {change.old.slice(0, 3).map((img: string, i: number) => (
+                    <div key={i} className="border border-red-200 rounded overflow-hidden w-16 h-16 opacity-70">
+                      <img src={img} alt={`Removed ${i+1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                  {change.old.length > 3 && (
+                    <div className="flex items-center justify-center w-16 h-16 border border-red-200 rounded bg-red-50 text-red-700">
+                      +{change.old.length - 3}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div key={fieldName} className="py-2 border-b border-gray-100 last:border-0">
         <span className="font-medium">{friendlyName}:</span>{' '}

@@ -141,7 +141,43 @@ export default function AssetDetailPage() {
           </div>
         </div>
 
+        {/* Inspection Log Section */}
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <ClipboardCheck size={20} className="text-gray-400" />
+              Inspection Log
+            </h2>
+            <button 
+              onClick={() => setShowNewInspection(true)}
+              className="inline-flex items-center gap-1 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+            >
+              <PlusCircle size={16} />
+              New Inspection
+            </button>
+          </div>
 
+          {/* New Inspection Form */}
+          {showNewInspection && (
+            <NewInspectionForm
+              assetId={asset?.id}
+              id={id}
+              onSubmit={async () => {
+                fetchInspectionLogs(id);
+                setShowNewInspection(false);
+              }}
+              onCancel={() => setShowNewInspection(false)}
+            />
+          )}
+
+          {/* Inspection Log Table */}
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <InspectionLogTable 
+              logs={inspectionLogs} 
+              loading={logsLoading && !showNewInspection} 
+            />
+          </div>
+        </div>
 
         {/* Asset Version History Section */}
         <div className="mt-8 pt-6 border-t border-gray-200">
