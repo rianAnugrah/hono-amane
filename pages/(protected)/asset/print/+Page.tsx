@@ -4,7 +4,7 @@ import { Asset } from "../types";
 import { formatDate } from "@/components/utils/formatting";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
 import { Printer } from "lucide-react";
-import { printAssets } from "../_shared/asset-print-utils";
+import { printAssets } from "../../../../components/asset/asset-print-utils";
 
 
 const SelectedAssetsPage = () => {

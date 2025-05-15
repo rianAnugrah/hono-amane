@@ -3,10 +3,10 @@ import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import { Asset } from "./types";
 
-import AssetToolbar from "./_shared/asset-toolbar";
+import AssetToolbar from "../../../components/asset/asset-toolbar";
 // import AssetForm from "./_shared/asset-form";
-import AssetPagination from "./_shared/asset-pagination";
-import AssetList from "./_shared/asset-list";
+import AssetPagination from "../../../components/asset/asset-pagination";
+import AssetList from "../../../components/asset/asset-list";
 import AssetForm from "@/components/forms/AssetForm";
 import { AssetFormValues } from "@/components/forms/AssetForm/types";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";

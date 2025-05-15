@@ -1,6 +1,6 @@
 import React from "react";
 import { QRCodeCanvas } from "qrcode.react";
-import { Asset } from "../types";
+import { Asset } from "../../pages/(protected)/asset/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@/renderer/Link";
 import Switch from "@/components/ui/switch";

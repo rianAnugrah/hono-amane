@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { formatDate } from "@/components/utils/formatting";
 import { Asset } from "../(protected)/asset/types";
-import AssetPrintItem from "../(protected)/asset/_shared/asset-print-item";
+import AssetPrintItem from "../../components/asset/asset-print-item";
 
 const SelectedAssetsPage = () => {
   const [assets, setAssets] = useState<Asset[]>([]);

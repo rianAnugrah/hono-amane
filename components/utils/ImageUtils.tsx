@@ -1,5 +1,5 @@
 import React from 'react';
-import NoImagePlaceholder from '../../pages/(protected)/asset/_shared/NoImagePlaceholder';
+import NoImagePlaceholder from '../asset/NoImagePlaceholder';
 
 // Function to determine if an image array has valid images
 export const hasValidImages = (images?: string[] | null): boolean => {

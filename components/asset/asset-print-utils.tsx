@@ -1,6 +1,6 @@
 // utils/asset-print-utils.js
 import { formatDate } from "@/components/utils/formatting";
-import { Asset } from "../types";
+import { Asset } from "../../pages/(protected)/asset/types";
 
 export const generateAssetItem = (asset: Asset, index: number): string => {
   return `

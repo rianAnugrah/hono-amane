@@ -1,5 +1,5 @@
 import React from "react";
-import { Asset } from "../types";
+import { Asset } from "../../pages/(protected)/asset/types";
 import { Link } from "@/renderer/Link";
 import {
   ChevronDown,

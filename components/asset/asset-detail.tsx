@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Asset } from "../types";
+import { Asset } from "../../pages/(protected)/asset/types";
 import { QRCodeCanvas } from "qrcode.react";
 import {
   formatDate,

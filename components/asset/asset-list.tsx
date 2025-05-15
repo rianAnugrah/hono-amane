@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-import { Asset } from "../types";
+import { Asset } from "../../pages/(protected)/asset/types";
 import AssetItem from "./asset-item";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
 import Switch from "@/components/ui/switch";
