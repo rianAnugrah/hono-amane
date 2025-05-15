@@ -152,13 +152,13 @@ function DesktopNav() {
       <DesktopLink href="/dashboard" icon={<HomeIcon />} label="Home" />
       <DesktopLink href="/asset" icon={<Archive />} label="Asset" />
       {role === "pic" && (
-        <DesktopLink href="/audit" icon={<SearchCheck />} label="Inspection" />
+        <DesktopLink href="/inspection" icon={<SearchCheck />} label="Inspection" />
       )}
 
       {role === "admin" && (
         <>
           <DesktopLink
-            href="/audit"
+            href="/inspection"
             icon={<SearchCheck />}
             label="Inspection"
           />
