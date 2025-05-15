@@ -1,41 +1,28 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { AnimatePresence, motion } from "framer-motion";
 import { Asset } from "./types";
 
 import AssetToolbar from "../../../components/asset/asset-toolbar";
-// import AssetForm from "./_shared/asset-form";
 import AssetPagination from "../../../components/asset/asset-pagination";
 import AssetList from "../../../components/asset/asset-list";
-import AssetForm from "@/components/forms/AssetForm";
-import { AssetFormValues } from "@/components/forms/AssetForm/types";
+import AssetFormModal from "@/components/asset/AssetFormModal";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
 import { useUserStore } from "@/stores/store-user-login";
+import { useAssetForm } from "@/hooks/useAssetForm";
 
 const AssetCrudPage = () => {
-  // Form and edit state
-  const [form, setForm] = useState<AssetFormValues>({
-    assetNo: "",
-    lineNo: "",
-    assetName: "",
-    projectCode_id: null,
-    locationDesc_id: null,
-    detailsLocation_id: null,
-    condition: "",
-    acqValue: null,
-    acqValueIdr: null,
-    bookValue: null,
-    accumDepre: null,
-    adjustedDepre: null,
-    ytdDepre: null,
-    pisDate: "",
-    transDate: "",
-    categoryCode: "",
-    images: []
-  });
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState<boolean>(false);
-  const { location } = useUserStore();
+  // Use the asset form hook for handling form state and operations
+  const {
+    form,
+    editingId,
+    showForm,
+    handleChange,
+    handleSubmit,
+    startEdit,
+    startCreate,
+    handleCancel,
+    setShowForm
+  } = useAssetForm({ onSuccess: fetchAssets });
 
   // List state
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -53,14 +40,12 @@ const AssetCrudPage = () => {
     "card"
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { location } = useUserStore();
 
   console.log("location", location);
-  // useEffect(() => {
-  //   setLocationDesc_id(location?.id?.toString() ?? "");
-  // }, [location]);
 
   // Fetch assets with filters
-  const fetchAssets = async () => {
+  async function fetchAssets() {
     try {
       setIsLoading(true);
       const { data } = await axios.get(
@@ -87,79 +72,6 @@ const AssetCrudPage = () => {
   useEffect(() => {
     fetchAssets();
   }, [page, pageSize, search, condition, sortBy, sortOrder, locationDesc_id]);
-
-  // Form handlers
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
-    // Handle array values (like images)
-    if (name === 'images') {
-      setForm(prev => ({ ...prev, [name]: Array.isArray(value) ? value : [] }));
-    } else {
-      setForm(prev => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleSubmit = async () => {
-    try {
-      if (editingId) {
-        await axios.put(`/api/assets/${editingId}`, form);
-      } else {
-        await axios.post("/api/assets", form);
-      }
-      setForm({
-        assetNo: "",
-        lineNo: "",
-        assetName: "",
-        projectCode_id: null,
-        locationDesc_id: null,
-        detailsLocation_id: null,
-        condition: "",
-        acqValue: null,
-        acqValueIdr: null,
-        bookValue: null,
-        accumDepre: null,
-        adjustedDepre: null,
-        ytdDepre: null,
-        pisDate: "",
-        transDate: "",
-        categoryCode: "",
-        images: []
-      });
-      setEditingId(null);
-      setShowForm(false);
-      fetchAssets();
-    } catch (error) {
-      console.error("Failed to save asset:", error);
-    }
-  };
-
-  const handleEdit = (asset: Asset) => {
-    // Convert the Asset object to the expected AssetFormValues structure
-    const formValues: AssetFormValues = {
-      assetNo: asset.assetNo || "",
-      lineNo: asset.lineNo || "",
-      assetName: asset.assetName || "",
-      projectCode_id: asset.projectCode_id || null,
-      locationDesc_id: asset.locationDesc_id || null,
-      detailsLocation_id: asset.detailsLocation_id || null,
-      condition: asset.condition || "",
-      acqValue: asset.acqValue || null,
-      acqValueIdr: asset.acqValueIdr || null,
-      bookValue: asset.bookValue || null,
-      accumDepre: asset.accumDepre || null,
-      adjustedDepre: asset.adjustedDepre || null,
-      ytdDepre: asset.ytdDepre || null,
-      pisDate: asset.pisDate || "",
-      transDate: asset.transDate || "",
-      categoryCode: asset.categoryCode || "",
-      images: asset.images || []
-    };
-    
-    setForm(formValues);
-    setEditingId(asset.id);
-    setShowForm(true);
-  };
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this asset?")) {
@@ -200,29 +112,13 @@ const AssetCrudPage = () => {
     setPageSize(20);
   };
 
-  // Reset form
-  const handleCancel = () => {
-    setForm({
-      assetNo: "",
-      lineNo: "",
-      assetName: "",
-      projectCode_id: null,
-      locationDesc_id: null,
-      detailsLocation_id: null,
-      condition: "",
-      acqValue: null,
-      acqValueIdr: null,
-      bookValue: null,
-      accumDepre: null,
-      adjustedDepre: null,
-      ytdDepre: null,
-      pisDate: "",
-      transDate: "",
-      categoryCode: "",
-      images: []
-    });
-    setEditingId(null);
-    setShowForm(false);
+  // Handle toggling the form visibility
+  const handleToggleForm = (show: boolean) => {
+    if (show) {
+      startCreate();
+    } else {
+      setShowForm(false);
+    }
   };
 
   // Inside the component
@@ -260,28 +156,18 @@ const AssetCrudPage = () => {
 
   return (
     <div className="">
-      {/* Asset Form */}
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm p-6"
-          >
-            <AssetForm
-              editingId={editingId}
-              handleChange={handleChange}
-              handleSubmit={handleSubmit}
-              handleCancel={handleCancel}
-              form={form}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Asset Form Modal */}
+      <AssetFormModal
+        showForm={showForm}
+        editingId={editingId}
+        form={form}
+        handleChange={handleChange}
+        handleSubmit={handleSubmit}
+        handleCancel={handleCancel}
+      />
 
       <AssetToolbar
-        setShowForm={setShowForm}
+        setShowForm={handleToggleForm}
         showForm={showForm}
         currentView={currentView}
         setCurrentView={(view) => setCurrentView(view)}
@@ -302,7 +188,7 @@ const AssetCrudPage = () => {
 
       <AssetList
         assets={assets}
-        handleEdit={handleEdit}
+        handleEdit={startEdit}
         handleDelete={handleDelete}
         currentView={currentView}
         handleCheckboxChange={handleCheckboxChange}
