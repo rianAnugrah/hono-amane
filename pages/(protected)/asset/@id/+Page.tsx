@@ -3,7 +3,7 @@ import { usePageContext } from "@/renderer/usePageContext";
 import { useEffect, useState } from "react";
 import { Asset } from "../types";
 import { Link } from "@/renderer/Link";
-import { ArrowLeft, Loader2, ClipboardCheck, PlusCircle } from "lucide-react";
+import { ArrowLeft, Loader2, ClipboardCheck, PlusCircle, History } from "lucide-react";
 
 // Import the extracted components
 import AssetHeader from "@/components/asset/AssetHeader";
@@ -12,6 +12,7 @@ import AssetBasicInfo from "@/components/asset/AssetBasicInfo";
 import AssetFinancialInfo from "@/components/asset/AssetFinancialInfo";
 import NewInspectionForm from "@/components/asset/NewInspectionForm";
 import InspectionLogTable, { InspectionLog } from "@/components/asset/InspectionLogTable";
+import AssetVersionHistory from "@/components/asset/AssetVersionHistory";
 
 // Main component
 export default function AssetDetailPage() {
@@ -22,6 +23,7 @@ export default function AssetDetailPage() {
   const [inspectionLogs, setInspectionLogs] = useState<InspectionLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
   const [showNewInspection, setShowNewInspection] = useState(false);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
 
   // Fetch asset details
   useEffect(() => {
@@ -139,42 +141,29 @@ export default function AssetDetailPage() {
           </div>
         </div>
 
-        {/* Inspection Log Section */}
+
+
+        {/* Asset Version History Section */}
         <div className="mt-8 pt-6 border-t border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <ClipboardCheck size={20} className="text-gray-400" />
-              Inspection Log
+              <History size={20} className="text-gray-400" />
+              Version History
             </h2>
             <button 
-              onClick={() => setShowNewInspection(true)}
-              className="inline-flex items-center gap-1 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+              onClick={() => setShowVersionHistory(!showVersionHistory)}
+              className="inline-flex items-center gap-1 px-3 py-2 text-sm text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 transition-colors"
             >
-              <PlusCircle size={16} />
-              New Inspection
+              {showVersionHistory ? 'Hide History' : 'Show History'}
             </button>
           </div>
 
-          {/* New Inspection Form */}
-          {showNewInspection && (
-            <NewInspectionForm
-              assetId={asset?.id}
-              id={id}
-              onSubmit={async () => {
-                fetchInspectionLogs(id);
-                setShowNewInspection(false);
-              }}
-              onCancel={() => setShowNewInspection(false)}
-            />
+          {/* Version History Component */}
+          {showVersionHistory && (
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden p-4">
+              <AssetVersionHistory assetNo={asset.assetNo} />
+            </div>
           )}
-
-          {/* Inspection Log Table */}
-          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-            <InspectionLogTable 
-              logs={inspectionLogs} 
-              loading={logsLoading && !showNewInspection} 
-            />
-          </div>
         </div>
       </div>
     </div>

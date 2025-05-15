@@ -257,6 +257,38 @@ assetRoutes.get("/by-asset-number/:id", async (c) => {
   }
 });
 
+// GET asset version history by assetNo
+assetRoutes.get("/versions/:assetNo", async (c) => {
+  try {
+    const assetNo = c.req.param("assetNo");
+    
+    // Get all versions of the asset with the given assetNo
+    const assetVersions = await prisma.asset.findMany({
+      where: {
+        assetNo: assetNo,
+        deletedAt: null,
+      },
+      orderBy: {
+        version: "desc", // Latest versions first
+      },
+      include: {
+        projectCode: true,
+        locationDesc: true,
+        detailsLocation: true,
+      },
+    });
+
+    if (assetVersions.length === 0) {
+      return c.json({ error: `No assets found with asset number ${assetNo}` }, 404);
+    }
+
+    return c.json(assetVersions);
+  } catch (error) {
+    console.error("Error fetching asset versions:", error);
+    return c.json({ error: "Failed to fetch asset versions" }, 500);
+  }
+});
+
 // CREATE asset
 assetRoutes.post("/", async (c) => {
   try {
