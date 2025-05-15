@@ -42,6 +42,12 @@ const parseDate = (dateString: string): Date | null => {
     return null;
   }
   
+  // Handle ISO date strings from API (e.g., "2025-05-16T00:00:00.000Z")
+  if (dateString.includes('T')) {
+    const parsedDate = new Date(dateString);
+    return isNaN(parsedDate.getTime()) ? null : parsedDate;
+  }
+  
   // Handle different date formats (yyyy-MM-dd, MM/dd/yyyy, etc.)
   const parsedDate = new Date(dateString);
   return isNaN(parsedDate.getTime()) ? null : parsedDate;
@@ -112,6 +118,35 @@ export const DatePickerFields = ({
   format = 'yyyy-MM-dd',
   validatePlaceholders = true
 }: DatePickerProps) => {
+  // Format ISO date to YYYY-MM-DD if needed
+  const formatISODate = (dateStr: string): string => {
+    if (!dateStr) return '';
+    if (dateStr.includes('T')) {
+      const date = new Date(dateStr);
+      if (!isNaN(date.getTime())) {
+        return formatDate(date, 'yyyy-MM-dd');
+      }
+    }
+    return dateStr;
+  };
+
+  // Auto-format ISO date when component receives value
+  useEffect(() => {
+    if (value && value.includes('T')) {
+      const formattedDate = formatISODate(value);
+      if (formattedDate !== value) {
+        // Update value if it's an ISO date
+        const event = {
+          target: {
+            name,
+            value: formattedDate
+          }
+        };
+        onChange(event);
+      }
+    }
+  }, [value, name]);
+
   // Check if value contains placeholder patterns
   const hasPlaceholder = value && (
     value.includes('YYYY') || 

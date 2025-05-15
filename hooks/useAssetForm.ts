@@ -24,7 +24,7 @@ const defaultFormValues: AssetFormValues = {
 };
 
 interface UseAssetFormProps {
-  onSuccess?: () => void;
+  onSuccess?: (asset: Asset) => void;
 }
 
 export function useAssetForm({ onSuccess }: UseAssetFormProps = {}) {
@@ -54,11 +54,31 @@ export function useAssetForm({ onSuccess }: UseAssetFormProps = {}) {
   // Submit form data to API
   const handleSubmit = async () => {
     try {
+      console.log("handleSubmit called with editingId:", editingId, "and form:", form);
       setIsSubmitting(true);
+      let updatedAsset = null;
+      
       if (editingId) {
-        await axios.put(`/api/assets/${editingId}`, form);
+        console.log("Updating asset with ID:", editingId);
+        const response = await axios.put(`/api/assets/${editingId}`, form);
+        console.log("Update response:", response.data);
+        updatedAsset = response.data;
+        
+        // Fetch the latest version of the asset to ensure we have all fields
+        try {
+          console.log("Fetching latest asset version after update");
+          const refreshResponse = await axios.get(`/api/assets/${response.data.id}`);
+          updatedAsset = refreshResponse.data;
+          console.log("Got latest asset version:", updatedAsset);
+        } catch (refreshError) {
+          console.error("Error fetching latest asset version:", refreshError);
+          // Continue with the response data we have
+        }
       } else {
-        await axios.post("/api/assets", form);
+        console.log("Creating new asset");
+        const response = await axios.post("/api/assets", form);
+        console.log("Create response:", response.data);
+        updatedAsset = response.data;
       }
       
       resetForm();
@@ -66,10 +86,15 @@ export function useAssetForm({ onSuccess }: UseAssetFormProps = {}) {
       
       // Call the onSuccess callback if provided
       if (onSuccess) {
-        onSuccess();
+        console.log("Calling onSuccess callback with updated asset:", updatedAsset);
+        onSuccess(updatedAsset);
       }
     } catch (error) {
       console.error("Failed to save asset:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+      }
     } finally {
       setIsSubmitting(false);
     }

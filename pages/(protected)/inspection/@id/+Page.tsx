@@ -55,7 +55,18 @@ export default function InspectionDetailPage() {
     startCreate,
     handleCancel: originalHandleCancel,
     setShowForm,
-  } = useAssetForm({ onSuccess: handleFetchAssets });
+  } = useAssetForm({ 
+    onSuccess: (updatedAsset) => {
+      console.log("Asset form successfully saved asset:", updatedAsset);
+      if (updatedAsset && assetToEdit) {
+        console.log("Adding updated asset to inspection from callback");
+        handleAddAsset(updatedAsset);
+      } else {
+        // Regular asset management, just refresh the list
+        handleFetchAssets();
+      }
+    } 
+  });
 
   const pageContext = usePageContext();
   const inspectionId = pageContext.routeParams?.id;
@@ -167,24 +178,59 @@ export default function InspectionDetailPage() {
 
   // Add asset to inspection
   const handleAddAsset = async (asset = selectedAsset) => {
-    if (!asset || !inspectionId) return;
+    if (!asset || !inspectionId) {
+      console.error("Cannot add asset to inspection: Missing asset or inspectionId", {
+        assetProvided: !!asset,
+        inspectionIdProvided: !!inspectionId,
+        asset: asset
+      });
+      return;
+    }
+
+    // Ensure asset has a version field
+    if (asset.version === undefined) {
+      console.error("Asset missing version field:", asset);
+      setError("Cannot add asset to inspection: Missing version information");
+      return;
+    }
 
     try {
+      console.log("Adding asset to inspection:", {
+        inspectionId,
+        assetId: asset.id,
+        assetVersion: asset.version,
+        assetDetails: asset
+      });
+      
+      const requestBody = {
+        inspectionId,
+        assetId: asset.id,
+        assetVersion: asset.version
+      };
+      
+      console.log("Request body for adding asset:", requestBody);
+      
       const response = await fetch("/api/inspections/items", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          inspectionId,
-          assetId: asset.id,
-          assetVersion: asset.version,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
+      console.log("Add asset response status:", response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Failed to add asset to inspection:", errorText);
+        throw new Error(`Failed to add asset: ${response.statusText}`);
+      }
+
       const data = await response.json();
+      console.log("Add asset response:", data);
 
       if (data.success) {
+        console.log("Successfully added asset to inspection:", data.data);
         // Update inspection state to include the new item
         setInspection((prev) => {
           if (!prev) return prev;
@@ -206,11 +252,12 @@ export default function InspectionDetailPage() {
         setAssetCondition("Good");
         setAssetRemarks("");
       } else {
+        console.error("API returned success: false when adding asset:", data);
         throw new Error(data.error || "Failed to add asset to inspection");
       }
     } catch (error) {
       console.error("Error adding asset to inspection:", error);
-      setError("Failed to add asset to inspection. Please try again.");
+      setError(`Failed to add asset to inspection: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -219,18 +266,34 @@ export default function InspectionDetailPage() {
     if (!assetToEdit || !inspectionId) return;
 
     try {
+      console.log("handleSaveAssetEdit - Starting with asset:", assetToEdit);
+      
       // First, ensure we have the latest asset data (with the correct version and isLatest flag)
+      console.log("Fetching latest asset data for:", assetToEdit.assetNo);
       const latestAssetResponse = await fetch(`/api/assets/by-asset-number/${assetToEdit.assetNo}`);
+      
       if (!latestAssetResponse.ok) {
+        const errorText = await latestAssetResponse.text();
+        console.error(`Error fetching latest asset (${latestAssetResponse.status}): ${errorText}`);
         throw new Error(`Failed to fetch latest asset data: ${latestAssetResponse.statusText}`);
       }
       
       const latestAsset = await latestAssetResponse.json();
+      console.log("Latest asset data received:", latestAsset);
+      
       if (!latestAsset || !latestAsset.id) {
         throw new Error("Could not find the latest version of this asset");
       }
       
       // Now update the asset using the latest id
+      console.log("Updating asset with ID:", latestAsset.id);
+      console.log("Update payload:", {
+        condition: assetCondition,
+        remark: assetRemarks,
+        assetNo: latestAsset.assetNo,
+        assetName: latestAsset.assetName
+      });
+      
       const updateResponse = await fetch(`/api/assets/${latestAsset.id}`, {
         method: "PUT",
         headers: {
@@ -246,19 +309,47 @@ export default function InspectionDetailPage() {
         }),
       });
 
+      console.log("Update response status:", updateResponse.status);
+      
       if (!updateResponse.ok) {
         const errorData = await updateResponse.json();
+        console.error("Update failed with error:", errorData);
         throw new Error(errorData.error || `Update failed with status: ${updateResponse.status}`);
       }
 
       const updateData = await updateResponse.json();
+      console.log("Update successful, new asset data:", updateData);
 
       if (updateData && updateData.id) {
-        // Now add the updated asset to the inspection
+        // Fetch the updated asset again to ensure we have the latest version
+        console.log("Fetching the newly updated asset to get the latest version");
+        const refreshResponse = await fetch(`/api/assets/${updateData.id}`);
+        if (!refreshResponse.ok) {
+          console.error("Failed to refresh asset data after update:", refreshResponse.statusText);
+          // Continue with the update data we have, even though it might not be the latest
+        } else {
+          const refreshedAsset = await refreshResponse.json();
+          console.log("Refreshed asset data for adding to inspection:", refreshedAsset);
+          if (refreshedAsset && refreshedAsset.id) {
+            // Use the refreshed asset data instead of the update response
+            // Now add the updated asset to the inspection
+            console.log("Adding updated and refreshed asset to inspection");
+            await handleAddAsset(refreshedAsset);
+            // Reset state after successful update
+            setShowAssetEditForm(false);
+            setAssetToEdit(null);
+            console.log("Asset edit flow completed successfully");
+            return; // Exit early since we've handled everything
+          }
+        }
+        
+        // Fallback to using the updateData if refresh failed
+        console.log("Adding updated asset to inspection (using update response data)");
         await handleAddAsset(updateData);
         // Reset state after successful update
         setShowAssetEditForm(false);
         setAssetToEdit(null);
+        console.log("Asset edit flow completed successfully");
       } else {
         throw new Error("Invalid response from update API");
       }
@@ -271,20 +362,10 @@ export default function InspectionDetailPage() {
   // Wrap original submit to handle the inspection-specific logic
   const handleSubmit = async () => {
     await originalHandleSubmit();
-    // If we have an asset to edit, add the updated asset to the inspection
-    if (assetToEdit) {
-      // Refresh the asset to get the latest data
-      try {
-        const response = await fetch(`/api/assets/${assetToEdit.id}`);
-        const data = await response.json();
-        if (data && data.id) {
-          await handleAddAsset(data);
-        }
-      } catch (error) {
-        console.error("Error fetching updated asset:", error);
-      }
-    }
-    // Reset state
+    // The onSuccess callback will handle adding the asset to inspection
+    // No need to refetch or add asset here anymore
+    
+    // Reset state after submission is complete
     setShowAssetEditForm(false);
     setAssetToEdit(null);
   };
