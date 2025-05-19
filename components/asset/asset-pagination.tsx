@@ -16,7 +16,7 @@ export default function AssetPagination({
   handlePageSizeChange,
 }: AssetPaginationProps) {
   return (
-    <div className="fixed bottom-16 md:bottom-4 py-2 w-full md:w-[calc(100vw_-_12rem)]  bg-gray-50 border-none  border-gray-300 rounded-b-2xl rounded-none px-4 z-[2]">
+    <div className="sticky bottom-16 md:bottom-0 py-2 w-full   bg-gray-50 border-none  border-gray-300 rounded-b-2xl rounded-none px-4 z-[2]">
       <div className="flex flex-col md:flex-row justify-between items-center  md:space-y-0">
         <div className="hidden md:block text-xs text-gray-600 ">
           Showing <span className="font-bold">{Math.min((page - 1) * pageSize + 1, totalAssets)}</span> to{" "}
