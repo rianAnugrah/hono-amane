@@ -92,7 +92,7 @@ export default function DashboardCharts({ stats }) {
   return (
     <div className="my-6 grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Asset by Locations (Full Width) */}
-      <div className="bg-white p-4 rounded-lg shadow-md md:col-span-2">
+      <div className="bg-white p-4 rounded-lg border border-gray-300 md:col-span-2">
         <h2 className="text-xl font-bold mb-6">Asset by Locations</h2>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={chartData.locations}>
@@ -105,7 +105,7 @@ export default function DashboardCharts({ stats }) {
       </div>
 
       {/* Asset by Category */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
+      <div className="bg-white p-4 rounded-lg border border-gray-300">
         <h2 className="text-xl font-bold mb-6">Asset by Category</h2>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={chartData.categories}>
@@ -118,7 +118,7 @@ export default function DashboardCharts({ stats }) {
       </div>
 
       {/* Asset by Condition */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
+      <div className="bg-white p-4 rounded-lg border border-gray-300">
         <h2 className="text-xl font-bold mb-6">Asset by Condition</h2>
         <ResponsiveContainer width="100%" height={400}>
           <PieChart>

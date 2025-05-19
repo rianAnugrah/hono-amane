@@ -47,7 +47,7 @@ export function Page() {
         {role === "admin" && (
           <Link
             href="/asset/create"
-            className="relative shadow-md group bg-[#fdfdfd] items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-black gap-2"
+            className="relative border border-gray-300 group bg-[#fdfdfd] items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-black gap-2"
           >
             <img
               src="/img/add-new-asset.jpg"
@@ -63,7 +63,7 @@ export function Page() {
         )}
         <Link
           href="/qr-scanner"
-          className="relative shadow-md cursor-pointer bg-[#ada5e9] group items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-white gap-2 transition-all"
+          className="relative border border-gray-300 cursor-pointer bg-[#ada5e9] group items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-white gap-2 transition-all"
         >
           <img
             src="/img/scan-asset.jpg"
@@ -140,7 +140,7 @@ function DashboardItem({
 }) {
   const { role } = useUserStore();
   return (
-    <div className="w-full group shadow-md rounded-xl bg-gray-200 border border-gray-300 p-2 flex flex-col items-end gap-2">
+    <div className="w-full group border border-gray-300 rounded-xl bg-gray-200 border border-gray-300 p-2 flex flex-col items-end gap-2">
       <div className="flex relative flex-col rounded-lg border border-gray-300 overflow-hidden bg-white p-4 w-full">
         <h4 className="text-sm text-gray-500 mb-2 z-10">{title}</h4>
         <div className="font-bold text-5xl text-gray-700 z-10">{value}</div>

@@ -88,7 +88,7 @@ export default function AssetList({
   }
 
   return (
-    <div className={`px-4 ${currentView === "table" ? "grid grid-cols-1" : "grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 gap-4 py-4 rounded-lg"}`}>
+    <div className={`px-4 ${currentView === "table" ? "grid grid-cols-1" : "grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4 py-4 rounded-lg"}`}>
       {assets.map((asset) => (
         <div
           key={asset.id}
