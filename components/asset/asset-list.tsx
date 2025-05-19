@@ -35,33 +35,30 @@ export default function AssetList({
     setExpandedId(expandedId === id ? null : id);
   };
 
-  // Simplified scrolling function
+  // Scroll to expanded item
   useEffect(() => {
     if (expandedId) {
       setTimeout(() => {
         const element = itemRefs.current.get(expandedId);
         if (element) {
-          // Simple approach: scroll the element into view with a specific behavior
           element.scrollIntoView({
             behavior: "smooth",
-            block: "center", // This will center the element vertically
+            block: "center",
           });
         }
-      }, 100); // Small delay to ensure DOM updates complete
+      }, 100);
     }
   }, [expandedId]);
 
-  // Skeleton loader component
+  // Skeleton loader
   const AssetSkeleton = () => (
-    <div className={`${currentView === "table" ? "w-full" : "w-full"} animate-pulse`}>
-      <div className="bg-gray-200 rounded-lg p-4 h-32"></div>
-    </div>
+    <div className="animate-pulse bg-gray-100 rounded-lg h-96 md:h-80"></div>
   );
 
-  // Empty state component
+  // Empty state
   const EmptyState = () => (
-    <div className="flex flex-col items-center justify-center py-10 w-full">
-      <div className="rounded-full bg-gray-100 p-4 mb-4">
+    <div className="flex flex-col items-center justify-center py-16 w-full bg-gray-100 rounded-lg border border-gray-200">
+      <div className="rounded-full bg-gray-50 p-4 mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
         </svg>
@@ -71,48 +68,61 @@ export default function AssetList({
     </div>
   );
 
-  // Render skeletons when loading
+  // Loading state
   if (isLoading) {
     return (
-      <div className={`px-4 ${currentView === "table" ? "grid grid-cols-1" : "grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 gap-4 py-4 rounded-lg"}`}>
-        {Array(12).fill(0).map((_, i) => (
-          <AssetSkeleton key={i} />
-        ))}
+      <div className="max-w-screen-2xl mx-auto px-4 py-6">
+        <div className={`grid ${currentView === "table" ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"} gap-6`}>
+          {Array(12).fill(0).map((_, i) => (
+            <AssetSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }
 
-  // Render empty state when no assets
+  // Empty state
   if (assets.length === 0) {
-    return <EmptyState />;
+    return (
+      <div className="max-w-screen-2xl mx-auto px-4 py-6">
+        <EmptyState />
+      </div>
+    );
   }
 
   return (
-    <div className={`px-4 ${currentView === "table" ? "grid grid-cols-1" : "grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4 py-4 rounded-lg"}`}>
-      {assets.map((asset) => (
-        <div
-          key={asset.id}
-          ref={(el) => {
-            if (el) {
-              itemRefs.current.set(asset.id, el);
-            } else {
-              itemRefs.current.delete(asset.id);
-            }
-          }}
-        >
-         
-          <AssetItem
-            asset={asset}
-            currentView={currentView}
-            isExpanded={expandedId === asset.id}
-            onToggle={handleToggle}
-            handleEdit={handleEdit}
-            handleDelete={handleDelete}
-            checked={selectedAssets.some((a) => a.id === asset.id)}
-            onSelectAsset={() => handleCheckboxChange(asset)}
-          />
-        </div>
-      ))}
+    <div className="w-full mx-auto px-4 py-6 ">
+      <div 
+        className={`grid ${
+          currentView === "table" 
+            ? "grid-cols-1 gap-4" 
+            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
+        }`}
+      >
+        {assets.map((asset) => (
+          <div
+            key={asset.id}
+            ref={(el) => {
+              if (el) {
+                itemRefs.current.set(asset.id, el);
+              } else {
+                itemRefs.current.delete(asset.id);
+              }
+            }}
+          >
+            <AssetItem
+              asset={asset}
+              currentView={currentView}
+              isExpanded={expandedId === asset.id}
+              onToggle={handleToggle}
+              handleEdit={handleEdit}
+              handleDelete={handleDelete}
+              checked={selectedAssets.some((a) => a.id === asset.id)}
+              onSelectAsset={() => handleCheckboxChange(asset)}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -155,7 +155,7 @@ const AssetCrudPage = () => {
   };
 
   return (
-    <div className="">
+    <div className="flex flex-col h-full bg-gray-50">
       {/* Asset Form Modal */}
       <AssetFormModal
         showForm={showForm}
@@ -166,44 +166,50 @@ const AssetCrudPage = () => {
         handleCancel={handleCancel}
       />
 
-      <AssetToolbar
-        setShowForm={handleToggleForm}
-        showForm={showForm}
-        currentView={currentView}
-        setCurrentView={(view) => setCurrentView(view)}
-        search={search}
-        handleSearchChange={handleSearchChange}
-        condition={condition}
-        handleConditionChange={handleConditionChange}
-        locationDesc_id={locationDesc_id}
-        handleLocationChange={handleLocationChange}
-        sortBy={sortBy}
-        handleSortByChange={handleSortByChange}
-        sortOrder={sortOrder}
-        handleResetFilters={handleResetFilters}
-        handleSortOrderChange={handleSortOrderChange}
-        toggleSelectAll={toggleSelectAll}
-        allSelected={allSelected}
-      />
+      <div className="sticky top-0 z-10">
+        <AssetToolbar
+          setShowForm={handleToggleForm}
+          showForm={showForm}
+          currentView={currentView}
+          setCurrentView={(view) => setCurrentView(view)}
+          search={search}
+          handleSearchChange={handleSearchChange}
+          condition={condition}
+          handleConditionChange={handleConditionChange}
+          locationDesc_id={locationDesc_id}
+          handleLocationChange={handleLocationChange}
+          sortBy={sortBy}
+          handleSortByChange={handleSortByChange}
+          sortOrder={sortOrder}
+          handleResetFilters={handleResetFilters}
+          handleSortOrderChange={handleSortOrderChange}
+          toggleSelectAll={toggleSelectAll}
+          allSelected={allSelected}
+        />
+      </div>
 
-      <AssetList
-        assets={assets}
-        handleEdit={startEdit}
-        handleDelete={handleDelete}
-        currentView={currentView}
-        handleCheckboxChange={handleCheckboxChange}
-        toggleSelectAll={toggleSelectAll}
-        isLoading={isLoading}
-      />
+      <div className="flex-grow overflow-auto bg-gray-100">
+        <AssetList
+          assets={assets}
+          handleEdit={startEdit}
+          handleDelete={handleDelete}
+          currentView={currentView}
+          handleCheckboxChange={handleCheckboxChange}
+          toggleSelectAll={toggleSelectAll}
+          isLoading={isLoading}
+        />
+      </div>
 
       {!isLoading && assets.length > 0 && (
-        <AssetPagination
-          page={page}
-          pageSize={pageSize}
-          totalAssets={totalAssets}
-          handlePageChange={handlePageChange}
-          handlePageSizeChange={handlePageSizeChange}
-        />
+        <div className="sticky bottom-8 md:-bottom-0 z-10 ">
+          <AssetPagination
+            page={page}
+            pageSize={pageSize}
+            totalAssets={totalAssets}
+            handlePageChange={handlePageChange}
+            handlePageSizeChange={handlePageSizeChange}
+          />
+        </div>
       )}
     </div>
   );

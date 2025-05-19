@@ -107,88 +107,96 @@ export default function AssetToolbar({
   };
 
   return (
-    <div className="bg-gray-100 z-[2] rounded-none shadow-none pb-4 md:pb-0 border-b md:border-none px-4  border-gray-300 mb-0 sticky top-0 ">
-      <div className="grid grid-cols-3 items-center py-3  gap-3">
-        <InputText
-          value={search}
-          onChange={handleSearchChange}
-          icon={<Search />}
-          placeholder="Search by name"
-        />
+    <div className="bg-gray-100 z-[2] shadow-none border-b border-gray-200 mb-0">
+      <div className=" mx-auto px-4">
+        <div className="grid grid-cols-3 items-center py-4 gap-3">
+          <div className="col-span-2 md:col-span-1">
+            <InputText
+              value={search}
+              onChange={handleSearchChange}
+              icon={<Search className="text-gray-400" />}
+              placeholder="Search by name"
+            />
+          </div>
 
-        <button
-          onClick={() => setShowSlideUpToolbar(!showSlideUpToolbar)}
-          className="flex md:hidden btn btn-soft "
-        >
-          {!showSlideUpToolbar ? <Filter size={14} /> : <FilterX size={14} />}{" "}
-          Filter
-        </button>
+          <div className="flex justify-center md:justify-start">
+            <button
+              onClick={() => setShowSlideUpToolbar(!showSlideUpToolbar)}
+              className="flex md:hidden btn btn-soft items-center gap-1"
+            >
+              {!showSlideUpToolbar ? <Filter size={14} /> : <FilterX size={14} />}{" "}
+              Filter
+            </button>
 
-        <div>
-          <button
-            onClick={() => setShowToolbar(!showToolbar)}
-            className="hidden md:flex btn btn-soft btn-sm"
-          >
-            {!showToolbar ? <Filter size={14} /> : <FilterX size={14} />} Filter
-          </button>
+            <button
+              onClick={() => setShowToolbar(!showToolbar)}
+              className="hidden md:flex btn btn-soft btn-sm items-center gap-1"
+            >
+              {!showToolbar ? <Filter size={14} /> : <FilterX size={14} />} Filter
+            </button>
+          </div>
+
+          <div className="flex items-center justify-end gap-2">
+            <AssetViewToggle
+              currentView={currentView}
+              onChange={setCurrentView}
+            />
+            <div className="hidden md:block">
+              <SelectedAssetsPage />
+            </div>
+            {role !== "read_only" && (
+              <>
+                <button
+                  onClick={() => setShowForm(!showForm)}
+                  className="btn btn-sm btn-primary btn-soft flex items-center gap-1"
+                >
+                  <PlusCircle className="w-4 h-4" /> 
+                  <span className="hidden md:inline">New Asset</span>
+                  <span className="md:hidden">New</span>
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
-        <div className="md:flex items-center justify-end gap-2 hidden">
-          <AssetViewToggle
-            currentView={currentView}
-            onChange={setCurrentView}
-          />
-          <SelectedAssetsPage />
-          {role !== "read_only" && (
-            <>
-              <button
-                onClick={() => setShowForm(!showForm)}
-                className="btn  btn-sm btn-primary btn-soft"
-              >
-                <PlusCircle className="w-5 h-5" /> New Asset
-              </button>
-            </>
+        <AnimatePresence>
+          {showToolbar && (
+            <motion.div
+              initial={{ height: 0, opacity: 0, overflow: "hidden" }}
+              animate={{ height: "auto", opacity: 1, overflow: "visible" }}
+              exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="pb-4"
+            >
+              {renderFIlter()}
+            </motion.div>
           )}
-        </div>
-      </div>
+        </AnimatePresence>
 
-      <AnimatePresence>
-        {showToolbar && (
-          <motion.div
-            initial={{ height: 0, opacity: 0, overflow: "hidden" }}
-            animate={{ height: "auto", opacity: 1, overflow: "visible" }}
-            exit={{ height: 0, opacity: 0, overflow: "hidden" }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="bg-gray-100 relative border- border-gray-200"
-          >
-            {renderFIlter()}
-          </motion.div>
+        <SlideUpModal
+          modalOpen={showSlideUpToolbar}
+          onToggle={setShowSlideUpToolbar}
+        >
+          {renderFIlter()}
+        </SlideUpModal>
+
+        {/* TABLE HEADER */}
+        {currentView === "table" && (
+          <div className="hidden mt-4 w-full md:grid grid-cols-12 items-center font-bold text-xs bg-white px-4 py-2 text-gray-500 rounded-t-lg border border-gray-200">
+            <div className="col-span-4 pr-4 py-2 flex items-center gap-2">
+              <Checkbox checked={allSelected} onChange={toggleSelectAll} />
+             Asset Name
+            </div>
+            <div className="px-4 py-2 flex items-center">Condition</div>
+            <div className="px-4 py-2 flex items-center"> Code</div>
+            <div className="px-4 py-2 flex items-center">Location</div>
+            <div className="px-4 py-2 col-span-2 flex items-center">Value</div>
+            <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
+              Options
+            </div>
+          </div>
         )}
-      </AnimatePresence>
-
-      <SlideUpModal
-        modalOpen={showSlideUpToolbar}
-        onToggle={setShowSlideUpToolbar}
-      >
-        {renderFIlter()}
-      </SlideUpModal>
-
-      {/* TABLE HEADER */}
-      {currentView === "table" && (
-        <div className="hidden mt-4 w-full md:grid grid-cols-12 items-center font-bold text-xs bg-white px-4 py-2 text-gray-500 rounded-t-lg border border-gray-200">
-          <div className="col-span-4 pr-4 py-2 flex items-center gap-2">
-            <Checkbox checked={allSelected} onChange={toggleSelectAll} />
-           Asset Name
-          </div>
-          <div className="px-4 py-2 flex items-center">Condition</div>
-          <div className="px-4 py-2 flex items-center"> Code</div>
-          <div className="px-4 py-2 flex items-center">Location</div>
-          <div className="px-4 py-2 col-span-2 flex items-center">Value</div>
-          <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
-            Options
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

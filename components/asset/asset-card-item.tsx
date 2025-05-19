@@ -66,7 +66,7 @@ const CardItem = ({
 
   return (
     <div 
-      className={`relative bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md ${
+      className={`relative bg-white rounded-xl  overflow-hidden transition-all duration-200 hover:shadow-md ${
         checked ? "ring-2 ring-blue-500" : "border border-gray-200"
       }`}
       style={{ height: "380px" }}

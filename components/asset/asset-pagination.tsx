@@ -15,17 +15,93 @@ export default function AssetPagination({
   handlePageChange,
   handlePageSizeChange,
 }: AssetPaginationProps) {
+  const totalPages = Math.max(1, Math.ceil(totalAssets / pageSize));
+  
   return (
-    <div className="sticky bottom-16 md:bottom-0 py-2 w-full   bg-gray-50 border-none  border-gray-300 rounded-b-2xl rounded-none px-4 z-[2]">
-      <div className="flex flex-col md:flex-row justify-between items-center  md:space-y-0">
-        <div className="hidden md:block text-xs text-gray-600 ">
-          Showing <span className="font-bold">{Math.min((page - 1) * pageSize + 1, totalAssets)}</span> to{" "}
-          <span className="font-bold">{Math.min(page * pageSize, totalAssets)}</span> of {totalAssets} assets
+    <div className="w-full bg-gray-100 border-t border-gray-200 py-3 px-4 shadow-sm">
+      <div className=" mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+        {/* Mobile view */}
+        <div className="md:hidden flex w-full justify-between items-center">
+          <button
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page === 1}
+            className="px-3 py-1 border border-gray-300 bg-white text-gray-600 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          
+          <span className="text-sm font-medium">
+            Page {page} of {totalPages}
+          </span>
+          
+          <button
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page >= totalPages}
+            className="px-3 py-1 border border-gray-300 bg-white text-gray-600 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight size={16} />
+          </button>
         </div>
-        <div className="hidden md:flex w-max items-center gap-2">
-            <p className="text-xs">Item per page</p>
+        
+        {/* Desktop view */}
+        <div className="hidden md:block text-sm text-gray-600">
+          Showing <span className="font-medium">{Math.min((page - 1) * pageSize + 1, totalAssets)}</span> to{" "}
+          <span className="font-medium">{Math.min(page * pageSize, totalAssets)}</span> of{" "}
+          <span className="font-medium">{totalAssets}</span> assets
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-2">
+            <button
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 1}
+              className="p-2 border border-gray-300 bg-white text-gray-600 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            
+            <div className="flex items-center">
+              {Array.from({ length: Math.min(5, totalPages) }).map((_, idx) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = idx + 1;
+                } else if (page <= 3) {
+                  pageNum = idx + 1;
+                } else if (page >= totalPages - 2) {
+                  pageNum = totalPages - 4 + idx;
+                } else {
+                  pageNum = page - 2 + idx;
+                }
+                
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`w-8 h-8 flex items-center justify-center text-sm rounded-md ${
+                      page === pageNum 
+                        ? "bg-blue-50 text-blue-600 font-medium" 
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page >= totalPages}
+              className="p-2 border border-gray-300 bg-white text-gray-600 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">Items per page</span>
             <select
-              className=" px-2 py-1 text-xs border border-gray-300 bg-gray-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+              className="px-2 py-1 text-sm border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
               value={pageSize}
               onChange={handlePageSizeChange}
             >
@@ -34,25 +110,6 @@ export default function AssetPagination({
               <option value={50}>50</option>
             </select>
           </div>
-        <div className="flex justify-end items-center space-x-4 ">
-          
-          <button
-            onClick={() => handlePageChange(page - 1)}
-            disabled={page === 1}
-            className="px-3 py-1s border border-gray-300 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronLeft />
-          </button>
-          <span className="text-xs text-gray-600">
-            Page <span className="font-bold">{page}</span> of <span className="font-bold">{Math.max(1, Math.ceil(totalAssets / pageSize))}</span>
-          </span>
-          <button
-            onClick={() => handlePageChange(page + 1)}
-            disabled={page * pageSize >= totalAssets}
-            className="px-3 py-1s border border-gray-300 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronRight />
-          </button>
         </div>
       </div>
     </div>
