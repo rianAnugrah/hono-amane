@@ -47,9 +47,10 @@ interface InspectionDetailProps {
   inspectionId: string;
   onBack?: () => void; // Optional callback for back button
   isStandalone?: boolean; // Whether this is a standalone page or embedded
+  onInspectionChange?: () => void; // Optional callback for when inspection data changes
 }
 
-const InspectionDetail = ({ inspectionId, onBack, isStandalone = false }: InspectionDetailProps) => {
+const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspectionChange }: InspectionDetailProps) => {
   // Use the asset form hook for handling form state and operations
   const {
     form,
@@ -111,6 +112,11 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false }: Inspec
       .then((data) => {
         if (data.success) {
           setInspection(data.data);
+          
+          // Notify parent component that we've refreshed the data
+          if (onInspectionChange) {
+            onInspectionChange();
+          }
         } else {
           throw new Error(data.error || "Failed to load inspection data");
         }
@@ -248,25 +254,43 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false }: Inspec
         }
         
         // Update inspection state to include the new item
-        setInspection((prev) => {
-          if (!prev) return prev;
-
-          return {
-            ...prev,
-            items: [...prev.items, itemData],
-          };
-        });
-
-        // Reset selection
-        setSelectedAsset(null);
-        setSearchResults([]);
-        setSearchQuery("");
-
-        // Reset asset edit form
-        setShowAssetEditForm(false);
-        setAssetToEdit(null);
-        setAssetCondition("Good");
-        setAssetRemarks("");
+        if (inspection) {
+          // Use a copy of the previous inspection data
+          const updatedInspection = { ...inspection };
+          
+          // Create the new item if we have all necessary data
+          if (asset) {
+            const newItem = {
+              id: itemData.id,
+              asset: asset,
+              assetVersion: asset.version,
+            };
+            
+            // Add the new item to the items array
+            updatedInspection.items = [...updatedInspection.items, newItem];
+            
+            // Update the state
+            setInspection(updatedInspection);
+            
+            // Clear selected asset and search results
+            setSelectedAsset(null);
+            setSearchResults([]);
+            setSearchQuery("");
+            setAssetToEdit(null);
+            setShowAssetEditForm(false);
+            
+            // Notify parent component of change if callback provided
+            if (onInspectionChange) {
+              onInspectionChange();
+            }
+            
+            console.log("Updated inspection with new asset:", updatedInspection);
+          } else {
+            console.error("Cannot add asset to inspection: Asset data is missing");
+          }
+        } else {
+          console.error("Cannot add asset to inspection: Inspection data is missing");
+        }
       } else {
         console.error("API returned error when adding asset:", data);
         throw new Error(data.error || "Failed to add asset to inspection");
@@ -279,86 +303,58 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false }: Inspec
 
   // Simple function to save asset edit without the full form
   const handleSaveAssetEdit = async () => {
-    if (!assetToEdit || !inspectionId) return;
+    if (!assetToEdit) return;
 
     try {
-      console.log("handleSaveAssetEdit - Starting with asset:", assetToEdit);
-      
-      // First, ensure we have the latest asset data (with the correct version and isLatest flag)
-      console.log("Fetching latest asset data for:", assetToEdit.assetNo);
-      const latestAssetResponse = await fetch(`/api/assets/by-asset-number/${assetToEdit.assetNo}`);
-      
-      if (!latestAssetResponse.ok) {
-        const errorText = await latestAssetResponse.text();
-        console.error(`Error fetching latest asset (${latestAssetResponse.status}): ${errorText}`);
-        throw new Error(`Failed to fetch latest asset data: ${latestAssetResponse.statusText}`);
-      }
-      
-      const latestAsset = await latestAssetResponse.json();
-      console.log("Latest asset data received:", latestAsset);
-      
-      if (!latestAsset || !latestAsset.id) {
-        throw new Error("Could not find the latest version of this asset");
-      }
-      
-      // Fix: Make sure we're updating the correct asset with exact values from the original
-      console.log("Updating asset with ID:", latestAsset.id);
-      
-      // Create a minimal update payload with only the fields we want to update
-      // Note that the API creates a new version with the updated fields
-      const updatePayload = {
-        assetNo: latestAsset.assetNo,
-        assetName: latestAsset.assetName,
+      // Prepare the update data
+      const updateData = {
+        id: assetToEdit.id,
         condition: assetCondition,
-        remark: assetRemarks
+        remark: assetRemarks || null,
       };
-      
-      console.log("Update payload:", updatePayload);
-      
-      const updateResponse = await fetch(`/api/assets/${latestAsset.id}`, {
-        method: "PUT",
+
+      console.log("Updating asset with data:", updateData);
+
+      // Send the update request
+      const response = await fetch(`/api/assets/${assetToEdit.id}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updatePayload),
+        body: JSON.stringify(updateData),
       });
 
-      console.log("Update response status:", updateResponse.status);
-      
-      if (!updateResponse.ok) {
-        const errorText = await updateResponse.text();
-        console.error(`Update failed with error (${updateResponse.status}): ${errorText}`);
-        throw new Error(`Update failed with status: ${updateResponse.status}. Response: ${errorText}`);
+      if (!response.ok) {
+        throw new Error(`Failed to update asset: ${response.statusText}`);
       }
 
-      // Get the updated asset data
-      const updatedAsset = await updateResponse.json();
-      console.log("Update successful, new asset data:", updatedAsset);
+      const data = await response.json();
 
-      // Wait for the update to complete before proceeding
-      // Now fetch the latest version to ensure we have the current data
-      console.log("Fetching the freshly updated asset by ID:", updatedAsset.id);
-      const refreshResponse = await fetch(`/api/assets/${updatedAsset.id}`);
-      
-      if (!refreshResponse.ok) {
-        console.error("Error fetching updated asset:", refreshResponse.statusText);
-        // Continue with the data we have
-      } else {
-        const refreshedAsset = await refreshResponse.json();
-        console.log("Refreshed asset data:", refreshedAsset);
-        
-        // Add the updated asset to the inspection
-        console.log("Adding refreshed asset to inspection");
-        await handleAddAsset(refreshedAsset);
+      if (!data.id) {
+        throw new Error("Invalid response data from asset update");
       }
-      
-      // Reset state after successful update
+
+      console.log("Asset updated successfully:", data);
+
+      // Add the updated asset to the inspection
+      await handleAddAsset({
+        ...assetToEdit,
+        condition: assetCondition,
+        remark: assetRemarks || null,
+        version: data.version || assetToEdit.version
+      });
+
+      // Close the form
       setShowAssetEditForm(false);
       setAssetToEdit(null);
-      console.log("Asset edit flow completed successfully");
-    } catch (error) {
-      console.error("Error updating asset:", error);
-      setError(`Failed to update asset: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      // Notify parent component of change if callback provided
+      if (onInspectionChange) {
+        onInspectionChange();
+      }
+    } catch (err) {
+      console.error("Error updating asset:", err);
+      setError(`Failed to update asset: ${err instanceof Error ? err.message : "Unknown error"}`);
     }
   };
 
@@ -410,31 +406,33 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false }: Inspec
 
   // Remove asset from inspection
   const handleRemoveAsset = async (itemId: string) => {
-    if (!inspectionId) return;
+    if (!inspectionId || !itemId) return;
 
     try {
       const response = await fetch(`/api/inspections/items/${itemId}`, {
         method: "DELETE",
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        // Update inspection state to remove the item
-        setInspection((prev) => {
-          if (!prev) return prev;
-
-          return {
-            ...prev,
-            items: prev.items.filter((item) => item.id !== itemId),
-          };
-        });
-      } else {
-        throw new Error(data.error || "Failed to remove asset from inspection");
+      if (!response.ok) {
+        throw new Error(`Failed to remove asset: ${response.statusText}`);
       }
-    } catch (error) {
-      console.error("Error removing asset from inspection:", error);
-      setError("Failed to remove asset. Please try again.");
+
+      // Update the state by removing the item with the matching ID
+      if (inspection) {
+        const updatedInspection = { ...inspection };
+        updatedInspection.items = updatedInspection.items.filter(
+          (item) => item.id !== itemId
+        );
+        setInspection(updatedInspection);
+        
+        // Notify parent component of change if callback provided
+        if (onInspectionChange) {
+          onInspectionChange();
+        }
+      }
+    } catch (err) {
+      console.error("Error removing asset from inspection:", err);
+      setError("Failed to remove asset from inspection. Please try again.");
     }
   };
 
@@ -443,33 +441,34 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false }: Inspec
     if (!inspectionId) return;
 
     try {
-      const response = await fetch(`/api/inspections/${inspectionId}`, {
+      const response = await fetch(`/api/inspections/${inspectionId}/notes`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          notes: newNotes,
-        }),
+        body: JSON.stringify({ notes: newNotes.trim() || null }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update notes: ${response.statusText}`);
+      }
 
       const data = await response.json();
 
-      if (data.success) {
-        setInspection((prev) => {
-          if (!prev) return prev;
-
-          return {
-            ...prev,
-            notes: data.data.notes,
-          };
-        });
+      if (data.success && inspection) {
+        const updatedInspection = { ...inspection, notes: newNotes.trim() || null };
+        setInspection(updatedInspection);
+        
+        // Notify parent component of change if callback provided
+        if (onInspectionChange) {
+          onInspectionChange();
+        }
       } else {
-        throw new Error(data.error || "Failed to update inspection notes");
+        throw new Error(data.error || "Failed to update notes");
       }
-    } catch (error) {
-      console.error("Error updating inspection notes:", error);
-      setError("Failed to update notes. Please try again.");
+    } catch (err) {
+      console.error("Error updating inspection notes:", err);
+      setError("Failed to update inspection notes. Please try again.");
     }
   };
 
@@ -482,30 +481,35 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false }: Inspec
 
   // Delete inspection
   const handleDeleteInspection = async () => {
-    if (
-      !inspectionId ||
-      !confirm("Are you sure you want to delete this inspection?")
-    )
+    if (!inspectionId || !window.confirm("Are you sure you want to delete this inspection? This action cannot be undone.")) {
       return;
+    }
 
     try {
       const response = await fetch(`/api/inspections/${inspectionId}`, {
         method: "DELETE",
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        if (isStandalone) {
-          navigate("/inspection");
-        } else if (onBack) {
-          onBack();
-        }
-      } else {
-        throw new Error(data.error || "Failed to delete inspection");
+      if (!response.ok) {
+        throw new Error(`Failed to delete inspection: ${response.statusText}`);
       }
-    } catch (error) {
-      console.error("Error deleting inspection:", error);
+
+      // Show success message and navigate back
+      alert("Inspection deleted successfully");
+      
+      // Notify parent component of change if callback provided
+      if (onInspectionChange) {
+        onInspectionChange();
+      }
+      
+      // Navigate back or call the onBack function
+      if (onBack) {
+        onBack();
+      } else if (isStandalone) {
+        navigate("/inspection");
+      }
+    } catch (err) {
+      console.error("Error deleting inspection:", err);
       setError("Failed to delete inspection. Please try again.");
     }
   };

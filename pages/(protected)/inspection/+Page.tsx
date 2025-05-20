@@ -150,7 +150,7 @@ export default function InspectionListPage() {
     return (
       <motion.div
         className="grid gap-4 overflow-y-auto pb-20"
-        style={{ maxHeight: isMobile ? 'none' : 'calc(100vh - 150px)' }}
+        style={{ maxHeight: isMobile ? 'none' : 'calc(100vh - 180px)' }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
@@ -270,7 +270,7 @@ export default function InspectionListPage() {
   // Render the "create new inspection" panel
   const renderNewInspectionForm = () => {
     return (
-      <div className="bg-white rounded-xl shadow">
+      <div className="bg-white rounded-xl shadow overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
         <div className="p-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">Create New Inspection</h2>
@@ -292,7 +292,7 @@ export default function InspectionListPage() {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4 sticky top-0 bg-gray-100 z-10 py-3 -mx-6 px-6 shadow-sm">
         <h1 className="text-2xl font-bold">Asset Inspections</h1>
         {!isMobile && !showNewInspectionForm ? (
           <button
@@ -320,16 +320,16 @@ export default function InspectionListPage() {
         isFullView ? (
           <div className="grid grid-cols-5 gap-6">
             {/* Left side: Inspections list - smaller when in full view */}
-            <div className="col-span-1">
+            <div className="col-span-1 overflow-hidden">
               {renderInspectionsList()}
             </div>
 
             {/* Right side: Full inspection details using component */}
-            <div className="col-span-4 bg-white rounded-xl shadow">
+            <div className="col-span-4 bg-white rounded-xl shadow overflow-hidden max-h-[calc(100vh-180px)]">
               {showNewInspectionForm ? (
                 renderNewInspectionForm()
               ) : selectedInspectionId ? (
-                <div className="p-4">
+                <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
                   <div className="flex justify-end mb-4">
                     <button
                       onClick={toggleFullView}
@@ -340,7 +340,8 @@ export default function InspectionListPage() {
                   </div>
                   <InspectionDetail 
                     inspectionId={selectedInspectionId} 
-                    onBack={() => setSelectedInspectionId(null)} 
+                    onBack={() => setSelectedInspectionId(null)}
+                    onInspectionChange={() => loadInspections()}
                   />
                 </div>
               ) : (
@@ -358,11 +359,11 @@ export default function InspectionListPage() {
             </div>
 
             {/* Middle: Inspection details or New Form */}
-            <div className={`bg-white rounded-xl shadow ${selectedAsset ? 'col-span-1' : 'col-span-1'}`}>
+            <div className={`bg-white rounded-xl shadow overflow-hidden ${selectedAsset ? 'col-span-1' : 'col-span-1'}`}>
               {showNewInspectionForm ? (
                 renderNewInspectionForm()
               ) : selectedInspectionId ? (
-                <div className="p-4">
+                <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
                   <div className="flex justify-end mb-2">
                     <button
                       onClick={toggleFullView}
@@ -379,7 +380,8 @@ export default function InspectionListPage() {
                   </div>
                   <InspectionDetail 
                     inspectionId={selectedInspectionId} 
-                    onBack={() => setSelectedInspectionId(null)} 
+                    onBack={() => setSelectedInspectionId(null)}
+                    onInspectionChange={() => loadInspections()}
                   />
                 </div>
               ) : (
@@ -391,7 +393,7 @@ export default function InspectionListPage() {
             
             {/* Right side: Asset details (when an asset is selected) */}
             {selectedAsset && (
-              <div className="col-span-1 bg-white rounded-xl shadow p-4">
+              <div className="col-span-1 bg-white rounded-xl shadow p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
                 {renderAssetDetails()}
               </div>
             )}
@@ -399,7 +401,9 @@ export default function InspectionListPage() {
         )
       ) : (
         /* Mobile view: just the list */
-        renderInspectionsList()
+        <div className="pt-2">
+          {renderInspectionsList()}
+        </div>
       )}
     </div>
   )
