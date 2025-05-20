@@ -68,7 +68,7 @@ function MobileNavbar() {
                   label="Location"
                 />
                 <MobileLink
-                  href="/audit"
+                  href="/inspection"
                   icon={<SearchCheck />}
                   label="Inspection"
                 />
