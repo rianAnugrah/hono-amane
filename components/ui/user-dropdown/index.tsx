@@ -5,11 +5,11 @@ export default function UserDropDown({isCompact = false} : {isCompact?: boolean}
   const { email, name, role } = useUserStore();
   
   return (
-    <div className="dropdown dropdown-end dropdown-hover cursor-pointer h-full">
+    <div className="dropdown dropdown-end dropdown-hover cursor-pointer h-full w-full">
       <div
         tabIndex={0}
         role="button"
-        className="flex flex-col gap-6 items-center justify-start py-8 rounded-lg w-[18rem] p-2"
+        className="flex flex-col gap-6 items-center justify-start py-8 rounded-lg w-full p-2"
       >
         <div className="bg-amber-600 w-10 h-10 rounded-full p-2">
           {name ? (
