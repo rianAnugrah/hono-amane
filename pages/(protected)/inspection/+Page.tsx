@@ -8,6 +8,7 @@ import type { Inspection, InspectionItem, Asset } from '@/components/inspection/
 
 export default function InspectionListPage() {
   const [inspections, setInspections] = useState<Inspection[]>([])
+  const [filteredInspections, setFilteredInspections] = useState<Inspection[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null)
@@ -18,6 +19,16 @@ export default function InspectionListPage() {
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
   const [isFullView, setIsFullView] = useState(false)
   const [showNewInspectionForm, setShowNewInspectionForm] = useState(false)
+  
+  // Search and filter states
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filterByInspector, setFilterByInspector] = useState("")
+  const [filterByDateRange, setFilterByDateRange] = useState<{start: string, end: string}>({
+    start: "",
+    end: ""
+  })
+  const [inspectors, setInspectors] = useState<Array<{id: string, name: string}>>([])
+  const [showFilters, setShowFilters] = useState(false)
 
   // Check if screen is mobile size
   useEffect(() => {
@@ -49,6 +60,21 @@ export default function InspectionListPage() {
       .then((data) => {
         if (data.success) {
           setInspections(data.data)
+          setFilteredInspections(data.data)
+          
+          // Extract unique inspectors for filter dropdown
+          const uniqueInspectors = Array.from(
+            new Set(
+              data.data
+                .filter((inspection: Inspection) => inspection.inspector && inspection.inspector.id)
+                .map((inspection: Inspection) => JSON.stringify({
+                  id: inspection.inspector.id,
+                  name: inspection.inspector.name || inspection.inspector.email || 'Unknown'
+                }))
+            )
+          ).map((str) => JSON.parse(str as string));
+          
+          setInspectors(uniqueInspectors);
         } else {
           throw new Error(data.error || 'Failed to load inspection data')
         }
@@ -63,6 +89,47 @@ export default function InspectionListPage() {
   useEffect(() => {
     loadInspections();
   }, [])
+
+  // Apply filters to inspections
+  useEffect(() => {
+    if (!inspections.length) return;
+    
+    let filtered = [...inspections];
+    
+    // Apply search filter (on date and inspector name)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(inspection => 
+        (inspection.date && new Date(inspection.date).toLocaleDateString().toLowerCase().includes(query)) ||
+        (inspection.inspector?.name && inspection.inspector.name.toLowerCase().includes(query)) ||
+        (inspection.inspector?.email && inspection.inspector.email.toLowerCase().includes(query)) ||
+        (inspection.notes && inspection.notes.toLowerCase().includes(query))
+      );
+    }
+    
+    // Apply inspector filter
+    if (filterByInspector) {
+      filtered = filtered.filter(inspection => 
+        inspection.inspector && inspection.inspector.id === filterByInspector
+      );
+    }
+    
+    // Apply date range filter
+    if (filterByDateRange.start || filterByDateRange.end) {
+      filtered = filtered.filter(inspection => {
+        const inspectionDate = new Date(inspection.date);
+        const startDate = filterByDateRange.start ? new Date(filterByDateRange.start) : new Date(0);
+        const endDate = filterByDateRange.end ? new Date(filterByDateRange.end) : new Date(8640000000000000); // Max date
+        
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+        
+        return inspectionDate >= startDate && inspectionDate <= endDate;
+      });
+    }
+    
+    setFilteredInspections(filtered);
+  }, [inspections, searchQuery, filterByInspector, filterByDateRange]);
 
   // Function to fetch inspection details when an inspection is selected
   const handleSelectInspection = async (id: string) => {
@@ -147,6 +214,10 @@ export default function InspectionListPage() {
       return <div className="p-4 bg-gray-50 text-gray-600 rounded-lg">No inspection records found.</div>;
     }
     
+    if (filteredInspections.length === 0) {
+      return <div className="p-4 bg-gray-50 text-gray-600 rounded-lg">No inspections match the current filters.</div>;
+    }
+    
     return (
       <motion.div
         className="grid gap-4 overflow-y-auto pb-20"
@@ -154,7 +225,7 @@ export default function InspectionListPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        {inspections.map((inspection) => {
+        {filteredInspections.map((inspection) => {
           const inspectorName = inspection.inspector?.name || 'Unknown'
           const itemCount = inspection.items.length
           const isSelected = selectedInspection?.id === inspection.id
@@ -290,6 +361,118 @@ export default function InspectionListPage() {
     );
   };
 
+  // Render search and filters UI
+  const renderSearchAndFilters = () => {
+    return (
+      <div className="mb-4 bg-white rounded-lg shadow p-4">
+        <div className="flex flex-col sm:flex-row gap-3 mb-2">
+          {/* Search input */}
+          <div className="flex-1">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search inspections..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setSearchQuery('');
+                    e.currentTarget.blur();
+                  }
+                }}
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+          
+          {/* Filter toggle button */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg flex items-center gap-2"
+          >
+            <span>Filters</span>
+            <span>{showFilters ? '▲' : '▼'}</span>
+          </button>
+        </div>
+        
+        {/* Collapsible filter panel */}
+        {showFilters && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 pt-3 border-t">
+            {/* Inspector filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Filter by Inspector
+              </label>
+              <select
+                value={filterByInspector}
+                onChange={(e) => setFilterByInspector(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">All Inspectors</option>
+                {inspectors.map((inspector) => (
+                  <option key={inspector.id} value={inspector.id}>
+                    {inspector.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Date range filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Filter by Date Range
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="date"
+                  placeholder="Start date"
+                  value={filterByDateRange.start}
+                  onChange={(e) => setFilterByDateRange({...filterByDateRange, start: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <input
+                  type="date"
+                  placeholder="End date"
+                  value={filterByDateRange.end}
+                  onChange={(e) => setFilterByDateRange({...filterByDateRange, end: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+            
+            {/* Clear filters button */}
+            <div className="sm:col-span-2 flex justify-end">
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setFilterByInspector('');
+                  setFilterByDateRange({start: '', end: ''});
+                }}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {/* Results count */}
+        <div className="mt-3 text-sm text-gray-500">
+          {filteredInspections.length} {filteredInspections.length === 1 ? 'inspection' : 'inspections'} found
+          {filteredInspections.length !== inspections.length && ` (filtered from ${inspections.length})`}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4 sticky top-0 bg-gray-100 z-10 py-3 -mx-6 px-6 shadow-sm">
@@ -321,6 +504,7 @@ export default function InspectionListPage() {
           <div className="grid grid-cols-5 gap-6">
             {/* Left side: Inspections list - smaller when in full view */}
             <div className="col-span-1 overflow-hidden">
+              {renderSearchAndFilters()}
               {renderInspectionsList()}
             </div>
 
@@ -355,6 +539,7 @@ export default function InspectionListPage() {
           <div className={`grid ${selectedAsset ? 'grid-cols-3' : 'grid-cols-2'} gap-6`}>
             {/* Left side: Inspections list */}
             <div className={selectedAsset ? 'col-span-1' : 'col-span-1'}>
+              {renderSearchAndFilters()}
               {renderInspectionsList()}
             </div>
 
@@ -402,6 +587,7 @@ export default function InspectionListPage() {
       ) : (
         /* Mobile view: just the list */
         <div className="pt-2">
+          {renderSearchAndFilters()}
           {renderInspectionsList()}
         </div>
       )}
