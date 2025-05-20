@@ -2,39 +2,20 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from '@/renderer/Link'
 import { navigate } from 'vike/client/router'
-
-type InspectionItem = {
-  id: string
-  asset: {
-    id: string
-    assetNo: string
-    assetName: string
-    condition: string
-    version: number
-  }
-  assetVersion: number
-}
-
-type Inspection = {
-  id: string
-  date: string
-  notes: string | null
-  inspector: {
-    id: string
-    name: string | null
-    email: string
-  }
-  items: InspectionItem[]
-}
+import InspectionDetail from '@/components/inspection/InspectionDetail'
+import type { Inspection, InspectionItem, Asset } from '@/components/inspection/InspectionDetail'
 
 export default function InspectionListPage() {
   const [inspections, setInspections] = useState<Inspection[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null)
+  const [selectedInspectionId, setSelectedInspectionId] = useState<string | null>(null)
   const [loadingDetails, setLoadingDetails] = useState(false)
   const [detailsError, setDetailsError] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
+  const [isFullView, setIsFullView] = useState(false)
 
   // Check if screen is mobile size
   useEffect(() => {
@@ -87,6 +68,8 @@ export default function InspectionListPage() {
     // On desktop, show in split view
     setLoadingDetails(true)
     setDetailsError(null)
+    setSelectedAsset(null)
+    setSelectedInspectionId(id);
     
     try {
       const response = await fetch(`/api/inspections/${id}`)
@@ -109,70 +92,28 @@ export default function InspectionListPage() {
     }
   }
 
-  // Handle removing asset from inspection
-  const handleRemoveAsset = async (itemId: string) => {
-    if (!selectedInspection) return;
+  // Function when details are updated from child component
+  const handleDetailsChange = (updatedInspection: Inspection) => {
+    setSelectedInspection(updatedInspection);
+    
+    // Also update the inspection in the list view
+    setInspections(prev => 
+      prev.map(insp => 
+        insp.id === updatedInspection.id ? updatedInspection : insp
+      )
+    );
+  }
 
-    try {
-      const response = await fetch(`/api/inspections/items/${itemId}`, {
-        method: "DELETE",
-      });
+  // Toggle between split view and full view
+  const toggleFullView = () => {
+    setIsFullView(!isFullView)
+    setSelectedAsset(null) // Clear selected asset when toggling view
+  }
 
-      const data = await response.json();
-
-      if (data.success) {
-        // Update selected inspection state to remove the item
-        setSelectedInspection((prev) => {
-          if (!prev) return prev;
-
-          return {
-            ...prev,
-            items: prev.items.filter((item) => item.id !== itemId),
-          };
-        });
-      } else {
-        throw new Error(data.error || "Failed to remove asset from inspection");
-      }
-    } catch (error) {
-      console.error("Error removing asset from inspection:", error);
-      setDetailsError("Failed to remove asset. Please try again.");
-    }
-  };
-
-  // Update inspection notes
-  const handleUpdateNotes = async (newNotes: string) => {
-    if (!selectedInspection) return;
-
-    try {
-      const response = await fetch(`/api/inspections/${selectedInspection.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          notes: newNotes,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setSelectedInspection((prev) => {
-          if (!prev) return prev;
-
-          return {
-            ...prev,
-            notes: data.data.notes,
-          };
-        });
-      } else {
-        throw new Error(data.error || "Failed to update inspection notes");
-      }
-    } catch (error) {
-      console.error("Error updating inspection notes:", error);
-      setDetailsError("Failed to update notes. Please try again.");
-    }
-  };
+  // Function to fetch asset details
+  const handleSelectAsset = async (asset: Asset) => {
+    setSelectedAsset(asset)
+  }
 
   // Render the inspections list
   const renderInspectionsList = () => {
@@ -243,104 +184,66 @@ export default function InspectionListPage() {
     );
   };
 
-  // Render the inspection details panel
-  const renderInspectionDetails = () => {
-    if (loadingDetails) {
-      return (
-        <div className="flex items-center justify-center h-60">
-          <p>Loading inspection details...</p>
-        </div>
-      );
-    }
-    
-    if (detailsError) {
-      return <div className="p-4 bg-red-50 text-red-600 rounded-lg">{detailsError}</div>;
-    }
-    
-    if (!selectedInspection) {
+  // Render asset details panel
+  const renderAssetDetails = () => {
+    if (!selectedAsset) {
       return (
         <div className="flex items-center justify-center h-60 text-gray-500">
-          <p>Select an inspection to view details</p>
+          <p>Select an asset to view details</p>
         </div>
       );
     }
     
     return (
-      <div>
+      <div className="bg-white rounded-lg p-4">
         <div className="flex justify-between items-start mb-4">
-          <div>
-            <h2 className="text-xl font-bold">Inspection Details</h2>
-            <p className="text-gray-600">
-              {new Date(selectedInspection.date).toLocaleDateString()} | Inspector:{" "}
-              {selectedInspection.inspector.name || selectedInspection.inspector.email}
-            </p>
+          <h3 className="text-xl font-bold">{selectedAsset.assetName}</h3>
+          <button 
+            onClick={() => setSelectedAsset(null)}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Asset Number</p>
+              <p>{selectedAsset.assetNo}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Condition</p>
+              <p>{selectedAsset.condition}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Version</p>
+              <p>{selectedAsset.version}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Location</p>
+              <p>{selectedAsset.locationDesc?.description || 'Not specified'}</p>
+            </div>
           </div>
-          <div className="flex gap-2">
+          
+          <div>
+            <p className="text-sm font-medium text-gray-500">Detail Location</p>
+            <p>{selectedAsset.detailsLocation?.description || 'Not specified'}</p>
+          </div>
+          
+          <div>
+            <p className="text-sm font-medium text-gray-500">Remarks</p>
+            <p className="whitespace-pre-wrap">{selectedAsset.remark || 'No remarks'}</p>
+          </div>
+          
+          <div className="pt-4 border-t">
             <Link
-              href={`/inspection/${selectedInspection.id}`}
+              href={`/asset/${selectedAsset.id}`}
               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
             >
-              Full View
+              View Full Asset Details
             </Link>
           </div>
-        </div>
-
-        {/* Notes Section */}
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <h3 className="text-md font-medium mb-2">Notes</h3>
-          <textarea
-            value={selectedInspection.notes || ""}
-            onChange={(e) =>
-              setSelectedInspection((prev) =>
-                prev ? { ...prev, notes: e.target.value } : prev
-              )
-            }
-            onBlur={(e) => handleUpdateNotes(e.target.value)}
-            className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Add inspection notes..."
-            rows={2}
-          />
-        </div>
-
-        {/* Inspected Assets */}
-        <div>
-          <h3 className="text-md font-medium mb-2">Inspected Assets</h3>
-          
-          {selectedInspection.items.length === 0 ? (
-            <p className="text-gray-500 text-sm">
-              No assets have been added to this inspection yet.
-            </p>
-          ) : (
-            <div className="border rounded-md overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset No</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Condition</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {selectedInspection.items.map((item) => (
-                    <tr key={item.id}>
-                      <td className="px-4 py-2 whitespace-nowrap">{item.asset.assetNo}</td>
-                      <td className="px-4 py-2">{item.asset.assetName}</td>
-                      <td className="px-4 py-2">{item.asset.condition}</td>
-                      <td className="px-4 py-2">
-                        <button
-                          onClick={() => handleRemoveAsset(item.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Remove
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
       </div>
     );
@@ -358,19 +261,84 @@ export default function InspectionListPage() {
         </Link>
       </div>
 
-      {/* Desktop view: split layout */}
+      {/* Desktop view: enhanced layout with full view option */}
       {!isMobile ? (
-        <div className="flex gap-6">
-          {/* Left side: Inspections list */}
-          <div className="w-1/2">
-            {renderInspectionsList()}
-          </div>
+        isFullView ? (
+          <div className="grid grid-cols-5 gap-6">
+            {/* Left side: Inspections list - smaller when in full view */}
+            <div className="col-span-1">
+              {renderInspectionsList()}
+            </div>
 
-          {/* Right side: Inspection details */}
-          <div className="w-1/2 bg-white rounded-xl shadow p-4">
-            {renderInspectionDetails()}
+            {/* Right side: Full inspection details using component */}
+            <div className="col-span-4 bg-white rounded-xl shadow">
+              {selectedInspectionId ? (
+                <div className="p-4">
+                  <div className="flex justify-end mb-4">
+                    <button
+                      onClick={toggleFullView}
+                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-md hover:bg-blue-200 transition"
+                    >
+                      Split View
+                    </button>
+                  </div>
+                  <InspectionDetail 
+                    inspectionId={selectedInspectionId} 
+                    onBack={() => setSelectedInspectionId(null)} 
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-60 text-gray-500">
+                  <p>Select an inspection to view details</p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className={`grid ${selectedAsset ? 'grid-cols-3' : 'grid-cols-2'} gap-6`}>
+            {/* Left side: Inspections list */}
+            <div className={selectedAsset ? 'col-span-1' : 'col-span-1'}>
+              {renderInspectionsList()}
+            </div>
+
+            {/* Middle: Inspection details */}
+            <div className={`bg-white rounded-xl shadow ${selectedAsset ? 'col-span-1' : 'col-span-1'}`}>
+              {selectedInspectionId ? (
+                <div className="p-4">
+                  <div className="flex justify-end mb-2">
+                    <button
+                      onClick={toggleFullView}
+                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-md hover:bg-blue-200 transition mr-2"
+                    >
+                      Full View
+                    </button>
+                    <Link
+                      href={`/inspection/${selectedInspectionId}`}
+                      className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition"
+                    >
+                      Go to Page
+                    </Link>
+                  </div>
+                  <InspectionDetail 
+                    inspectionId={selectedInspectionId} 
+                    onBack={() => setSelectedInspectionId(null)} 
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-60 text-gray-500">
+                  <p>Select an inspection to view details</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Right side: Asset details (when an asset is selected) */}
+            {selectedAsset && (
+              <div className="col-span-1 bg-white rounded-xl shadow p-4">
+                {renderAssetDetails()}
+              </div>
+            )}
+          </div>
+        )
       ) : (
         /* Mobile view: just the list */
         renderInspectionsList()

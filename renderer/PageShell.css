@@ -16,10 +16,10 @@ a.is-active {
   transition: opacity 0.2s ease-in-out;
 }
 
-body {
-  /* Prevent content jumps during page transitions */
+/* Prevent content jumps during page transitions */
+/* body {
   overflow-y: scroll;
-}
+} */
 
 /* Smooth transitions for content updates */
 #react-root > * {
