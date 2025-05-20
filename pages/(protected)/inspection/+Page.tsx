@@ -361,13 +361,11 @@ export default function InspectionListPage() {
     );
   };
 
-  // Render search and filters UI
-  const renderSearchAndFilters = () => {
-    return (
-      <div className="mb-4 bg-white rounded-lg shadow p-4">
-        <div className="flex flex-col sm:flex-row gap-3 mb-2">
-          {/* Search input */}
-          <div className="flex-1">
+  return (
+    <div className="p-6">
+      <div className="sticky top-0 bg-gray-100 z-10 -mx-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-center py-3 px-6 gap-3">
+          <div className="flex-1 w-full">
             <div className="relative">
               <input
                 type="text"
@@ -393,204 +391,197 @@ export default function InspectionListPage() {
             </div>
           </div>
           
-          {/* Filter toggle button */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg flex items-center gap-2"
-          >
-            <span>Filters</span>
-            <span>{showFilters ? '▲' : '▼'}</span>
-          </button>
-        </div>
-        
-        {/* Collapsible filter panel */}
-        {showFilters && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 pt-3 border-t">
-            {/* Inspector filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Filter by Inspector
-              </label>
-              <select
-                value={filterByInspector}
-                onChange={(e) => setFilterByInspector(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">All Inspectors</option>
-                {inspectors.map((inspector) => (
-                  <option key={inspector.id} value={inspector.id}>
-                    {inspector.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg flex items-center gap-1"
+            >
+              <span>Filters</span>
+              <span>{showFilters ? '▲' : '▼'}</span>
+            </button>
             
-            {/* Date range filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Filter by Date Range
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="date"
-                  placeholder="Start date"
-                  value={filterByDateRange.start}
-                  onChange={(e) => setFilterByDateRange({...filterByDateRange, start: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <input
-                  type="date"
-                  placeholder="End date"
-                  value={filterByDateRange.end}
-                  onChange={(e) => setFilterByDateRange({...filterByDateRange, end: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-            
-            {/* Clear filters button */}
-            <div className="sm:col-span-2 flex justify-end">
+            {!isMobile && !showNewInspectionForm ? (
               <button
                 onClick={() => {
-                  setSearchQuery('');
-                  setFilterByInspector('');
-                  setFilterByDateRange({start: '', end: ''});
+                  setShowNewInspectionForm(true);
+                  setSelectedInspectionId(null);
+                  setSelectedAsset(null);
                 }}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg"
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition whitespace-nowrap"
               >
-                Clear Filters
+                + New Inspection
               </button>
-            </div>
-          </div>
-        )}
-        
-        {/* Results count */}
-        <div className="mt-3 text-sm text-gray-500">
-          {filteredInspections.length} {filteredInspections.length === 1 ? 'inspection' : 'inspections'} found
-          {filteredInspections.length !== inspections.length && ` (filtered from ${inspections.length})`}
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4 sticky top-0 bg-gray-100 z-10 py-3 -mx-6 px-6 shadow-sm">
-        <h1 className="text-2xl font-bold">Asset Inspections</h1>
-        {!isMobile && !showNewInspectionForm ? (
-          <button
-            onClick={() => {
-              setShowNewInspectionForm(true);
-              setSelectedInspectionId(null);
-              setSelectedAsset(null);
-            }}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-          >
-            + New Inspection
-          </button>
-        ) : (
-          <Link
-            href="/inspection/new"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-          >
-            + New Inspection
-          </Link>
-        )}
-      </div>
-
-      {/* Desktop view: enhanced layout with full view option */}
-      {!isMobile ? (
-        isFullView ? (
-          <div className="grid grid-cols-5 gap-6">
-            {/* Left side: Inspections list - smaller when in full view */}
-            <div className="col-span-1 overflow-hidden">
-              {renderSearchAndFilters()}
-              {renderInspectionsList()}
-            </div>
-
-            {/* Right side: Full inspection details using component */}
-            <div className="col-span-4 bg-white rounded-xl shadow overflow-hidden max-h-[calc(100vh-180px)]">
-              {showNewInspectionForm ? (
-                renderNewInspectionForm()
-              ) : selectedInspectionId ? (
-                <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
-                  <div className="flex justify-end mb-4">
-                    <button
-                      onClick={toggleFullView}
-                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-md hover:bg-blue-200 transition"
-                    >
-                      Split View
-                    </button>
-                  </div>
-                  <InspectionDetail 
-                    inspectionId={selectedInspectionId} 
-                    onBack={() => setSelectedInspectionId(null)}
-                    onInspectionChange={() => loadInspections()}
-                  />
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-60 text-gray-500">
-                  <p>Select an inspection to view details or create a new one</p>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className={`grid ${selectedAsset ? 'grid-cols-3' : 'grid-cols-2'} gap-6`}>
-            {/* Left side: Inspections list */}
-            <div className={selectedAsset ? 'col-span-1' : 'col-span-1'}>
-              {renderSearchAndFilters()}
-              {renderInspectionsList()}
-            </div>
-
-            {/* Middle: Inspection details or New Form */}
-            <div className={`bg-white rounded-xl shadow overflow-hidden ${selectedAsset ? 'col-span-1' : 'col-span-1'}`}>
-              {showNewInspectionForm ? (
-                renderNewInspectionForm()
-              ) : selectedInspectionId ? (
-                <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
-                  <div className="flex justify-end mb-2">
-                    <button
-                      onClick={toggleFullView}
-                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-md hover:bg-blue-200 transition mr-2"
-                    >
-                      Full View
-                    </button>
-                    <Link
-                      href={`/inspection/${selectedInspectionId}`}
-                      className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition"
-                    >
-                      Go to Page
-                    </Link>
-                  </div>
-                  <InspectionDetail 
-                    inspectionId={selectedInspectionId} 
-                    onBack={() => setSelectedInspectionId(null)}
-                    onInspectionChange={() => loadInspections()}
-                  />
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-60 text-gray-500">
-                  <p>Select an inspection to view details or create a new one</p>
-                </div>
-              )}
-            </div>
-            
-            {/* Right side: Asset details (when an asset is selected) */}
-            {selectedAsset && (
-              <div className="col-span-1 bg-white rounded-xl shadow p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
-                {renderAssetDetails()}
-              </div>
+            ) : (
+              <Link
+                href="/inspection/new"
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition whitespace-nowrap"
+              >
+                + New Inspection
+              </Link>
             )}
           </div>
-        )
-      ) : (
-        /* Mobile view: just the list */
-        <div className="pt-2">
-          {renderSearchAndFilters()}
-          {renderInspectionsList()}
         </div>
-      )}
+        
+        {/* Collapsible filter panel - now inside the sticky header */}
+        {showFilters && (
+          <div className="bg-white border-t border-gray-200 px-6 py-4 shadow-inner transition-all duration-200 ease-in-out">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Inspector filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Filter by Inspector
+                </label>
+                <select
+                  value={filterByInspector}
+                  onChange={(e) => setFilterByInspector(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">All Inspectors</option>
+                  {inspectors.map((inspector) => (
+                    <option key={inspector.id} value={inspector.id}>
+                      {inspector.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* Date range filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Filter by Date Range
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="date"
+                    placeholder="Start date"
+                    value={filterByDateRange.start}
+                    onChange={(e) => setFilterByDateRange({...filterByDateRange, start: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <input
+                    type="date"
+                    placeholder="End date"
+                    value={filterByDateRange.end}
+                    onChange={(e) => setFilterByDateRange({...filterByDateRange, end: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+              
+              {/* Clear filters button */}
+              <div className="sm:col-span-2 flex justify-between items-center">
+                <div className="text-sm text-gray-500">
+                  {filteredInspections.length} {filteredInspections.length === 1 ? 'inspection' : 'inspections'} found
+                  {filteredInspections.length !== inspections.length && ` (filtered from ${inspections.length})`}
+                </div>
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setFilterByInspector('');
+                    setFilterByDateRange({start: '', end: ''});
+                  }}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      <div className="mt-6">
+        {/* Desktop view: enhanced layout with full view option */}
+        {!isMobile ? (
+          isFullView ? (
+            <div className="grid grid-cols-5 gap-6">
+              {/* Left side: Inspections list - smaller when in full view */}
+              <div className="col-span-1 overflow-hidden">
+                {renderInspectionsList()}
+              </div>
+
+              {/* Right side: Full inspection details using component */}
+              <div className="col-span-4 bg-white rounded-xl shadow overflow-hidden max-h-[calc(100vh-180px)]">
+                {showNewInspectionForm ? (
+                  renderNewInspectionForm()
+                ) : selectedInspectionId ? (
+                  <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+                    <div className="flex justify-end mb-4">
+                      <button
+                        onClick={toggleFullView}
+                        className="bg-blue-100 text-blue-800 px-3 py-1 rounded-md hover:bg-blue-200 transition"
+                      >
+                        Split View
+                      </button>
+                    </div>
+                    <InspectionDetail 
+                      inspectionId={selectedInspectionId} 
+                      onBack={() => setSelectedInspectionId(null)}
+                      onInspectionChange={() => loadInspections()}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-60 text-gray-500">
+                    <p>Select an inspection to view details or create a new one</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className={`grid ${selectedAsset ? 'grid-cols-3' : 'grid-cols-2'} gap-6`}>
+              {/* Left side: Inspections list */}
+              <div className={selectedAsset ? 'col-span-1' : 'col-span-1'}>
+                {renderInspectionsList()}
+              </div>
+
+              {/* Middle: Inspection details or New Form */}
+              <div className={`bg-white rounded-xl shadow overflow-hidden ${selectedAsset ? 'col-span-1' : 'col-span-1'}`}>
+                {showNewInspectionForm ? (
+                  renderNewInspectionForm()
+                ) : selectedInspectionId ? (
+                  <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+                    <div className="flex justify-end mb-2">
+                      <button
+                        onClick={toggleFullView}
+                        className="bg-blue-100 text-blue-800 px-3 py-1 rounded-md hover:bg-blue-200 transition mr-2"
+                      >
+                        Full View
+                      </button>
+                      <Link
+                        href={`/inspection/${selectedInspectionId}`}
+                        className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition"
+                      >
+                        Go to Page
+                      </Link>
+                    </div>
+                    <InspectionDetail 
+                      inspectionId={selectedInspectionId} 
+                      onBack={() => setSelectedInspectionId(null)}
+                      onInspectionChange={() => loadInspections()}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-60 text-gray-500">
+                    <p>Select an inspection to view details or create a new one</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Right side: Asset details (when an asset is selected) */}
+              {selectedAsset && (
+                <div className="col-span-1 bg-white rounded-xl shadow p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+                  {renderAssetDetails()}
+                </div>
+              )}
+            </div>
+          )
+        ) : (
+          /* Mobile view: just the list */
+          <div className="pt-2">
+            {renderInspectionsList()}
+          </div>
+        )}
+      </div>
     </div>
   )
 } 

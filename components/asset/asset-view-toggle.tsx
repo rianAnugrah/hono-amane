@@ -22,7 +22,7 @@ const AssetViewToggle = ({
         {/* Table View Button */}
         <button
           onClick={() => onChange("table")}
-          className={`btn btn-sm  btn-ghost rounded-none ${
+          className={`btn btn-sm relative btn-ghost rounded-none ${
             currentView === "table"
                ? " bg-blue-300 "
                 : " text-gray-500"
@@ -38,7 +38,7 @@ const AssetViewToggle = ({
         {/* Card View Button */}
         <button
           onClick={() => onChange("card")}
-          className={`btn btn-sm  btn-ghost rounded-none${
+          className={`btn btn-sm relative btn-ghost rounded-none ${
             currentView === "card"
               ? " bg-blue-300 "
                 : " text-gray-500"
