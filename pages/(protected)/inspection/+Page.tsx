@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Link } from '@/renderer/Link'
 import { navigate } from 'vike/client/router'
 import InspectionDetail from '@/components/inspection/InspectionDetail'
+import InspectionForm from '@/components/inspection/InspectionForm'
 import type { Inspection, InspectionItem, Asset } from '@/components/inspection/InspectionDetail'
 
 export default function InspectionListPage() {
@@ -16,6 +17,7 @@ export default function InspectionListPage() {
   const [isMobile, setIsMobile] = useState(false)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
   const [isFullView, setIsFullView] = useState(false)
+  const [showNewInspectionForm, setShowNewInspectionForm] = useState(false)
 
   // Check if screen is mobile size
   useEffect(() => {
@@ -35,7 +37,8 @@ export default function InspectionListPage() {
     }
   }, [])
 
-  useEffect(() => {
+  const loadInspections = () => {
+    setLoading(true);
     fetch('/api/inspections')
       .then((res) => {
         if (!res.ok) {
@@ -55,6 +58,10 @@ export default function InspectionListPage() {
         setError('Failed to load inspection data. Please try again later.')
       })
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    loadInspections();
   }, [])
 
   // Function to fetch inspection details when an inspection is selected
@@ -70,6 +77,7 @@ export default function InspectionListPage() {
     setDetailsError(null)
     setSelectedAsset(null)
     setSelectedInspectionId(id);
+    setShowNewInspectionForm(false);
     
     try {
       const response = await fetch(`/api/inspections/${id}`)
@@ -102,6 +110,16 @@ export default function InspectionListPage() {
         insp.id === updatedInspection.id ? updatedInspection : insp
       )
     );
+  }
+
+  // Handle successful creation of a new inspection
+  const handleInspectionCreated = (newInspectionId: string) => {
+    // Refresh the inspections list
+    loadInspections();
+    
+    // Select the newly created inspection
+    setShowNewInspectionForm(false);
+    handleSelectInspection(newInspectionId);
   }
 
   // Toggle between split view and full view
@@ -249,16 +267,52 @@ export default function InspectionListPage() {
     );
   };
 
+  // Render the "create new inspection" panel
+  const renderNewInspectionForm = () => {
+    return (
+      <div className="bg-white rounded-xl shadow">
+        <div className="p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">Create New Inspection</h2>
+            <button
+              onClick={() => setShowNewInspectionForm(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+          <InspectionForm 
+            onBack={() => setShowNewInspectionForm(false)} 
+            onSuccess={handleInspectionCreated}
+          />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Asset Inspections</h1>
-        <Link
-          href="/inspection/new"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-        >
-          + New Inspection
-        </Link>
+        {!isMobile && !showNewInspectionForm ? (
+          <button
+            onClick={() => {
+              setShowNewInspectionForm(true);
+              setSelectedInspectionId(null);
+              setSelectedAsset(null);
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          >
+            + New Inspection
+          </button>
+        ) : (
+          <Link
+            href="/inspection/new"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          >
+            + New Inspection
+          </Link>
+        )}
       </div>
 
       {/* Desktop view: enhanced layout with full view option */}
@@ -272,7 +326,9 @@ export default function InspectionListPage() {
 
             {/* Right side: Full inspection details using component */}
             <div className="col-span-4 bg-white rounded-xl shadow">
-              {selectedInspectionId ? (
+              {showNewInspectionForm ? (
+                renderNewInspectionForm()
+              ) : selectedInspectionId ? (
                 <div className="p-4">
                   <div className="flex justify-end mb-4">
                     <button
@@ -289,7 +345,7 @@ export default function InspectionListPage() {
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-60 text-gray-500">
-                  <p>Select an inspection to view details</p>
+                  <p>Select an inspection to view details or create a new one</p>
                 </div>
               )}
             </div>
@@ -301,9 +357,11 @@ export default function InspectionListPage() {
               {renderInspectionsList()}
             </div>
 
-            {/* Middle: Inspection details */}
+            {/* Middle: Inspection details or New Form */}
             <div className={`bg-white rounded-xl shadow ${selectedAsset ? 'col-span-1' : 'col-span-1'}`}>
-              {selectedInspectionId ? (
+              {showNewInspectionForm ? (
+                renderNewInspectionForm()
+              ) : selectedInspectionId ? (
                 <div className="p-4">
                   <div className="flex justify-end mb-2">
                     <button
@@ -326,7 +384,7 @@ export default function InspectionListPage() {
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-60 text-gray-500">
-                  <p>Select an inspection to view details</p>
+                  <p>Select an inspection to view details or create a new one</p>
                 </div>
               )}
             </div>
