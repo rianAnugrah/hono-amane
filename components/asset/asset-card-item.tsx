@@ -10,12 +10,15 @@ import {
   Package,
   Hash,
   Tag,
-  Info
+  Info,
 } from "lucide-react";
 import Checkbox from "@/components/ui/checkbox";
 import { formatIDR } from "@/components/utils/formatting";
 import AssetDetail from "./asset-detail";
-import { ImageWithFallback, hasValidImages } from "@/components/utils/ImageUtils";
+import {
+  ImageWithFallback,
+  hasValidImages,
+} from "@/components/utils/ImageUtils";
 
 const CardItem = ({
   asset,
@@ -65,7 +68,7 @@ const CardItem = ({
   };
 
   return (
-    <div 
+    <div
       className={`relative bg-white rounded-xl  overflow-hidden transition-all duration-200 hover:shadow-md ${
         checked ? "ring-2 ring-blue-500" : "border border-gray-200"
       }`}
@@ -73,21 +76,18 @@ const CardItem = ({
     >
       {/* Selection Checkbox */}
       <div className="absolute top-3 left-3 z-[1] drop-shadow-sm">
-        <Checkbox
-          checked={checked}
-          onChange={() => onSelectAsset(asset)}
-        />
+        <Checkbox checked={checked} onChange={() => onSelectAsset(asset)} />
       </div>
 
       {/* Action Buttons - Top Right */}
       <div className="absolute top-3 right-3 z-[1] flex gap-1 bg-white/90 p-1 rounded-md">
-        <Link
+        {/* <Link
           href={`/asset/${asset.assetNo}`}
           className="p-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
           aria-label="View asset details"
         >
           <ExternalLink size={15} />
-        </Link>
+        </Link> */}
         {role !== "read_only" && (
           <>
             <button
@@ -118,7 +118,9 @@ const CardItem = ({
         />
         <div className="absolute bottom-2 right-2">
           <span
-            className={`px-2 py-0.5 rounded-full text-xs font-medium ${getConditionStyle(asset.condition)}`}
+            className={`px-2 py-0.5 rounded-full text-xs font-medium ${getConditionStyle(
+              asset.condition
+            )}`}
           >
             {asset.condition}
           </span>
@@ -138,10 +140,10 @@ const CardItem = ({
             <span className="truncate">{asset.categoryCode || "N/A"}</span>
           </div>
         </div>
-        
+
         {/* Asset Name */}
-        <h3 
-          className="font-medium text-gray-900 line-clamp-2 mb-2 text-sm leading-tight" 
+        <h3
+          className="font-medium text-gray-900 line-clamp-2 mb-2 text-sm leading-tight"
           title={asset.assetName}
         >
           {asset.assetName}
@@ -152,7 +154,10 @@ const CardItem = ({
           {/* Remark/Description */}
           {asset.remark && (
             <div className="flex items-start text-gray-600">
-              <Info size={11} className="mr-1 mt-0.5 flex-shrink-0 text-gray-400" />
+              <Info
+                size={11}
+                className="mr-1 mt-0.5 flex-shrink-0 text-gray-400"
+              />
               <p className="line-clamp-2" title={asset.remark}>
                 {truncate(asset.remark, 70)}
               </p>
@@ -164,13 +169,16 @@ const CardItem = ({
             <Tag size={11} className="mr-1 flex-shrink-0 text-gray-400" />
             <span className="truncate">{asset.projectCode?.code || "N/A"}</span>
           </div>
-          
+
           {/* Location */}
           <div className="flex items-start text-gray-600">
-            <MapPin size={11} className="mr-1 mt-0.5 flex-shrink-0 text-gray-400" />
+            <MapPin
+              size={11}
+              className="mr-1 mt-0.5 flex-shrink-0 text-gray-400"
+            />
             <span className="truncate leading-tight">
               {asset.locationDesc?.description || "N/A"}
-              {asset.detailsLocation?.description && 
+              {asset.detailsLocation?.description &&
                 ` - ${truncate(asset.detailsLocation.description, 15)}`}
             </span>
           </div>
@@ -184,7 +192,7 @@ const CardItem = ({
             </p>
 
             {/* More Details Button */}
-            <button
+            {/* <button
               onClick={() => {
                 const modal = document.getElementById(`asset_modal_${asset.id}`);
                 if (modal instanceof HTMLDialogElement) {
@@ -195,7 +203,15 @@ const CardItem = ({
             >
               More details
               <ChevronRight size={12} />
-            </button>
+            </button> */}
+
+            <Link
+              href={`/asset/${asset.assetNo}`}
+              className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
+              aria-label="View asset details"
+            >
+              More details<ChevronRight size={12} />
+            </Link>
           </div>
         </div>
 
