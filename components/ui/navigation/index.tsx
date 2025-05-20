@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import {
   Archive,
   BookCopy,
+  ChevronLeft,
+  ChevronRight,
   CircleCheckBig,
   Cog,
   CogIcon,
@@ -29,6 +31,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
 import { useUserStore } from "@/stores/store-user-login";
 import Logo from "@/components/svg/logo";
+import LocationDisplay from "../location-display";
+import UserDropDown from "../user-dropdown";
 
 export default function Navbar() {
   return (
@@ -44,7 +48,7 @@ function MobileNavbar() {
   const { role } = useUserStore();
 
   return (
-    <nav className="bg-gradient-to-br  from-cyan-950 to-blue-950 md:hidden border-t w-full bottom-0 fixed z-10">
+    <nav className="bg-gradient-to-br  from-cyan-950 to-blue-950 hidden border-t w-full bottom-0 fixed z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex justify-between items-center w-full">
@@ -141,18 +145,41 @@ function MobileNavbar() {
 
 function DesktopNav() {
   const { role } = useUserStore();
+  const [isCompact, setIsCompact] = useState(false);
+  
+  useEffect(() => {
+    // Load preference from localStorage on mount
+    const savedCompactState = localStorage.getItem('sidebarCompact');
+    if (savedCompactState !== null) {
+      setIsCompact(savedCompactState === 'true');
+    }
+  }, []);
+  
+  const toggleSidebar = () => {
+    const newState = !isCompact;
+    setIsCompact(newState);
+    // Save preference to localStorage
+    localStorage.setItem('sidebarCompact', String(newState));
+  };
 
   return (
-    <nav className="hidden  md:flex flex-col  h-[100svh] gap-1 w-[15rem] pl-12 pr-7 pb-4">
-      <div className="h-[8.75rem] flex items-center justify-center">
-        <div className="h-[3rem] w-[3rem]">
-          <Logo />
-        </div>
+    <nav className={`flex flex-col h-[100svh] gap-1 ${isCompact ? 'w-[4.5rem]' : 'w-[15rem]'} transition-all duration-300 ${isCompact ? 'pl-3 pr-3' : 'pl-12 pr-7'} pb-4 relative`}>
+      <div className="h-[12.75rem] flex items-center justify-center">
+       <UserDropDown isCompact={isCompact} />
       </div>
-      <DesktopLink href="/dashboard" icon={<HomeIcon />} label="Home" />
-      <DesktopLink href="/asset" icon={<Archive />} label="Asset" />
+      
+      <button 
+        onClick={toggleSidebar}
+        className="absolute -right-[-1.5rem] top-[10.75rem] bg-blue-950 text-white hover:bg-blue-800 p-1 rounded-full shadow-md z-10"
+        aria-label={isCompact ? "Expand sidebar" : "Collapse sidebar"}
+      >
+        {isCompact ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+      </button>
+      
+      <DesktopLink href="/dashboard" icon={<HomeIcon />} label="Home" isCompact={isCompact} />
+      <DesktopLink href="/asset" icon={<Archive />} label="Asset" isCompact={isCompact} />
       {role === "pic" && (
-        <DesktopLink href="/inspection" icon={<SearchCheck />} label="Inspection" />
+        <DesktopLink href="/inspection" icon={<SearchCheck />} label="Inspect" isCompact={isCompact} />
       )}
 
       {role === "admin" && (
@@ -160,31 +187,30 @@ function DesktopNav() {
           <DesktopLink
             href="/inspection"
             icon={<SearchCheck />}
-            label="Inspection"
+            label="Inspect"
+            isCompact={isCompact}
           />
-          <DesktopLink href="/category" icon={<BookCopy />} label="Category" />
-          <DesktopLink href="/location" icon={<MapPin />} label="Location" />
-          <DesktopLink href="/user" icon={<User2 />} label="User" />
+          <DesktopLink href="/category" icon={<BookCopy />} label="Code" isCompact={isCompact} />
+          <DesktopLink href="/location" icon={<MapPin />} label="Zone" isCompact={isCompact} />
+          <DesktopLink href="/user" icon={<User2 />} label="User" isCompact={isCompact} />
         </>
       )}
-      {/* <DesktopLink href="/setting" icon={<Settings />} label="Setting" /> */}
+      
       <div className="flex w-full items-center justify-center py-4">
         <Link
           href="/qr-scanner"
-          className=" bg-orange-600 group hover:bg-orange-200 hover:text-orange-600 py-2 px-4 transition-all duration-300 flex flex-row items-center justify-start gap-1 rounded shadow relative w-full   text-white"
+          className={`bg-orange-600 group hover:bg-orange-200 hover:text-orange-600 py-2 ${isCompact ? 'px-2' : 'px-4'} transition-all duration-300 flex flex-row items-center ${isCompact ? 'justify-center' : 'justify-start'} gap-1 rounded shadow relative w-full text-white`}
         >
           <ScanQrCode className="w-[1.5rem] h-[1.5rem] group-hover:scale-[1.2] transition-all duration-300" />
-          <span className="text-xs font-bold">Scan QR</span>
+          {!isCompact && <span className="text-xs font-bold">Scan QR</span>}
         </Link>
       </div>
+
+      <LocationDisplay size={ isCompact ? 0 : 3} orientation="vertical" />
+      
       <div className="flex flex-grow flex-col"></div>
-      <a
-        href="/logout"
-        className="text-white hover:bg-gray-700 hover:text-gray-200 py-2 px-4 transition-all duration-300 flex flex-row items-center justify-start gap-1 rounded-l-lg relative w-full"
-      >
-        <LogOut className="w-[1rem] h-[1rem]" />
-        <span className="text-xs">Logout</span>
-      </a>
+      
+     
     </nav>
   );
 }

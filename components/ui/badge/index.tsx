@@ -66,12 +66,13 @@ export default function Badge({
   return (
     <span
       className={`
-        inline-flex items-center justify-center 
+        inline-flex items-center justify-center
         font-medium
         ${colorClasses[color][variant]}
         ${sizeClasses[size]}
         ${variant === 'outline' ? 'bg-transparent' : ''}
         rounded-full
+        max-w-full overflow-hidden text-ellipsis whitespace-nowrap
       `}
     >
       {icon && <span className="mr-1.5">{icon}</span>}
