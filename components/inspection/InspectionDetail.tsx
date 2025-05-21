@@ -899,216 +899,69 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-lg font-medium flex items-center">
             <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            Find Assets
-          </h2>
-          <motion.button
-            onClick={() => setShowQrScanner(true)}
-            className="bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition text-sm flex items-center shadow-sm"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
             </svg>
-            Scan QR Code
-          </motion.button>
+            Add Asset with QR Code
+          </h2>
         </div>
 
-        <p className="text-sm text-gray-600 mb-4">
-          Search for assets or use the QR scanner to find and add assets to this
-          inspection.
-        </p>
-
-        {/* Asset Search Section */}
-        <div className="flex gap-2 mb-4">
-          <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder="Search by asset number or name..."
-              className="block w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            />
-          </div>
-          <motion.button
-            onClick={handleSearch}
-            disabled={searching || !searchQuery.trim()}
-            className="bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-300 flex items-center shadow-sm"
-            whileHover={!searching && searchQuery.trim() ? { scale: 1.02 } : {}}
-            whileTap={!searching && searchQuery.trim() ? { scale: 0.98 } : {}}
-          >
-            {searching ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Searching...
-              </>
-            ) : (
-              "Search"
-            )}
-          </motion.button>
+        <div className="bg-blue-50 rounded-lg border border-blue-100 p-4 mb-4 flex items-start">
+          <svg className="w-5 h-5 mr-3 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          <p className="text-sm text-blue-800">
+            Scan the QR code on an asset to quickly add it to this inspection. The scanner uses your device's camera to read the asset QR code.
+          </p>
         </div>
 
-        {searchResults.length > 0 && (
-          <div className="border border-gray-200 rounded-lg mb-4 max-h-60 overflow-y-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50 sticky top-0">
-                <tr>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Asset No
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Condition
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {searchResults.map((asset) => {
-                  const isSelected = selectedAsset?.id === asset.id;
-                  const isAlreadyAdded = inspection.items.some(
-                    (item) => item.asset.id === asset.id
-                  );
-
-                  return (
-                    <tr
-                      key={asset.id}
-                      className={isSelected ? "bg-blue-50" : "hover:bg-gray-50 transition-colors"}
-                    >
-                      <td className="px-4 py-2.5 whitespace-nowrap text-sm">
-                        {asset.assetNo}
-                      </td>
-                      <td className="px-4 py-2.5 text-sm">{asset.assetName}</td>
-                      <td className="px-4 py-2.5 text-sm">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium inline-block ${
-                          asset.condition === 'Good' ? 'bg-green-100 text-green-800' :
-                          asset.condition === 'Fair' ? 'bg-blue-100 text-blue-800' :
-                          asset.condition === 'Poor' ? 'bg-yellow-100 text-yellow-800' :
-                          asset.condition === 'Broken' ? 'bg-red-100 text-red-800' :
-                          asset.condition === 'Missing' ? 'bg-purple-100 text-purple-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {asset.condition}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2.5 text-sm">
-                        {isAlreadyAdded ? (
-                          <span className="text-gray-500 text-sm flex items-center">
-                            <svg className="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                            Already added
-                          </span>
-                        ) : (
-                          <div className="flex gap-2">
-                            <motion.button
-                              onClick={async () => {
-                                try {
-                                  // Fetch the latest asset version by asset number
-                                  const latestAssetResponse = await fetch(`/api/assets/by-asset-number/${asset.assetNo}`);
-                                  if (!latestAssetResponse.ok) {
-                                    throw new Error(`Failed to fetch latest asset data: ${latestAssetResponse.statusText}`);
-                                  }
-                                  
-                                  const latestAsset = await latestAssetResponse.json();
-                                  if (!latestAsset || !latestAsset.id) {
-                                    throw new Error("Could not find the latest version of this asset");
-                                  }
-                                  
-                                  // Set the asset for editing with complete data
-                                  setAssetToEdit(latestAsset);
-                                  setAssetCondition(latestAsset.condition || "Good");
-                                  setAssetRemarks(latestAsset.remark || "");
-                                  setShowAssetEditForm(true);
-                                } catch (error) {
-                                  console.error("Error fetching asset details:", error);
-                                  setError(`Failed to load asset details: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                                  
-                                  // Fallback to using the data we already have
-                                  setAssetToEdit(asset);
-                                  setAssetCondition(asset.condition);
-                                  setAssetRemarks(asset.remark || "");
-                                  setShowAssetEditForm(true);
-                                }
-                              }}
-                              className="px-3 py-1 rounded-lg bg-green-100 text-green-800 hover:bg-green-200 transition-colors flex items-center"
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                            >
-                              <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                              </svg>
-                              Edit
-                            </motion.button>
-                            <motion.button
-                              onClick={() =>
-                                setSelectedAsset(isSelected ? null : asset)
-                              }
-                              className={`px-3 py-1 rounded-lg flex items-center ${
-                                isSelected
-                                  ? "bg-blue-100 text-blue-800"
-                                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                              } transition-colors`}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                            >
-                              {isSelected ? (
-                                <>
-                                  <svg className="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                  </svg>
-                                  Selected
-                                </>
-                              ) : (
-                                <>
-                                  <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                                  </svg>
-                                  Select
-                                </>
-                              )}
-                            </motion.button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {selectedAsset && (
-          <div className="flex justify-end">
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+          <div className="bg-gray-50 border border-gray-100 rounded-lg p-5 flex flex-col items-center justify-center w-full sm:w-auto">
+            <svg className="w-16 h-16 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+            </svg>
+            <p className="text-sm text-gray-600 mb-3 text-center">
+              Scan the QR code to add an asset to this inspection
+            </p>
             <motion.button
-              onClick={() => handleAddAsset()}
-              className="bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition flex items-center shadow-sm"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowQrScanner(true)}
+              className="bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-all flex items-center shadow-sm"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
               </svg>
-              Add to Inspection
+              Open QR Scanner
             </motion.button>
           </div>
-        )}
+
+          <div className="hidden sm:block text-gray-300 font-light">OR</div>
+
+          <div className="bg-gray-50 border border-gray-100 rounded-lg p-5 flex flex-col items-center justify-center w-full sm:w-auto">
+            <svg className="w-16 h-16 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p className="text-sm text-gray-600 mb-3 text-center">
+              Create a new asset and add it to inspection
+            </p>
+            <motion.button
+              onClick={() => {
+                // Show the full asset form for creating a new asset
+                startCreate();
+                setShowForm(true);
+              }}
+              className="bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition-all flex items-center shadow-sm"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              Create New Asset
+            </motion.button>
+          </div>
+        </div>
       </motion.div>
 
       {/* Inspected Assets Section */}
@@ -1151,7 +1004,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
         ) : (
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 sticky top-0">
                 <tr>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Asset No
@@ -1162,7 +1015,6 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Condition
                   </th>
-                 
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Version
                   </th>

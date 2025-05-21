@@ -279,7 +279,7 @@ export default function InspectionListPage() {
         transition={{ duration: 0.3 }}
       >
         {/* Summary Stats Cards */}
-        <div className="grid grid-cols-1  gap-4 p-4 bg-white border-b border-gray-100">
+        <div className="grid grid-cols-1  gap-4 p-4 bg-white border-b border-gray-200">
           <motion.div 
             className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 overflow-hidden relative hover:shadow-md transition-all"
             whileHover={{ y: -2 }}
@@ -314,7 +314,7 @@ export default function InspectionListPage() {
         </div>
         
         {/* Toolbar */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-100">
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
           {renderToolbar()}
         </div>
         
@@ -332,7 +332,7 @@ export default function InspectionListPage() {
             return (
               <motion.div
                 key={inspection.id}
-                className={`bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all cursor-pointer ${
+                className={`bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer ${
                   isSelected && !isMobile ? "ring-2 ring-blue-500 bg-blue-50" : ""
                 }`}
                 whileHover={{ y: -2 }}
@@ -719,7 +719,7 @@ export default function InspectionListPage() {
                 renderNewInspectionForm()
               ) : selectedInspectionId ? (
                 <div className="overflow-y-auto h-full">
-                  <div className="flex justify-between items-center py-4 px-10 border-b">
+                  <div className="flex justify-between items-center py-4 px-10 border-b border-gray-200">
                     <h2 className="text-xl font-semibold">Inspection Details</h2>
                     <div className="flex items-center space-x-2">
                       <motion.button
