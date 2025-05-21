@@ -7,6 +7,53 @@ import InspectionQrScanner from '@/components/blocks/qrscan/InspectionQrScanner'
 import { useAssetForm } from '@/hooks/useAssetForm';
 import AssetFormModal from '@/components/asset/AssetFormModal';
 import axios from 'axios';
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+
+// Logo URL
+const LOGO_URL = "https://www.hcml.co.id/wp-content/uploads/2020/08/SKK-HCML-Warna.png";
+
+// PDF styles
+const styles = StyleSheet.create({
+  page: { padding: 30 },
+  title: { fontSize: 24, marginBottom: 10, fontWeight: 'bold' },
+  subtitle: { fontSize: 14, marginBottom: 20, color: '#666' },
+  section: { marginBottom: 20 },
+  sectionTitle: { fontSize: 16, marginBottom: 10, fontWeight: 'bold' },
+  row: { flexDirection: 'row', marginBottom: 5 },
+  label: { width: 120, fontWeight: 'bold' },
+  value: { flex: 1 },
+  table: { width: '100%', marginTop: 10 },
+  tableHeader: { 
+    flexDirection: 'row', 
+    backgroundColor: '#f0f0f0', 
+    padding: 5, 
+    fontWeight: 'bold',
+    fontSize: 10 
+  },
+  tableRow: { flexDirection: 'row', padding: 5, borderBottomWidth: 1, borderBottomColor: '#eee', fontSize: 9 },
+  col1: { width: '20%' },
+  col2: { width: '40%' },
+  col3: { width: '20%' },
+  col4: { width: '20%' },
+  notes: { marginBottom: 10, padding: 10, backgroundColor: '#f9f9f9' },
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    paddingBottom: 10
+  },
+  logo: { 
+    width: 120, 
+    marginBottom: 10
+  },
+  headerRight: {
+    flexDirection: 'column',
+    alignItems: 'flex-end'
+  }
+});
 
 type Inspector = {
   id: string;
@@ -80,6 +127,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
   const [inspection, setInspection] = useState<Inspection | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageReady, setImageReady] = useState(true); // Start as true for simplicity
 
   // Asset search state
   const [searchQuery, setSearchQuery] = useState("");
@@ -96,6 +144,72 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
   const [assetToEdit, setAssetToEdit] = useState<Asset | null>(null);
   const [assetCondition, setAssetCondition] = useState("Good");
   const [assetRemarks, setAssetRemarks] = useState("");
+
+  // PDF Document component defined within the main component
+  const InspectionPDFDocument = () => {
+    if (!inspection) return null;
+    
+    return (
+      <Document>
+        <Page size="A4" style={styles.page}>
+          <View style={styles.header}>
+            <Image 
+              src={LOGO_URL}
+              style={styles.logo} 
+              cache={true}
+            />
+            <View style={styles.headerRight}>
+              <Text style={styles.subtitle}>Inspection Report</Text>
+              <Text style={{ fontSize: 10, color: '#666' }}>Generated on {new Date().toLocaleDateString()}</Text>
+            </View>
+          </View>
+          
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Inspection Details</Text>
+            <View style={styles.row}>
+              <Text style={styles.label}>Date:</Text>
+              <Text style={styles.value}>{new Date(inspection.date).toLocaleDateString()}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Inspector:</Text>
+              <Text style={styles.value}>{inspection.inspector.name || inspection.inspector.email}</Text>
+            </View>
+          </View>
+          
+          {inspection.notes && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Notes</Text>
+              <View style={styles.notes}>
+                <Text>{inspection.notes}</Text>
+              </View>
+            </View>
+          )}
+          
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Inspected Assets ({inspection.items.length})</Text>
+            
+            <View style={styles.table}>
+              <View style={styles.tableHeader}>
+                <Text style={styles.col1}>Asset No</Text>
+                <Text style={styles.col2}>Name</Text>
+                <Text style={styles.col3}>Condition</Text>
+                <Text style={styles.col4}>Version</Text>
+              </View>
+              
+              {inspection.items.map((item: InspectionItem) => (
+                <View key={item.id} style={styles.tableRow}>
+                  <Text style={styles.col1}>{item.asset.assetNo}</Text>
+                  <Text style={styles.col2}>{item.asset.assetName}</Text>
+                  <Text style={styles.col3}>{item.asset.condition}</Text>
+                  <Text style={styles.col4}>{item.assetVersion}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        </Page>
+      </Document>
+    );
+  };
 
   // Fetch inspection data
   useEffect(() => {
@@ -845,6 +959,32 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
             </svg>
             Back
           </motion.button>
+          
+          {inspection && (
+            <PDFDownloadLink 
+              document={<InspectionPDFDocument />} 
+              fileName={`inspection-${inspectionId}-${new Date().toISOString().split('T')[0]}.pdf`}
+              className="bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition flex items-center shadow-sm"
+              style={{
+                textDecoration: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              {({ blob, url, loading, error }) => (
+                <motion.div
+                  className="flex items-center"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <svg className="w-4 h-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  {loading ? "Generating PDF..." : "Download PDF"}
+                </motion.div>
+              )}
+            </PDFDownloadLink>
+          )}
+          
           <motion.button
             onClick={handleDeleteInspection}
             className="bg-red-600 text-white px-4 py-2.5 rounded-lg hover:bg-red-700 transition flex items-center shadow-sm"
