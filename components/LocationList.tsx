@@ -79,7 +79,7 @@ export default function LocationList({ refresh, onRefreshComplete }: LocationLis
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:h-[calc(100vh-240px)] overflow-auto ">
       <h2 className="text-lg font-semibold mb-3 text-gray-800">Locations</h2>
       
       {/* Search and Sort */}

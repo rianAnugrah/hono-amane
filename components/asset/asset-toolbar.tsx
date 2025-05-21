@@ -127,7 +127,7 @@ export default function AssetToolbar({
   };
 
   return (
-    <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-[100]">
+    <div className="bg-gray-100 border-b border-gray-200 sticky top-0 z-[100]">
       <div className="mx-auto px-4">
         <div className="grid grid-cols-12 items-center py-4 gap-3">
           {/* Search */}

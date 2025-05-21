@@ -41,7 +41,7 @@ export default function LocationsPage() {
   // Mobile view toggle between list and form
   if (isMobile) {
     return (
-      <div className="p-4 bg-gray-50 min-h-screen">
+      <div className="p-4  min-h-screen">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Locations</h1>
           <p className="text-gray-500 mb-4">Manage your location descriptions</p>
@@ -99,13 +99,13 @@ export default function LocationsPage() {
 
   // Desktop split view
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="mb-8 mx-auto max-w-7xl">
+    <div className="p-6  min-h-screen">
+      <div className="mb-8 mx-auto ">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Locations</h1>
         <p className="text-gray-500">Manage your location descriptions</p>
       </div>
       
-      <div className="grid grid-cols-12 gap-6 mx-auto max-w-7xl">
+      <div className="grid grid-cols-12 gap-6 mx-auto ">
         {/* Form section */}
         <motion.div 
           className="col-span-12 md:col-span-4 bg-white p-6 rounded-xl shadow-sm border border-gray-200"
