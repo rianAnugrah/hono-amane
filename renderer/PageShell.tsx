@@ -191,14 +191,14 @@ function PageShell({
       <PageContextProvider pageContext={pageContext}>
         <Layout>
           <Navbar />
-          <div className="w-full md:w-full flex flex-col h-full">
+          <div className="w-full md:w-full flex flex-col h-[100vh]">
             <div
-              className="flex w-full flex-col max-h-[calc(100svh_-_0rem)] overflow-y-auto md:p-4 "
+              className="flex w-full flex-col max-h-[calc(100svh_-_0rem)] overflow-y-auto md:p-0 "
               ref={parent}
             >
             
               {/* Scrollable Content */}
-              <div className="overflow-y-auto  bg-gray-100 rounded-b-lg pb-10">{children}</div>
+              <div className="overflow-y-auto  bg-gray-100 rounded-b-lg pb-10 lg:pb-0">{children}</div>
             </div>
           </div>
         </Layout>

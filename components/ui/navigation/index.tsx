@@ -261,13 +261,13 @@ function DesktopNav() {
        <UserDropDown isCompact={isCompact} />
       </div>
       
-      <button 
+      {/* <button 
         onClick={toggleSidebar}
         className="absolute -right-[-1.5rem] top-[10.75rem] bg-blue-950 text-gray-500 hover:text-orange-600 p-1 rounded-full shadow-md z-10"
         aria-label={isCompact ? "Expand sidebar" : "Collapse sidebar"}
       >
         {isCompact ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-      </button>
+      </button> */}
       
       <DesktopLink href="/dashboard" icon={<HomeIcon />} label="Home" isCompact={isCompact} />
       <DesktopLink href="/asset" icon={<Archive />} label="Asset" isCompact={isCompact} />
