@@ -12,6 +12,10 @@ import {
   LinkIcon,
   Pencil,
   Trash,
+  Eye,
+  EyeOff,
+  Calendar,
+  DollarSign
 } from "lucide-react";
 import Checkbox from "@/components/ui/checkbox";
 import { formatIDR } from "@/components/utils/formatting";
@@ -22,7 +26,7 @@ import NoImagePlaceholder from "./NoImagePlaceholder";
 import { ImageWithFallback, hasValidImages } from "@/components/utils/ImageUtils";
 
 /**
- * Interface untuk objek lokasi
+ * Interface for location object
  */
 interface LocationItem {
   userId: string;
@@ -31,6 +35,13 @@ interface LocationItem {
     id: number;
     description: string;
   };
+}
+
+// Extend the Asset interface in the file to ensure createdAt is available
+declare module "../../pages/(protected)/asset/types" {
+  interface Asset {
+    createdAt?: string;
+  }
 }
 
 export default function AssetItem({
@@ -55,15 +66,10 @@ export default function AssetItem({
   const { location, role } = useUserStore();
   const hasImages = hasValidImages(asset.images);
 
-  // console.log("LCOATION ITEM", location);
-
   function isLocationIdExists(
     locationsArray: LocationItem[],
     locationIdToCheck: number
   ): boolean {
-    // Validasi input sudah ditangani oleh TypeScript
-
-    // Cek apakah locationId ada dalam array
     return locationsArray.some((item) => item.locationId === locationIdToCheck);
   }
 
@@ -74,44 +80,73 @@ export default function AssetItem({
     if (isLocationIdExists(locationsArray, locationIdToCheck)) {
       return (
         <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
-          <Link
-            href={`/asset/${asset.assetNo}`}
-            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-          >
-            <ExternalLink />
-          </Link>
-          <button
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link
+              href={`/asset/${asset.assetNo}`}
+              className="p-2 text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 transition-colors flex items-center justify-center"
+              aria-label="View asset details"
+            >
+              <Eye size={16} />
+            </Link>
+          </motion.div>
+          
+          <motion.button
             onClick={() => handleEdit(asset)}
-            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+            className="p-2 text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 transition-colors flex items-center justify-center"
+            whileHover={{ scale: 1.05 }} 
+            whileTap={{ scale: 0.95 }}
+            title="Edit asset"
           >
-            <Pencil />
-          </button>
-          <button
+            <Pencil size={16} />
+          </motion.button>
+          
+          <motion.button
             onClick={() => handleDelete(asset.id)}
-            className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+            className="p-2 text-red-600 bg-red-50 rounded-full hover:bg-red-100 transition-colors flex items-center justify-center"
+            whileHover={{ scale: 1.05 }} 
+            whileTap={{ scale: 0.95 }}
+            title="Delete asset"
           >
-            <Trash />
-          </button>
-          <button
+            <Trash size={16} />
+          </motion.button>
+          
+          <motion.button
             onClick={() => onToggle(asset.id)}
-            className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors focus:outline-none"
+            className="p-2 text-gray-600 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center"
+            whileHover={{ scale: 1.05 }} 
+            whileTap={{ scale: 0.95 }}
+            title={isExpanded ? "Collapse details" : "Expand details"}
           >
-            {isExpanded ? <ChevronDown /> : <ChevronRight />}
-          </button>
+            {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          </motion.button>
         </div>
       );
     } else {
-      return "";
+      return null;
     }
   }
 
+  // Animation variants for better transitions
+  const tableRowVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+    hover: { backgroundColor: "rgba(243, 244, 246, 0.5)" }
+  };
+
   return (
     <motion.div layout key={asset.id} className="w-full">
-      {/* DESKTOP VIEW */}
+      {/* TABLE VIEW */}
       {currentView === "table" && (
-        <div className="p-0 w-full  md:flex flex-col items-center gap-0 md:border-b md:border-x md:bg-white px-4   md:border-gray-200 relative py-0 font-bold text-xs">
-          <div className="w-full grid grid-cols-12 ">
-            <div className="col-span-4 pr-4 py-2 flex items-center gap-2">
+        <motion.div 
+          className="w-full md:flex flex-col items-center md:border md:bg-white md:border-gray-200 relative py-0 font-bold text-xs rounded-lg overflow-hidden shadow-sm"
+          variants={tableRowVariants}
+          initial="hidden"
+          animate="visible"
+          whileHover="hover"
+          transition={{ duration: 0.2 }}
+        >
+          <div className="w-full grid grid-cols-12 items-center">
+            <div className="col-span-4 pr-4 py-3 flex items-center gap-3 pl-4">
               <div className="flex items-center">
                 <Checkbox
                   checked={checked}
@@ -119,8 +154,8 @@ export default function AssetItem({
                 />
               </div>
               <div className="flex flex-col">
-                {/* Show image thumbnail */}
-                <div className="w-10 h-10 rounded overflow-hidden mr-2 mb-1">
+                {/* Image thumbnail with better styling */}
+                <div className="w-12 h-12 rounded-lg overflow-hidden mr-2 mb-1.5 border border-gray-200 shadow-sm">
                   <ImageWithFallback
                     src={hasImages ? asset.images[0] : undefined}
                     alt={asset.assetName}
@@ -128,39 +163,61 @@ export default function AssetItem({
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div>{asset.assetName}</div>
-                <span className="text-gray-500">{asset.assetNo}</span>
+                <div className="font-medium text-gray-900">{asset.assetName}</div>
+                <span className="text-gray-500 font-mono text-[10px]">{asset.assetNo}</span>
               </div>
             </div>
-            <div className="px-4 py-2 flex items-center">
+            <div className="px-4 py-3 flex items-center">
               <span
-                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                  asset.condition === "Good"
+                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  asset.condition?.toLowerCase() === "good"
                     ? "bg-green-50 text-green-700"
-                    : asset.condition === "Broken"
+                    : asset.condition?.toLowerCase() === "broken"
                     ? "bg-red-50 text-red-700"
-                    : "bg-gray-50 text-gray-700"
+                    : "bg-yellow-50 text-yellow-700"
                 }`}
               >
                 {asset.condition}
               </span>
             </div>
-            <div className="px-4 py-2 flex items-center">
-              {asset.projectCode?.code}
+            <div className="px-4 py-3 flex items-center">
+              <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs">
+                {asset.projectCode?.code || "N/A"}
+              </span>
             </div>
-            <div className="px-4 py-2 flex items-center">
-              {asset.locationDesc?.description}
+            <div className="px-4 py-3 flex items-center">
+              {asset.locationDesc?.description || "N/A"}
             </div>
-            <div className="px-4 py-2 col-span-2 flex items-center">
-              {formatIDR(asset.acqValueIdr)}
+            <div className="px-4 py-3 col-span-2 flex items-center">
+              <div className="flex items-center gap-1">
+                <DollarSign size={14} className="text-green-500" />
+                <span className="font-semibold text-gray-900">
+                  {formatIDR(asset.acqValueIdr)}
+                </span>
+              </div>
             </div>
             {role !== "read_only" &&
               renderEditButton(location, asset.locationDesc_id || 0)}
           </div>
-          <AssetDetail isExpanded={isExpanded} asset={asset} />
-        </div>
+          
+          {/* Asset detail section with animations */}
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="w-full overflow-hidden"
+              >
+                <AssetDetail isExpanded={isExpanded} asset={asset} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       )}
 
+      {/* CARD VIEW */}
       {currentView === "card" && (
         <CardItem
           asset={asset}

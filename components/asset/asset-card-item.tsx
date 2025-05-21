@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { Asset } from "../../pages/(protected)/asset/types";
 import { Link } from "@/renderer/Link";
 import {
@@ -11,6 +12,8 @@ import {
   Hash,
   Tag,
   Info,
+  Calendar,
+  DollarSign,
 } from "lucide-react";
 import Checkbox from "@/components/ui/checkbox";
 import { formatIDR } from "@/components/utils/formatting";
@@ -55,32 +58,49 @@ const CardItem = ({
     return text.length > length ? text.substring(0, length) + "..." : text;
   };
 
+  // Get creation date (if available)
+  const creationDate = asset.createdAt 
+    ? new Date(asset.createdAt).toLocaleDateString() 
+    : null;
+
   // Get condition badge styles
   const getConditionStyle = (condition: string) => {
-    switch (condition) {
-      case "Good":
+    switch (condition?.toLowerCase()) {
+      case "good":
         return "bg-green-100 text-green-700 border border-green-200";
-      case "Broken":
+      case "fair":
+        return "bg-blue-100 text-blue-700 border border-blue-200";
+      case "broken":
         return "bg-red-100 text-red-700 border border-red-200";
-      default:
+      case "poor":
         return "bg-yellow-100 text-yellow-700 border border-yellow-200";
+      case "missing":
+        return "bg-purple-100 text-purple-700 border border-purple-200";
+      default:
+        return "bg-gray-100 text-gray-700 border border-gray-200";
     }
   };
 
   return (
-    <div
-      className={`relative bg-white rounded-xl  overflow-hidden transition-all duration-200 hover:shadow-md ${
+    <motion.div
+      className={`relative bg-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${
         checked ? "ring-2 ring-blue-500" : "border border-gray-200"
       }`}
       style={{ height: "380px" }}
+      whileHover={{ y: -4 }}
+      layout
     >
       {/* Selection Checkbox */}
-      <div className="absolute top-3 left-3 z-[1] drop-shadow-sm">
+      <motion.div 
+        className="absolute top-3 left-3 z-[5] drop-shadow-sm"
+        initial={{ opacity: 0.8 }}
+        whileHover={{ opacity: 1, scale: 1.05 }}
+      >
         <Checkbox checked={checked} onChange={() => onSelectAsset(asset)} />
-      </div>
+      </motion.div>
 
       {/* Action Buttons - Top Right */}
-      <div className="absolute top-3 right-3 z-[1] flex gap-1 bg-white/90 p-1 rounded-md">
+      <div className="absolute top-3 right-3 z-[5] flex gap-1 bg-white/90 p-1 rounded-md">
         {/* <Link
           href={`/asset/${asset.assetNo}`}
           className="p-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
@@ -90,32 +110,38 @@ const CardItem = ({
         </Link> */}
         {role !== "read_only" && (
           <>
-            <button
+            <motion.button
               onClick={() => handleEdit(asset)}
               className="p-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
               aria-label="Edit asset"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
             >
               <Pencil size={15} />
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               onClick={() => handleDelete(asset.id)}
               className="p-1.5 rounded-md text-red-600 hover:bg-red-50 transition-colors"
               aria-label="Delete asset"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
             >
               <Trash size={15} />
-            </button>
+            </motion.button>
           </>
         )}
       </div>
 
       {/* Image Container */}
-      <div className="relative bg-gray-50" style={{ height: "170px" }}>
+      <div className="relative bg-gray-50 group" style={{ height: "170px" }}>
         <ImageWithFallback
           src={getAssetImageUrl()}
           alt={asset.assetName}
           assetName={asset.assetName}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
+        
+        {/* Condition Badge */}
         <div className="absolute bottom-2 right-2">
           <span
             className={`px-2 py-0.5 rounded-full text-xs font-medium ${getConditionStyle(
@@ -124,6 +150,11 @@ const CardItem = ({
           >
             {asset.condition}
           </span>
+        </div>
+        
+        {/* Asset ID Chip */}
+        <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm text-white text-xs px-2 py-0.5 rounded-md font-mono opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          {asset.assetNo}
         </div>
       </div>
 
@@ -153,30 +184,38 @@ const CardItem = ({
         <div className="space-y-2 flex-grow text-xs">
           {/* Remark/Description */}
           {asset.remark && (
-            <div className="flex items-start text-gray-600">
+            <div className="flex items-start text-gray-600 group">
               <Info
                 size={11}
-                className="mr-1 mt-0.5 flex-shrink-0 text-gray-400"
+                className="mr-1 mt-0.5 flex-shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors"
               />
-              <p className="line-clamp-2" title={asset.remark}>
+              <p className="line-clamp-2 group-hover:text-gray-800 transition-colors" title={asset.remark}>
                 {truncate(asset.remark, 70)}
               </p>
             </div>
           )}
 
           {/* Project Code */}
-          <div className="flex items-center text-gray-600">
-            <Tag size={11} className="mr-1 flex-shrink-0 text-gray-400" />
-            <span className="truncate">{asset.projectCode?.code || "N/A"}</span>
+          <div className="flex items-center text-gray-600 group">
+            <Tag size={11} className="mr-1 flex-shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors" />
+            <span className="truncate group-hover:text-gray-800 transition-colors">{asset.projectCode?.code || "N/A"}</span>
           </div>
 
+          {/* Creation Date (if available) */}
+          {creationDate && (
+            <div className="flex items-center text-gray-600 group">
+              <Calendar size={11} className="mr-1 flex-shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              <span className="truncate group-hover:text-gray-800 transition-colors">{creationDate}</span>
+            </div>
+          )}
+
           {/* Location */}
-          <div className="flex items-start text-gray-600">
+          <div className="flex items-start text-gray-600 group">
             <MapPin
               size={11}
-              className="mr-1 mt-0.5 flex-shrink-0 text-gray-400"
+              className="mr-1 mt-0.5 flex-shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors"
             />
-            <span className="truncate leading-tight">
+            <span className="truncate leading-tight group-hover:text-gray-800 transition-colors">
               {asset.locationDesc?.description || "N/A"}
               {asset.detailsLocation?.description &&
                 ` - ${truncate(asset.detailsLocation.description, 15)}`}
@@ -187,31 +226,24 @@ const CardItem = ({
         {/* Price and Actions */}
         <div className="mt-auto pt-2 border-t border-gray-100">
           <div className="flex items-center justify-between">
-            <p className="font-semibold text-gray-900 text-sm">
-              {formatIDR(asset.acqValueIdr)}
-            </p>
+            <div className="flex items-center group">
+              <DollarSign size={10} className="text-gray-400 mr-1 group-hover:text-green-500 transition-colors" />
+              <p className="font-semibold text-gray-900 text-sm group-hover:text-green-600 transition-colors">
+                {formatIDR(asset.acqValueIdr)}
+              </p>
+            </div>
 
-            {/* More Details Button */}
-            {/* <button
-              onClick={() => {
-                const modal = document.getElementById(`asset_modal_${asset.id}`);
-                if (modal instanceof HTMLDialogElement) {
-                  modal.showModal();
-                }
-              }}
-              className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
-            >
-              More details
-              <ChevronRight size={12} />
-            </button> */}
-
-            <Link
-              href={`/asset/${asset.assetNo}`}
-              className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
-              aria-label="View asset details"
-            >
-              More details<ChevronRight size={12} />
-            </Link>
+            {/* View Details Link */}
+            <motion.div whileHover={{ x: 2 }} whileTap={{ x: -1 }}>
+              <Link
+                href={`/asset/${asset.assetNo}`}
+                className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors group"
+                aria-label="View asset details"
+              >
+                More details
+                <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </motion.div>
           </div>
         </div>
 
@@ -225,7 +257,7 @@ const CardItem = ({
           </form>
         </dialog>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

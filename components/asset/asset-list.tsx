@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-
+import { motion, AnimatePresence } from "framer-motion";
 import { Asset } from "../../pages/(protected)/asset/types";
 import AssetItem from "./asset-item";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
 import Switch from "@/components/ui/switch";
-// import the store
+import { Package, Search, AlertCircle } from "lucide-react";
 
 export default function AssetList({
   assets,
@@ -25,20 +25,20 @@ export default function AssetList({
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const itemRefs = useRef<Map<string, HTMLElement>>(new Map());
-  // Inside the component
-  const { selectedAssets, selectAsset, deselectAsset } =
-    useAssetSelectionStore();
-    const allSelected = assets.every((asset) =>
-      selectedAssets.some((a) => a.id === asset.id)
-    );
+  const { selectedAssets, selectAsset, deselectAsset } = useAssetSelectionStore();
+  
+  const allSelected = assets.length > 0 && assets.every((asset) =>
+    selectedAssets.some((a) => a.id === asset.id)
+  );
+  
   const handleToggle = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  // Scroll to expanded item
+  // Scroll to expanded item with smooth animation
   useEffect(() => {
     if (expandedId) {
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         const element = itemRefs.current.get(expandedId);
         if (element) {
           element.scrollIntoView({
@@ -47,34 +47,88 @@ export default function AssetList({
           });
         }
       }, 100);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [expandedId]);
 
-  // Skeleton loader
-  const AssetSkeleton = () => (
-    <div className="animate-pulse bg-gray-100 rounded-lg h-96 md:h-80"></div>
-  );
-
-  // Empty state
-  const EmptyState = () => (
-    <div className="flex flex-col items-center justify-center py-16 w-full bg-gray-100 rounded-lg border border-gray-200">
-      <div className="rounded-full bg-gray-50 p-4 mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-        </svg>
+  // Skeleton loader component with proper animation
+  const AssetSkeleton = ({ index }: { index: number }) => (
+    <motion.div 
+      className="bg-white rounded-xl overflow-hidden border border-gray-200"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+    >
+      <div className="animate-pulse">
+        {/* Image placeholder */}
+        <div className="bg-gray-200 h-40 w-full"></div>
+        
+        {/* Content placeholders */}
+        <div className="p-4 space-y-3">
+          <div className="flex justify-between">
+            <div className="h-2 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-2 bg-gray-200 rounded w-1/4"></div>
+          </div>
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div className="space-y-2">
+            <div className="h-2 bg-gray-200 rounded"></div>
+            <div className="h-2 bg-gray-200 rounded"></div>
+          </div>
+          <div className="pt-2 flex justify-between items-center">
+            <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+            <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+          </div>
+        </div>
       </div>
-      <h3 className="text-lg font-medium text-gray-900">No assets found</h3>
-      <p className="text-gray-500 mt-1 text-center">Try adjusting your search or filter to find what you're looking for.</p>
-    </div>
+    </motion.div>
   );
 
-  // Loading state
+  // Enhanced empty state with better UI
+  const EmptyState = () => (
+    <motion.div 
+      className="flex flex-col items-center justify-center py-16 w-full bg-white rounded-xl border border-gray-200 shadow-sm"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      <div className="rounded-full bg-gray-100 p-5 mb-4">
+        <Package className="h-10 w-10 text-gray-400" />
+      </div>
+      <h3 className="text-lg font-medium text-gray-900 mb-2">No assets found</h3>
+      <p className="text-gray-500 max-w-md text-center mb-2">
+        Try adjusting your search or filter criteria to find what you're looking for.
+      </p>
+      <div className="flex items-center text-sm text-blue-600 bg-blue-50 px-4 py-2 rounded-lg mt-2">
+        <Search className="w-4 h-4 mr-2" />
+        <span>Try a different search term or clear your filters</span>
+      </div>
+    </motion.div>
+  );
+
+  // Error state component
+  const ErrorState = ({ message }: { message: string }) => (
+    <motion.div 
+      className="flex flex-col items-center justify-center py-16 w-full bg-white rounded-xl border border-gray-200 shadow-sm"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      <div className="rounded-full bg-red-100 p-5 mb-4">
+        <AlertCircle className="h-10 w-10 text-red-500" />
+      </div>
+      <h3 className="text-lg font-medium text-gray-900 mb-2">Couldn't load assets</h3>
+      <p className="text-gray-500 max-w-md text-center">{message || "An error occurred while loading assets. Please try again."}</p>
+    </motion.div>
+  );
+
+  // Loading state with skeletons
   if (isLoading) {
     return (
       <div className="max-w-screen-2xl mx-auto px-4 py-6">
-        <div className={`grid ${currentView === "table" ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"} gap-6`}>
-          {Array(12).fill(0).map((_, i) => (
-            <AssetSkeleton key={i} />
+        <div className={`grid ${currentView === "table" ? "grid-cols-1 gap-4" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"}`}>
+          {Array(currentView === "table" ? 8 : 12).fill(0).map((_, i) => (
+            <AssetSkeleton key={i} index={i} />
           ))}
         </div>
       </div>
@@ -91,38 +145,54 @@ export default function AssetList({
   }
 
   return (
-    <div className="w-full mx-auto px-4 py-6 ">
-      <div 
-        className={`grid ${
-          currentView === "table" 
-            ? "grid-cols-1 gap-4" 
-            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
-        }`}
-      >
-        {assets.map((asset) => (
-          <div
-            key={asset.id}
-            ref={(el) => {
-              if (el) {
-                itemRefs.current.set(asset.id, el);
-              } else {
-                itemRefs.current.delete(asset.id);
-              }
-            }}
-          >
-            <AssetItem
-              asset={asset}
-              currentView={currentView}
-              isExpanded={expandedId === asset.id}
-              onToggle={handleToggle}
-              handleEdit={handleEdit}
-              handleDelete={handleDelete}
-              checked={selectedAssets.some((a) => a.id === asset.id)}
-              onSelectAsset={() => handleCheckboxChange(asset)}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
+    <motion.div 
+      className="w-full mx-auto px-4 py-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <AnimatePresence mode="popLayout">
+        <div 
+          className={`grid ${
+            currentView === "table" 
+              ? "grid-cols-1 gap-4" 
+              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
+          }`}
+        >
+          {assets.map((asset, index) => (
+            <motion.div
+              key={asset.id}
+              ref={(el: HTMLDivElement | null) => {
+                if (el) {
+                  itemRefs.current.set(asset.id, el);
+                } else {
+                  itemRefs.current.delete(asset.id);
+                }
+              }}
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ 
+                duration: 0.3, 
+                delay: index * 0.05,
+                layout: { duration: 0.2 }
+              }}
+            >
+              <AssetItem
+                asset={asset}
+                currentView={currentView}
+                isExpanded={expandedId === asset.id}
+                onToggle={handleToggle}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+                checked={selectedAssets.some((a) => a.id === asset.id)}
+                onSelectAsset={() => handleCheckboxChange(asset)}
+              />
+            </motion.div>
+          ))}
+        </div>
+      </AnimatePresence>
+    </motion.div>
   );
 }
