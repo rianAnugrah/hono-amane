@@ -346,13 +346,7 @@ export default function InspectionListPage() {
                         Inspection on{" "}
                         {new Date(inspection.date).toLocaleDateString()}
                       </h2>
-                      <div className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        status === 'completed' ? 'bg-green-100 text-green-800' :
-                        status === 'pending' ? 'bg-amber-100 text-amber-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                      </div>
+                   
                     </div>
                     <p className="text-sm text-gray-500">
                       Inspector: {inspectorName}
@@ -366,17 +360,7 @@ export default function InspectionListPage() {
                       </span>
                     </p>
                   </div>
-                  <motion.button
-                    className="bg-blue-100 text-blue-800 px-3 py-1 rounded-md hover:bg-blue-200 transition"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent triggering the parent div's onClick
-                      handleSelectInspection(inspection.id);
-                    }}
-                  >
-                    View
-                  </motion.button>
+                 
                 </div>
 
                 {inspection.notes && (
