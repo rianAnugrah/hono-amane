@@ -279,7 +279,7 @@ export default function InspectionListPage() {
         transition={{ duration: 0.3 }}
       >
         {/* Summary Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-white border-b">
+        <div className="grid grid-cols-1  gap-4 p-4 bg-white border-b border-gray-100">
           <motion.div 
             className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 overflow-hidden relative hover:shadow-md transition-all"
             whileHover={{ y: -2 }}
@@ -289,7 +289,7 @@ export default function InspectionListPage() {
             <p className="text-3xl font-bold mt-2">{inspections.length}</p>
             <p className="text-xs text-gray-400 mt-1">All recorded inspections</p>
           </motion.div>
-          <motion.div 
+          {/* <motion.div 
             className="bg-white p-5 rounded-xl shadow-sm border border-amber-200 overflow-hidden relative hover:shadow-md transition-all"
             whileHover={{ y: -2 }}
           >
@@ -310,11 +310,11 @@ export default function InspectionListPage() {
               {inspections.filter(i => i.status === 'completed').length || 0}
             </p>
             <p className="text-xs text-gray-400 mt-1">Successfully finalized</p>
-          </motion.div>
+          </motion.div> */}
         </div>
         
         {/* Toolbar */}
-        <div className="sticky top-0 z-10 bg-white border-b">
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-100">
           {renderToolbar()}
         </div>
         
@@ -492,7 +492,7 @@ export default function InspectionListPage() {
 
   const renderToolbar = () => {
     return (
-      <div className="sticky top-0 bg-white z-10 border-b border-gray-200 shadow-sm">
+      <div className="sticky top-0 bg-white z-10 border-b border-gray-200 ">
         <div className="flex flex-col sm:flex-row justify-between items-center py-3 px-4 gap-3">
           <div className="flex-1 w-full">
             <div className="relative">
@@ -719,7 +719,7 @@ export default function InspectionListPage() {
                 renderNewInspectionForm()
               ) : selectedInspectionId ? (
                 <div className="overflow-y-auto h-full">
-                  <div className="flex justify-between items-center p-4 border-b">
+                  <div className="flex justify-between items-center py-4 px-10 border-b">
                     <h2 className="text-xl font-semibold">Inspection Details</h2>
                     <div className="flex items-center space-x-2">
                       <motion.button
