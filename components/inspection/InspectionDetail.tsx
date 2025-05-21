@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import InspectionQrScanner from '@/components/blocks/qrscan/InspectionQrScanner';
 import { useAssetForm } from '@/hooks/useAssetForm';
 import AssetFormModal from '@/components/asset/AssetFormModal';
+import axios from 'axios';
 
 type Inspector = {
   id: string;
@@ -307,29 +308,21 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
     if (!assetToEdit) return;
 
     try {
-      // Prepare the update data
+      // Prepare the update data with only the fields we're changing
+      // Convert values to appropriate types
       const updateData = {
         id: assetToEdit.id,
         condition: assetCondition,
-        remark: assetRemarks || null,
+        remark: assetRemarks || null
       };
 
       console.log("Updating asset with data:", updateData);
 
-      // Send the update request
-      const response = await fetch(`/api/assets/${assetToEdit.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updateData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to update asset: ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      // Use axios like useAssetForm does instead of fetch
+      const response = await axios.put(`/api/assets/${assetToEdit.id}`, updateData);
+      console.log("Update response:", response.data);
+      
+      const data = response.data;
 
       if (!data.id) {
         throw new Error("Invalid response data from asset update");
@@ -355,6 +348,10 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
       }
     } catch (err) {
       console.error("Error updating asset:", err);
+      if (axios.isAxiosError(err) && err.response) {
+        console.error("Response data:", err.response.data);
+        console.error("Response status:", err.response.status);
+      }
       setError(`Failed to update asset: ${err instanceof Error ? err.message : "Unknown error"}`);
     }
   };
