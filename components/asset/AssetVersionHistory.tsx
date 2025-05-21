@@ -1,7 +1,25 @@
 import { useEffect, useState } from "react";
 import { Asset } from "@/pages/(protected)/asset/types";
-import { History, Loader2 } from "lucide-react";
+import { 
+  History, 
+  Loader2, 
+  ChevronDown, 
+  Clock, 
+  Sparkles, 
+  Calendar, 
+  AlertCircle, 
+  FileArchive, 
+  ArrowRight, 
+  ThumbsUp,
+  Bookmark,
+  Hash,
+  MapPin,
+  DollarSign,
+  FileText,
+  Camera
+} from "lucide-react";
 import { formatDate } from "@/utils/helpers";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AssetVersionHistoryProps {
   assetNo: string;
@@ -40,6 +58,11 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
       if (response.ok) {
         const data = await response.json();
         setVersions(data);
+        
+        // Auto-expand the first item if there are versions
+        if (data.length > 0) {
+          setExpanded({ [data[0].id]: true });
+        }
       } else {
         console.error("Failed to fetch asset version history");
       }
@@ -176,55 +199,85 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
     // Special handling for images
     if (fieldName === 'images') {
       return (
-        <div key={fieldName} className="py-2 border-b border-gray-100 last:border-0">
-          <span className="font-medium">{friendlyName}:</span>
-          <div className="mt-1">
+        <div key={fieldName} className="py-3 border-b border-gray-100 last:border-0">
+          <span className="font-medium text-gray-700 flex items-center gap-1.5">
+            <Camera size={14} className="text-blue-500" />
+            {friendlyName}:
+          </span>
+          <div className="mt-2 ml-5">
             {change.removedCount && change.removedCount > 0 ? (
-              <div className="text-red-500">Removed {change.removedCount} image{change.removedCount !== 1 ? 's' : ''}</div>
+              <div className="text-red-500 flex items-center gap-1.5 mb-2 text-sm">
+                <span className="inline-block w-2 h-2 bg-red-500 rounded-full"></span>
+                Removed {change.removedCount} image{change.removedCount !== 1 ? 's' : ''}
+              </div>
             ) : null}
             {change.addedCount && change.addedCount > 0 ? (
-              <div className="text-green-500">Added {change.addedCount} image{change.addedCount !== 1 ? 's' : ''}</div>
+              <div className="text-green-500 flex items-center gap-1.5 mb-2 text-sm">
+                <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
+                Added {change.addedCount} image{change.addedCount !== 1 ? 's' : ''}
+              </div>
             ) : null}
-            <div className="text-gray-500 text-sm">
+            <div className="text-gray-500 text-sm mt-1 bg-gray-50 py-1 px-2 rounded-md inline-block">
               Total images: {change.currentCount} (Previously: {change.previousCount})
             </div>
             
             {/* Preview of added images */}
             {Array.isArray(change.new) && change.new.length > 0 && (
-              <div className="mt-2">
-                <div className="text-sm font-medium mb-1">Added images:</div>
+              <motion.div 
+                className="mt-3"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="text-sm font-medium mb-2 text-green-700 flex items-center gap-1">
+                  <Sparkles size={12} />
+                  Added images:
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {change.new.slice(0, 3).map((img: string, i: number) => (
-                    <div key={i} className="border border-green-200 rounded overflow-hidden w-16 h-16">
+                    <motion.div 
+                      key={i} 
+                      className="border border-green-200 rounded-md overflow-hidden w-20 h-20 shadow-sm"
+                      whileHover={{ scale: 1.05, boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+                    >
                       <img src={img} alt={`Added ${i+1}`} className="w-full h-full object-cover" />
-                    </div>
+                    </motion.div>
                   ))}
                   {change.new.length > 3 && (
-                    <div className="flex items-center justify-center w-16 h-16 border border-green-200 rounded bg-green-50 text-green-700">
+                    <div className="flex items-center justify-center w-20 h-20 border border-green-200 rounded-md bg-green-50 text-green-700 font-medium">
                       +{change.new.length - 3}
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             )}
             
             {/* Preview of removed images */}
             {Array.isArray(change.old) && change.old.length > 0 && (
-              <div className="mt-2">
-                <div className="text-sm font-medium mb-1">Removed images:</div>
+              <motion.div 
+                className="mt-3"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+              >
+                <div className="text-sm font-medium mb-2 text-red-700 flex items-center gap-1">
+                  <Sparkles size={12} />
+                  Removed images:
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {change.old.slice(0, 3).map((img: string, i: number) => (
-                    <div key={i} className="border border-red-200 rounded overflow-hidden w-16 h-16 opacity-70">
+                    <div key={i} className="border border-red-200 rounded-md overflow-hidden w-20 h-20 opacity-70 relative">
+                      <div className="absolute inset-0 bg-red-100/30 backdrop-blur-[1px]"></div>
                       <img src={img} alt={`Removed ${i+1}`} className="w-full h-full object-cover" />
                     </div>
                   ))}
                   {change.old.length > 3 && (
-                    <div className="flex items-center justify-center w-16 h-16 border border-red-200 rounded bg-red-50 text-red-700">
+                    <div className="flex items-center justify-center w-20 h-20 border border-red-200 rounded-md bg-red-50 text-red-700 font-medium">
                       +{change.old.length - 3}
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
@@ -232,92 +285,202 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
     }
 
     return (
-      <div key={fieldName} className="py-2 border-b border-gray-100 last:border-0">
-        <span className="font-medium">{friendlyName}:</span>{' '}
-        <span className="text-red-500 line-through mr-2">{formatValue(change.old)}</span>
-        <span className="text-green-500">{formatValue(change.new)}</span>
-      </div>
+      <motion.div 
+        key={fieldName} 
+        className="py-3 border-b border-gray-100 last:border-0"
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        <span className="font-medium text-gray-700 flex items-center gap-1.5">
+          {getFieldIcon(fieldName)}
+          {friendlyName}:
+        </span>
+        <div className="mt-1 flex items-baseline gap-2 flex-wrap ml-5">
+          <div className="text-red-500 line-through bg-red-50 px-2 py-1 rounded text-sm border border-red-100">
+            {formatValue(change.old)}
+          </div>
+          <ArrowRight size={14} className="text-gray-400" />
+          <div className="text-green-600 bg-green-50 px-2 py-1 rounded text-sm font-medium border border-green-100">
+            {formatValue(change.new)}
+          </div>
+        </div>
+      </motion.div>
     );
+  };
+  
+  // Helper function to get an icon for each field type
+  const getFieldIcon = (fieldName: string) => {
+    const iconSize = 14;
+    const iconMap: Record<string, JSX.Element> = {
+      'assetName': <Bookmark size={iconSize} className="text-blue-500" />,
+      'lineNo': <Hash size={iconSize} className="text-gray-500" />,
+      'condition': <AlertCircle size={iconSize} className="text-yellow-500" />,
+      'pisDate': <Calendar size={iconSize} className="text-blue-500" />,
+      'transDate': <Calendar size={iconSize} className="text-green-500" />,
+      'location': <MapPin size={iconSize} className="text-red-500" />,
+      'detailedLocation': <MapPin size={iconSize} className="text-red-500" />,
+      'projectCode': <FileArchive size={iconSize} className="text-indigo-500" />,
+      'acqValueIdr': <DollarSign size={iconSize} className="text-blue-500" />,
+      'acqValue': <DollarSign size={iconSize} className="text-blue-500" />,
+    };
+    
+    return iconMap[fieldName] || <FileText size={iconSize} className="text-gray-500" />;
+  };
+
+  // Animation variants
+  const listVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-4">
-        <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+      <div className="flex items-center justify-center py-12">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+          <p className="text-gray-500 text-sm font-medium">Loading version history...</p>
+        </div>
       </div>
     );
   }
 
   if (versions.length === 0) {
     return (
-      <div className="text-gray-500 text-center p-4">
-        No version history available
+      <div className="text-gray-500 text-center p-10 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+        <History className="w-12 h-12 text-gray-400 mx-auto mb-3 opacity-70" />
+        <p className="text-gray-700 font-medium text-lg">No version history available</p>
+        <p className="text-gray-500 text-sm mt-2">Changes to this asset will be tracked here</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <motion.div 
+      className="space-y-5"
+      variants={listVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {versions.map((version, index) => {
         const changes = getChanges(version, index);
         const changeCount = Object.keys(changes).length;
+        const isFirst = index === 0;
+        const isExpanded = expanded[version.id] || false;
+        const date = new Date(version.updatedAt);
         
         return (
-          <div key={version.id} className="border border-gray-200 rounded-md overflow-hidden">
-            <div 
-              className="flex items-center justify-between p-3 bg-gray-50 cursor-pointer"
+          <motion.div 
+            key={version.id} 
+            className={`border ${isExpanded ? 'border-blue-200 bg-blue-50/30' : 'border-gray-200'} rounded-lg overflow-hidden shadow-sm transition-all duration-200`}
+            variants={itemVariants}
+            whileHover={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)', y: -2 }}
+          >
+            <motion.div 
+              className="flex items-center justify-between p-4 cursor-pointer group"
               onClick={() => toggleVersionDetails(version.id)}
             >
-              <div className="flex items-center gap-2">
-                <span className="font-semibold">Version {version.version}</span>
-                <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
-                  {new Date(version.updatedAt).toLocaleDateString()}
-                </span>
-                {index === 0 && (
-                  <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                    Current
-                  </span>
-                )}
-                {changeCount > 0 && index !== versions.length - 1 && (
-                  <span className="text-xs text-gray-500">
-                    {changeCount} change{changeCount !== 1 ? 's' : ''}
-                  </span>
-                )}
-              </div>
-              <button 
-                className="text-gray-400 hover:text-gray-700"
-                aria-label={expanded[version.id] ? "Collapse" : "Expand"}
-              >
-                <svg 
-                  className={`w-5 h-5 transition-transform ${expanded[version.id] ? 'rotate-180' : ''}`} 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            </div>
-            
-            {expanded[version.id] && (
-              <div className="p-3 border-t border-gray-200 bg-white">
-                {index === versions.length - 1 ? (
-                  <div className="text-gray-500 italic">Initial version</div>
-                ) : changeCount > 0 ? (
-                  <div className="space-y-1">
-                    {Object.entries(changes).map(([field, change]) => 
-                      formatChange(field, change)
-                    )}
+              <div className="flex items-center gap-3">
+                {isFirst ? (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white shadow-sm">
+                    <ThumbsUp size={16} />
                   </div>
                 ) : (
-                  <div className="text-gray-500 italic">No changes in this version</div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white shadow-sm">
+                    <Clock size={16} />
+                  </div>
                 )}
+                
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-gray-800">Version {version.version}</span>
+                    {isFirst && (
+                      <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium border border-green-200">
+                        Current
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                    <span className="inline-flex items-center">
+                      <Calendar size={12} className="mr-1" />
+                      {date.toLocaleDateString(undefined, {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                      <span className="mx-1 text-gray-400">•</span>
+                      {date.toLocaleTimeString(undefined, {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                    {changeCount > 0 && index !== versions.length - 1 && (
+                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full border border-blue-200">
+                        {changeCount} change{changeCount !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
+              
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className={`w-8 h-8 rounded-full ${isExpanded ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'} flex items-center justify-center transition-colors group-hover:bg-blue-100 group-hover:text-blue-600`}
+              >
+                <ChevronDown 
+                  size={18} 
+                  className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : 'rotate-0'}`} 
+                />
+              </motion.div>
+            </motion.div>
+            
+            <AnimatePresence>
+              {isExpanded && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-4 border-t border-gray-200 bg-white">
+                    {index === versions.length - 1 ? (
+                      <div className="flex flex-col items-center justify-center py-6 text-gray-600 bg-gray-50/80 rounded-lg">
+                        <FileArchive size={20} className="mb-2 text-gray-500" />
+                        <p className="font-medium">Initial version</p>
+                        <p className="text-xs mt-1 text-gray-500">Created on {new Date(version.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    ) : changeCount > 0 ? (
+                      <div className="space-y-1 pl-2">
+                        {Object.entries(changes).map(([field, change]) => 
+                          formatChange(field, change)
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-6 text-gray-600 bg-gray-50/80 rounded-lg">
+                        <p className="font-medium">No changes in this version</p>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         );
       })}
-    </div>
+    </motion.div>
   );
 };
 

@@ -11,7 +11,12 @@ import {
   Upload,
   X,
   ExternalLink,
+  Check,
+  Camera,
+  AlertCircle,
+  Info
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Asset } from "@/pages/(protected)/asset/types";
 
 interface Camera {
@@ -34,6 +39,7 @@ const QrScannerComponent = () => {
   const [isFetchingAsset, setIsFetchingAsset] = useState(false);
   const [switchingCamera, setSwitchingCamera] = useState(false);
   const [autoStartCamera, setAutoStartCamera] = useState(true);
+  const [scanSuccess, setScanSuccess] = useState(false);
 
   useEffect(() => {
     if (autoStartCamera) {
@@ -44,12 +50,48 @@ const QrScannerComponent = () => {
     }
   }, [autoStartCamera]);
 
+  useEffect(() => {
+    if (result) {
+      setScanSuccess(true);
+      const timer = setTimeout(() => {
+        setScanSuccess(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [result]);
+
+  useEffect(() => {
+    const fetchAssetData = async () => {
+      if (!result) return setAssetData(null);
+      try {
+        setIsFetchingAsset(true);
+        const response = await axios.get(`/api/assets/by-asset-number/${result}`);
+        setAssetData(response.data);
+      } catch (err) {
+        setError("Failed to fetch asset data.");
+        setAssetData(null);
+      } finally {
+        setIsFetchingAsset(false);
+      }
+    };
+    fetchAssetData();
+  }, [result]);
+
+  useEffect(() => {
+    return () => {
+      if (scanner) {
+        scanner.stop();
+        setScanner(null);
+      }
+    };
+  }, [scanner]);
+
   const loadCameras = async () => {
     try {
       setIsLoading(true);
       setError("");
       if (!navigator.mediaDevices?.getUserMedia) {
-        setError("Browser Anda tidak mendukung akses kamera.");
+        setError("Browser does not support camera access.");
         setIsLoading(false);
         return;
       }
@@ -66,7 +108,7 @@ const QrScannerComponent = () => {
       console.log("Available cameras:", availableCameras);
       
       if (availableCameras.length === 0) {
-        setError("Tidak ada kamera yang terdeteksi.");
+        setError("No cameras detected.");
         setPermissionState("granted");
         setIsLoading(false);
         return;
@@ -88,18 +130,18 @@ const QrScannerComponent = () => {
   const handleCameraError = (err: any) => {
     console.error("Camera error:", err);
     if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-      setError("Akses kamera ditolak.");
+      setError("Camera access denied.");
       setPermissionState("denied");
     } else if (err.name === "NotFoundError") {
-      setError("Tidak ada kamera ditemukan.");
+      setError("No camera found.");
     } else if (err.name === "NotReadableError") {
-      setError("Kamera sedang digunakan oleh aplikasi lain.");
+      setError("Camera is in use by another application.");
     } else if (err.name === "AbortError") {
-      setError("Operasi kamera dibatalkan.");
+      setError("Camera operation aborted.");
     } else if (err.name === "OverconstrainedError") {
-      setError("Kamera tidak memenuhi batasan yang diminta.");
+      setError("Camera does not meet the requested constraints.");
     } else {
-      setError(`Gagal memuat kamera: ${err.message}`);
+      setError(`Failed to load camera: ${err.message}`);
     }
     setCameraOn(false);
     setSwitchingCamera(false);
@@ -120,12 +162,12 @@ const QrScannerComponent = () => {
 
   const startCameraWithIndex = async (index: number) => {
     if (!videoRef.current || cameras.length === 0) {
-      setError("Video ref tidak tersedia atau kamera tidak ditemukan.");
+      setError("Video reference not available or no cameras found.");
       return;
     }
 
     if (switchingCamera) {
-      console.log("Camera switching already in progress, ignoring request");
+      console.log("Camera switching in progress, ignoring request");
       return;
     }
 
@@ -208,11 +250,11 @@ const QrScannerComponent = () => {
 
   const switchCamera = async () => {
     if (cameras.length <= 1) {
-      return setError("Hanya satu kamera tersedia.");
+      return setError("Only one camera available.");
     }
     
     if (switchingCamera || isLoading) {
-      console.log("Operation already in progress, ignoring switch request");
+      console.log("Operation in progress, ignoring switch request");
       return;
     }
     
@@ -247,7 +289,7 @@ const QrScannerComponent = () => {
       setCameras(availableCameras);
       
       if (availableCameras.length === 0) {
-        setError("Tidak ada kamera setelah penyegaran.");
+        setError("No cameras after refresh.");
       } else {
         setError("");
         setTimeout(() => {
@@ -255,7 +297,7 @@ const QrScannerComponent = () => {
         }, 500);
       }
     } catch (err: any) {
-      setError("Gagal memperbarui kamera: " + err.message);
+      setError("Failed to refresh cameras: " + err.message);
     } finally {
       setIsLoading(false);
     }
@@ -265,275 +307,304 @@ const QrScannerComponent = () => {
     const file = event.target.files?.[0];
     if (!file) return;
     setError("");
+    
     QrScanner.scanImage(file)
-      .then((res) => setResult(res))
-      .catch(() => setError("Gagal memindai QR dari file."));
-  };
-
-  useEffect(() => {
-    const fetchAssetData = async () => {
-      if (!result) return setAssetData(null);
-      try {
-        setIsFetchingAsset(true);
-        const response = await axios.get(`/api/assets/by-asset-number/${result}`);
-        setAssetData(response.data);
-      } catch (err) {
-        setError("Gagal mengambil data asset.");
-        setAssetData(null);
-      } finally {
-        setIsFetchingAsset(false);
-      }
-    };
-    fetchAssetData();
-  }, [result]);
-
-  useEffect(() => {
-    return () => {
-      if (scanner) {
-        scanner.stop();
-        setScanner(null);
-      }
-    };
-  }, [scanner]);
-
-  return (
-    <div className="max-w-lg mx-auto p-6">
-      <div className="relative w-full max-w-sm mx-auto border-2 border-gray-300 rounded-xl overflow-hidden">
-        <video ref={videoRef} className="w-full h-64 object-cover" />
-        {!cameraOn && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-700 text-white p-4">
-            {isLoading ? <p>Starting Camera...</p> : <p>Press Enable Camera</p>}
-          </div>
-        )}
-        {error && (
-          <div className="absolute bottom-0 left-0 w-full p-2">
-            <p className="text-red-600 text-center bg-red-100 border border-red-600 rounded text-xs">
-              {error}
-            </p>
-          </div>
-        )}
-      </div>
-
-      <CameraButtons
-        cameras={cameras}
-        currentCameraIndex={currentCameraIndex}
-        startCameraWithIndex={startCameraWithIndex}
-        stopCamera={stopCamera}
-        isLoading={isLoading || switchingCamera}
-      />
-
-      <ControlPanel
-        switchCamera={switchCamera}
-        refreshCameras={refreshCameras}
-        startCamera={startCameraWithIndex}
-        stopCamera={stopCamera}
-        requestCameraPermission={requestCameraPermission}
-        cameraOn={cameraOn}
-        isLoading={isLoading || switchingCamera}
-        permissionState={permissionState}
-        fileInputRef={fileInputRef}
-        handleFileUpload={handleFileUpload}
-      />
-
-      <ResultPanel
-        result={result}
-        setResult={setResult}
-        assetData={assetData}
-        isFetching={isFetchingAsset}
-      />
-    </div>
-  );
-};
-
-// === Reusable UI Components ===
-
-const CameraButtons = ({
-  cameras,
-  currentCameraIndex,
-  startCameraWithIndex,
-  stopCamera,
-  isLoading,
-}: {
-  cameras: Camera[];
-  currentCameraIndex: number;
-  startCameraWithIndex: (index: number) => void;
-  stopCamera: () => void;
-  isLoading: boolean;
-}) => {
-  if (cameras.length === 0)
-    return <p className="text-sm text-gray-500 mb-4 text-center">No Camera Detected</p>;
-
-  return (
-    <div className="flex justify-center mb-4 gap-2">
-      {cameras.map((_, index) => (
-        <button
-          key={index}
-          onClick={() => {
-            stopCamera();
-            setTimeout(() => startCameraWithIndex(index), 300);
-          }}
-          className={`p-1 rounded-md relative ${
-            currentCameraIndex === index
-              ? "bg-blue-100 border border-blue-500"
-              : "bg-gray-100 border hover:bg-gray-200 text-gray-300 border-gray-300"
-          }`}
-          disabled={isLoading || currentCameraIndex === index}
-        >
-          <CameraIcon className="w-10 h-10" />
-          <p
-            className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 text-xs text-white font-bold rounded-full flex items-center justify-center ${
-              currentCameraIndex === index ? "bg-blue-600" : "bg-gray-500"
-            }`}
-          >
-            {index}
-          </p>
-        </button>
-      ))}
-    </div>
-  );
-};
-
-const ControlPanel = ({
-  switchCamera,
-  refreshCameras,
-  startCamera,
-  stopCamera,
-  requestCameraPermission,
-  cameraOn,
-  isLoading,
-  permissionState,
-  fileInputRef,
-  handleFileUpload,
-}: any) => (
-  <div className="flex items-center justify-center divide-x divide-gray-300 mb-4">
-    <ButtonComponent
-      onClick={switchCamera}
-      icon={<SwitchCamera />}
-      label="Switch"
-      disabled={isLoading}
-      color="blue"
-    />
-    <ButtonComponent
-      onClick={refreshCameras}
-      icon={isLoading ? <RefreshCcw className="animate-spin" /> : <RefreshCcw />}
-      label={isLoading ? "Loading..." : "Refresh"}
-      disabled={isLoading}
-      color="gray"
-    />
-    {!cameraOn ? (
-      <ButtonComponent
-        onClick={permissionState === "denied" ? requestCameraPermission : () => startCamera(0)}
-        icon={isLoading ? <RefreshCcw className="animate-spin" /> : <Power />}
-        label={isLoading ? "Loading..." : "Enable"}
-        disabled={isLoading}
-        color="red"
-      />
-    ) : (
-      <ButtonComponent
-        onClick={stopCamera}
-        icon={<PowerOff />}
-        label="Stop"
-        disabled={isLoading}
-        color="red"
-      />
-    )}
-    <input
-      type="file"
-      accept="image/*"
-      ref={fileInputRef}
-      onChange={handleFileUpload}
-      className="hidden"
-    />
-    <ButtonComponent
-      onClick={() => fileInputRef.current?.click()}
-      icon={<Upload />}
-      label="Upload"
-      color="green"
-    />
-  </div>
-);
-
-const ResultPanel = ({
-  result,
-  setResult,
-  assetData,
-  isFetching,
-}: {
-  result: string;
-  setResult: (r: string) => void;
-  assetData: Asset | null;
-  isFetching: boolean;
-}) => (
-  <div className="flex flex-col items-center gap-2">
-    <div className="flex flex-row w-full gap-2 items-center">
-      <input
-        type="text"
-        value={result}
-        onChange={(e) => setResult(e.target.value)}
-        className="border rounded h-[2rem] px-2 text-xs text-gray-800 flex-grow"
-      />
-      <button
-        onClick={() => {
-          setResult("");
-          window.location.reload();
-        }}
-        className="bg-red-600 text-white h-[2rem] px-3 rounded hover:bg-red-500 flex items-center gap-1 text-xs"
-      >
-        <X className="w-auto h-3" />
-        <p>Reset</p>
-      </button>
-    </div>
-
-    {isFetching ? (
-      <p className="text-gray-600 mt-2">Loading asset data...</p>
-    ) : assetData ? (
-      <div className="mt-2 flex flex-col items-center gap-2">
-        <p className="text-sm text-gray-700">Asset found: {assetData.assetName}</p>
-        <button
-          onClick={() => navigate(`/asset/${result}`)}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 flex items-center gap-2"
-        >
-          <ExternalLink className="w-4 h-4" />
-          View Asset Details
-        </button>
-      </div>
-    ) : (
-      result && <p className="text-red-600 mt-2">No asset data found</p>
-    )}
-  </div>
-);
-
-const ButtonComponent = ({
-  onClick,
-  icon,
-  label,
-  disabled = false,
-  className = "",
-  color = "gray",
-}: {
-  onClick: () => void;
-  icon: React.ReactNode;
-  label: string;
-  disabled?: boolean;
-  className?: string;
-  color?: "gray" | "red" | "green" | "blue";
-}) => {
-  const colorClasses = {
-    gray: "border-gray-400 bg-gray-100 hover:bg-gray-200 text-gray-600",
-    red: "border-gray-400 bg-red-100 hover:bg-red-200 text-red-600",
-    green: "border-gray-400 bg-green-100 hover:bg-green-200 text-green-600",
-    blue: "border-gray-400 bg-blue-100 hover:bg-blue-200 text-blue-600",
+      .then((res) => {
+        setResult(res);
+        setScanSuccess(true);
+        setTimeout(() => setScanSuccess(false), 2000);
+      })
+      .catch(() => setError("Failed to scan QR code from file."));
   };
 
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`cursor-pointer border-y last:border-r first:border-l first:rounded-l-lg last:rounded-r-lg flex flex-col md:flex-row w-[6rem] md:w-auto px-4 transition disabled:bg-gray-200 disabled:text-gray-500 h-auto md:h-[2rem] items-center gap-2 justify-start py-2 ${colorClasses[color]} ${className}`}
+    <motion.div 
+      className="w-full max-w-md mx-auto bg-white rounded-xl shadow-lg overflow-hidden"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
     >
-      <div className="w-8 md:w-4 h-8 md:h-4 flex items-center justify-center">{icon}</div>
-      <p className="text-xs">{label}</p>
-    </button>
+      <div className="relative w-full bg-black rounded-t-xl overflow-hidden">
+        <motion.div
+          className="aspect-[4/3] bg-black flex items-center justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: cameraOn ? 1 : 0.7 }}
+          transition={{ duration: 0.5 }}
+        >
+          <video ref={videoRef} className="w-full h-full object-cover" />
+          
+          {cameraOn && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="relative w-3/4 aspect-square">
+                <motion.div
+                  className="absolute left-0 right-0 h-px bg-blue-500 z-10"
+                  initial={{ top: "0%" }}
+                  animate={{ top: ["0%", "100%", "0%"] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  style={{ boxShadow: "0 0 4px 1px rgba(59, 130, 246, 0.7)" }}
+                />
+                
+                <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-blue-500 rounded-tl"></div>
+                <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-blue-500 rounded-tr"></div>
+                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-blue-500 rounded-bl"></div>
+                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-blue-500 rounded-br"></div>
+                
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full opacity-70"></div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <AnimatePresence>
+            {scanSuccess && (
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-60 z-20"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <motion.div
+                  className="bg-green-500 rounded-full p-3"
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 1.5, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <Check size={40} className="text-white" />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          {!cameraOn && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-80 text-white gap-4">
+              {isLoading ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                >
+                  <RefreshCcw size={40} className="text-blue-400" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-blue-500 p-4 rounded-full cursor-pointer"
+                  onClick={permissionState === "denied" ? requestCameraPermission : () => startCameraWithIndex(0)}
+                >
+                  <Camera size={32} className="text-white" />
+                </motion.div>
+              )}
+              <p className="text-center px-8">
+                {isLoading 
+                  ? "Starting camera..." 
+                  : permissionState === "denied"
+                    ? "Camera access was denied. Click to request again."
+                    : "Press to enable camera"}
+              </p>
+            </div>
+          )}
+        </motion.div>
+        
+        <AnimatePresence>
+          {error && (
+            <motion.div 
+              className="absolute bottom-0 left-0 right-0 bg-red-500 text-white px-4 py-2 shadow-lg"
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              transition={{ type: "spring", damping: 15 }}
+            >
+              <div className="flex items-center gap-2">
+                <AlertCircle size={16} />
+                <p className="text-sm font-medium">{error}</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">Camera Controls</h3>
+        
+        <div className="flex flex-wrap justify-center gap-2 mb-3">
+          {cameras.length > 0 && (
+            <motion.div 
+              className="flex justify-center gap-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              {cameras.map((camera, index) => (
+                <motion.button
+                  key={index}
+                  onClick={() => {
+                    if (currentCameraIndex !== index) {
+                      stopCamera();
+                      setTimeout(() => startCameraWithIndex(index), 300);
+                    }
+                  }}
+                  className={`relative p-2 rounded-lg flex items-center justify-center ${
+                    currentCameraIndex === index
+                      ? "bg-blue-100 ring-2 ring-blue-400 text-blue-600"
+                      : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+                  }`}
+                  disabled={isLoading || currentCameraIndex === index}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <CameraIcon className="w-5 h-5" />
+                  <span className="ml-1 text-xs">{index + 1}</span>
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+        </div>
+        
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <motion.button
+            onClick={!cameraOn 
+              ? (permissionState === "denied" ? requestCameraPermission : () => startCameraWithIndex(0))
+              : stopCamera
+            }
+            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg shadow-sm text-sm font-medium ${
+              !cameraOn 
+                ? "bg-blue-600 hover:bg-blue-700 text-white"
+                : "bg-red-600 hover:bg-red-700 text-white"
+            }`}
+            disabled={isLoading}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {isLoading ? (
+              <RefreshCcw className="w-4 h-4 animate-spin" />
+            ) : !cameraOn ? (
+              <Power className="w-4 h-4" />
+            ) : (
+              <PowerOff className="w-4 h-4" />
+            )}
+            <span>{isLoading ? "Loading..." : !cameraOn ? "Start Camera" : "Stop Camera"}</span>
+          </motion.button>
+          
+          <motion.button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center justify-center gap-2 py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg shadow-sm text-sm font-medium"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Upload className="w-4 h-4" />
+            <span>Upload Image</span>
+          </motion.button>
+          
+          <motion.button
+            onClick={switchCamera}
+            className="flex items-center justify-center gap-2 py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg shadow-sm text-sm font-medium"
+            disabled={isLoading || cameras.length <= 1}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <SwitchCamera className="w-4 h-4" />
+            <span>Switch Camera</span>
+          </motion.button>
+          
+          <motion.button
+            onClick={refreshCameras}
+            className="flex items-center justify-center gap-2 py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg shadow-sm text-sm font-medium"
+            disabled={isLoading}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <RefreshCcw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            <span>Refresh Cameras</span>
+          </motion.button>
+        </div>
+        
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+          className="hidden"
+        />
+      </div>
+
+      <div className="px-4 py-3 bg-white border-t border-gray-200">
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">Scan Result</h3>
+        
+        <div className="flex items-center gap-2 mb-3">
+          <motion.input
+            type="text"
+            value={result}
+            onChange={(e) => setResult(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            placeholder="Asset number will appear here..."
+            initial={{ scale: 1 }}
+            animate={{ scale: scanSuccess ? [1, 1.03, 1] : 1 }}
+            transition={{ duration: 0.3 }}
+          />
+          
+          <motion.button
+            onClick={() => setResult("")}
+            className="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            disabled={!result}
+          >
+            <X className="w-5 h-5" />
+          </motion.button>
+        </div>
+        
+        {isFetchingAsset ? (
+          <div className="flex justify-center py-4">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            >
+              <RefreshCcw className="text-blue-500 w-6 h-6" />
+            </motion.div>
+          </div>
+        ) : assetData ? (
+          <motion.div 
+            className="mt-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+              <p className="text-sm font-medium text-blue-800">Asset found: {assetData.assetName}</p>
+            </div>
+            <motion.button
+              onClick={() => navigate(`/asset/${result}`)}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg shadow-sm font-medium flex items-center justify-center gap-2"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <ExternalLink className="w-5 h-5" />
+              <span>View Asset Details</span>
+            </motion.button>
+          </motion.div>
+        ) : result ? (
+          <motion.div
+            className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-700 text-sm flex items-start gap-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <p>Asset not found with scanned number. Please try again.</p>
+          </motion.div>
+        ) : (
+          <motion.div
+            className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-blue-700 text-sm flex items-start gap-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+            <p>Scan a QR code or upload an image containing a QR code to get an asset number.</p>
+          </motion.div>
+        )}
+      </div>
+    </motion.div>
   );
 };
 

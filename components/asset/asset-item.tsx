@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { Asset } from "../../pages/(protected)/asset/types";
 import { AnimatePresence, motion } from "framer-motion";
@@ -15,7 +15,8 @@ import {
   Eye,
   EyeOff,
   Calendar,
-  DollarSign
+  DollarSign,
+  ImageIcon
 } from "lucide-react";
 import Checkbox from "@/components/ui/checkbox";
 import { formatIDR } from "@/components/utils/formatting";
@@ -23,7 +24,7 @@ import AssetDetail from "./asset-detail";
 import { useUserStore } from "@/stores/store-user-login";
 import CardItem from "./asset-card-item";
 import NoImagePlaceholder from "./NoImagePlaceholder";
-import { ImageWithFallback, hasValidImages } from "@/components/utils/ImageUtils";
+import { ImageWithFallback, hasValidImages, getColorFromString, getInitials } from "@/components/utils/ImageUtils";
 
 /**
  * Interface for location object
@@ -65,6 +66,7 @@ export default function AssetItem({
 }) {
   const { location, role } = useUserStore();
   const hasImages = hasValidImages(asset.images);
+  const [imageError, setImageError] = useState(false);
 
   function isLocationIdExists(
     locationsArray: LocationItem[],
@@ -125,6 +127,36 @@ export default function AssetItem({
       return null;
     }
   }
+  
+  // Render asset thumbnail with fallback
+  const renderAssetThumbnail = () => {
+    if (!hasImages || imageError) {
+      // Generate background color based on asset name
+      const bgColor = getColorFromString(asset.assetName);
+      const initials = getInitials(asset.assetName);
+      
+      return (
+        <div 
+          className="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center"
+          style={{ backgroundColor: bgColor }}
+        >
+          <span className="font-bold text-gray-700">{initials}</span>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="w-12 h-12 rounded-lg overflow-hidden mr-2 mb-1.5 border border-gray-200 shadow-sm">
+        <img
+          src={hasImages ? asset.images[0] : undefined}
+          alt={asset.assetName}
+          className="w-full h-full object-cover"
+          onError={() => setImageError(true)}
+          loading="lazy"
+        />
+      </div>
+    );
+  };
 
   // Animation variants for better transitions
   const tableRowVariants = {
@@ -155,14 +187,7 @@ export default function AssetItem({
               </div>
               <div className="flex flex-col">
                 {/* Image thumbnail with better styling */}
-                <div className="w-12 h-12 rounded-lg overflow-hidden mr-2 mb-1.5 border border-gray-200 shadow-sm">
-                  <ImageWithFallback
-                    src={hasImages ? asset.images[0] : undefined}
-                    alt={asset.assetName}
-                    assetName={asset.assetName}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                {renderAssetThumbnail()}
                 <div className="font-medium text-gray-900">{asset.assetName}</div>
                 <span className="text-gray-500 font-mono text-[10px]">{asset.assetNo}</span>
               </div>

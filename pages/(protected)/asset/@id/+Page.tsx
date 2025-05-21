@@ -3,7 +3,8 @@ import { usePageContext } from "@/renderer/usePageContext";
 import { useEffect, useState } from "react";
 import { Asset } from "../types";
 import { Link } from "@/renderer/Link";
-import { ArrowLeft, Loader2, ClipboardCheck, PlusCircle, History } from "lucide-react";
+import { ArrowLeft, Loader2, ClipboardCheck, PlusCircle, History, ListChecks, FileText, ChevronRight, Info } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Import the extracted components
 import AssetHeader from "@/components/asset/AssetHeader";
@@ -14,6 +15,9 @@ import NewInspectionForm from "@/components/asset/NewInspectionForm";
 import InspectionLogTable, { InspectionLog } from "@/components/asset/InspectionLogTable";
 import AssetVersionHistory from "@/components/asset/AssetVersionHistory";
 
+// Type for mobile view tabs
+type MobileTab = 'info' | 'history';
+
 // Main component
 export default function AssetDetailPage() {
   const pageContext = usePageContext();
@@ -23,7 +27,9 @@ export default function AssetDetailPage() {
   const [inspectionLogs, setInspectionLogs] = useState<InspectionLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
   const [showNewInspection, setShowNewInspection] = useState(false);
-  const [showVersionHistory, setShowVersionHistory] = useState(false);
+  
+  // New state for mobile tab view
+  const [activeTab, setActiveTab] = useState<MobileTab>('info');
 
   // Fetch asset details
   useEffect(() => {
@@ -126,44 +132,108 @@ export default function AssetDetailPage() {
     );
   }
 
+  const renderAssetInfoSection = () => (
+    <div className="flex flex-col md:flex-row gap-6">
+      <AssetMediaSection asset={asset} />
+
+      {/* Right column: Asset Details */}
+      <div className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-0">
+        <AssetBasicInfo asset={asset} />
+        <AssetFinancialInfo asset={asset} />
+      </div>
+    </div>
+  );
+  
+  const renderVersionHistorySection = () => (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <History size={20} className="text-blue-500" />
+          Version History
+        </h2>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden p-4">
+        <AssetVersionHistory assetNo={asset.assetNo} />
+      </div>
+    </div>
+  );
+
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="w-full mx-auto">
       <AssetHeader />
 
-      <div className="p-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          <AssetMediaSection asset={asset} />
+      {/* Mobile Tab Navigation - Only visible on mobile */}
+      <div className="md:hidden border-b border-gray-200">
+        <div className="flex">
+          <button
+            onClick={() => setActiveTab('info')}
+            className={`flex-1 py-3 px-4 text-sm font-medium ${
+              activeTab === 'info' 
+                ? 'text-blue-600 border-b-2 border-blue-500' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-1.5">
+              <Info size={16} />
+              Asset Info
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex-1 py-3 px-4 text-sm font-medium ${
+              activeTab === 'history' 
+                ? 'text-blue-600 border-b-2 border-blue-500' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-1.5">
+              <History size={16} />
+              History
+            </div>
+          </button>
+        </div>
+      </div>
 
-          {/* Right column: Asset Details */}
-          <div className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-0">
-            <AssetBasicInfo asset={asset} />
-            <AssetFinancialInfo asset={asset} />
-          </div>
+      <div className="p-6">
+        {/* Mobile view (tab-based) */}
+        <div className="md:hidden">
+          <AnimatePresence mode="wait">
+            {activeTab === 'info' ? (
+              <motion.div
+                key="info"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.2 }}
+              >
+                {renderAssetInfoSection()}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="history"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+              >
+                {renderVersionHistorySection()}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-     
-
-        {/* Asset Version History Section */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <History size={20} className="text-gray-400" />
-              Version History
-            </h2>
-            <button 
-              onClick={() => setShowVersionHistory(!showVersionHistory)}
-              className="inline-flex items-center gap-1 px-3 py-2 text-sm text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 transition-colors"
-            >
-              {showVersionHistory ? 'Hide History' : 'Show History'}
-            </button>
+        {/* Desktop view (split view) */}
+        <div className="hidden md:block">
+          {/* Asset Info Section */}
+          <div>
+            {renderAssetInfoSection()}
           </div>
 
-          {/* Version History Component */}
-          {showVersionHistory && (
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden p-4">
-              <AssetVersionHistory assetNo={asset.assetNo} />
-            </div>
-          )}
+          {/* Asset Version History Section - Always visible on desktop */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            {renderVersionHistorySection()}
+          </div>
         </div>
       </div>
     </div>

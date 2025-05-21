@@ -1,26 +1,39 @@
-import React from "react";
+import React, { ReactNode } from "react";
+import { motion } from "framer-motion";
 
-// Item component for displaying asset properties
-const DetailItem = ({ 
-  label, 
-  value, 
-  highlight = false,
-  icon
-}: {
+interface DetailItemProps {
   label: string;
-  value: React.ReactNode;
+  value: ReactNode;
+  icon?: ReactNode;
   highlight?: boolean;
-  icon?: React.ReactNode;
-}) => (
-  <div className="flex items-start gap-3 py-3 border-b border-gray-100 group">
-    {icon && <div className="text-gray-400 mt-0.5">{icon}</div>}
-    <div className="flex-grow">
-      <dt className="text-xs font-medium text-gray-500 mb-1">{label}</dt>
-      <dd className={`${highlight ? "text-blue-600 font-semibold" : "text-gray-800"} text-sm`}>
-        {value || "—"}
-      </dd>
-    </div>
-  </div>
-);
+  className?: string;
+}
+
+const DetailItem: React.FC<DetailItemProps> = ({
+  label,
+  value,
+  icon,
+  highlight = false,
+  className = ""
+}) => {
+  return (
+    <motion.div 
+      className={`py-2.5 transition-all ${
+        highlight 
+          ? "bg-slate-50/70 px-3 rounded-md border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5" 
+          : ""
+      } ${className}`}
+      transition={{ duration: 0.2 }}
+    >
+      <div className="flex items-center gap-2 mb-1.5">
+        {icon && <div className="text-gray-500">{icon}</div>}
+        <span className="text-xs font-medium text-gray-500">{label}</span>
+      </div>
+      <div className={`ml-7 ${typeof value !== "object" ? "text-gray-800" : ""} ${highlight ? "font-medium" : ""}`}>
+        {value}
+      </div>
+    </motion.div>
+  );
+};
 
 export default DetailItem; 

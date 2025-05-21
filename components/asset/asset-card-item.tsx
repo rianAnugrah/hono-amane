@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Asset } from "../../pages/(protected)/asset/types";
 import { Link } from "@/renderer/Link";
@@ -14,13 +14,15 @@ import {
   Info,
   Calendar,
   DollarSign,
+  ImageIcon
 } from "lucide-react";
 import Checkbox from "@/components/ui/checkbox";
 import { formatIDR } from "@/components/utils/formatting";
 import AssetDetail from "./asset-detail";
 import {
-  ImageWithFallback,
-  hasValidImages,
+  getColorFromString,
+  getInitials,
+  hasValidImages
 } from "@/components/utils/ImageUtils";
 
 const CardItem = ({
@@ -44,6 +46,9 @@ const CardItem = ({
   location: any;
   onSelectAsset: (asset: Asset) => void;
 }) => {
+  // Track image loading errors
+  const [imageError, setImageError] = useState(false);
+  
   // Function to check if the asset has images
   const hasImages = hasValidImages(asset.images);
 
@@ -79,6 +84,35 @@ const CardItem = ({
       default:
         return "bg-gray-100 text-gray-700 border border-gray-200";
     }
+  };
+
+  // Render asset image or placeholder
+  const renderAssetImage = () => {
+    if (!hasImages || imageError) {
+      const bgColor = getColorFromString(asset.assetName);
+      const initials = getInitials(asset.assetName);
+      
+      return (
+        <div 
+          className="w-full h-full flex flex-col items-center justify-center"
+          style={{ backgroundColor: bgColor }}
+        >
+          <ImageIcon size={40} className="text-white/20 mb-2" />
+          <span className="text-2xl font-bold text-gray-700">{initials}</span>
+          <span className="text-xs text-gray-600 mt-1">No image available</span>
+        </div>
+      );
+    }
+    
+    return (
+      <img
+        src={getAssetImageUrl()}
+        alt={asset.assetName}
+        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        onError={() => setImageError(true)}
+        loading="lazy"
+      />
+    );
   };
 
   return (
@@ -134,12 +168,7 @@ const CardItem = ({
 
       {/* Image Container */}
       <div className="relative bg-gray-50 group" style={{ height: "170px" }}>
-        <ImageWithFallback
-          src={getAssetImageUrl()}
-          alt={asset.assetName}
-          assetName={asset.assetName}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {renderAssetImage()}
         
         {/* Condition Badge */}
         <div className="absolute bottom-2 right-2">
