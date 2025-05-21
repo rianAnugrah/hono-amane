@@ -1,7 +1,7 @@
 import InputSelect from "@/components/ui/input-select";
 import InputText from "@/components/ui/input-text";
 import { AnimatePresence, motion } from "framer-motion";
-import { Filter, FilterX, PlusCircle, Search } from "lucide-react";
+import { Filter, FilterX, PlusCircle, Search, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import Checkbox from "@/components/ui/checkbox";
 import SelectedAssetsPage from "@/pages/(protected)/asset/print/+Page";
@@ -9,6 +9,9 @@ import { LocationSelector } from "@/components/blocks/location-selector";
 import { useUserStore } from "@/stores/store-user-login";
 import AssetViewToggle from "./asset-view-toggle";
 import SlideUpModal from "@/components/blocks/slide-up-modal";
+
+type SelectEvent = React.ChangeEvent<HTMLSelectElement> | string;
+type InputEvent = React.ChangeEvent<HTMLInputElement>;
 
 export default function AssetToolbar({
   setShowForm,
@@ -32,166 +35,198 @@ export default function AssetToolbar({
   setShowForm: (showForm: boolean) => void;
   showForm: boolean;
   search: string;
-  handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSearchChange: (e: InputEvent) => void;
   condition: string;
-  handleConditionChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleConditionChange: (e: SelectEvent) => void;
   locationDesc_id: string;
-  handleLocationChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleLocationChange: (e: SelectEvent) => void;
   sortBy: string;
-  handleSortByChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleSortByChange: (e: SelectEvent) => void;
   sortOrder: string;
   handleResetFilters: () => void;
-  handleSortOrderChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  toggleSelectAll: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSortOrderChange: (e: SelectEvent) => void;
+  toggleSelectAll: (e: InputEvent) => void;
   currentView: "table" | "card" | "compact";
   setCurrentView: (view: "table" | "card" | "compact") => void;
-  allSelected: any;
+  allSelected: boolean;
 }) {
   const [showToolbar, setShowToolbar] = useState<boolean>(false);
   const [showSlideUpToolbar, setShowSlideUpToolbar] = useState<boolean>(false);
   const { role } = useUserStore();
 
-  const renderFIlter = () => {
+  const renderFilter = () => {
     return (
-      <>
-        <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-5 gap-4  pb-2 rounded-lg">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="space-y-4"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-5 gap-4 pb-2 rounded-lg">
           {/* Filter Controls */}
-
           <div className="md:col-span-2">
+            <label className="block text-xs font-medium text-gray-600 mb-1.5">Location</label>
             <LocationSelector
               value={locationDesc_id}
               onChange={(value: any) => handleLocationChange(value)}
             />
           </div>
 
-          <InputSelect
-            onChange={handleConditionChange}
-            options={[
-              { value: "", label: "All Condition" },
-              { value: "Good", label: "Good" },
-              { value: "Broken", label: "Broken" },
-              // { value: "#N/A", label: "N/A" },
-              { value: "X", label: "X" },
-              { value: "poor", label: "Poor" },
-            ]}
-            value={condition}
-          />
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1.5">Condition</label>
+            <InputSelect
+              onChange={handleConditionChange}
+              options={[
+                { value: "", label: "All Condition" },
+                { value: "Good", label: "Good" },
+                { value: "Broken", label: "Broken" },
+                { value: "X", label: "X" },
+                { value: "poor", label: "Poor" },
+              ]}
+              value={condition}
+            />
+          </div>
 
-          <InputSelect
-            onChange={handleSortByChange}
-            options={[
-              { value: "createdAt", label: "Sort by Created Date" },
-              { value: "assetNo", label: "Sort by Asset No" },
-              { value: "assetName", label: "Sort by Asset Name" },
-            ]}
-            value={sortBy}
-          />
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1.5">Sort By</label>
+            <InputSelect
+              onChange={handleSortByChange}
+              options={[
+                { value: "createdAt", label: "Created Date" },
+                { value: "assetNo", label: "Asset No" },
+                { value: "assetName", label: "Asset Name" },
+              ]}
+              value={sortBy}
+            />
+          </div>
 
-          <InputSelect
-            onChange={handleSortOrderChange}
-            options={[
-              { value: "desc", label: "Descending" },
-              { value: "asc", label: "Ascending" },
-            ]}
-            value={sortOrder}
-          />
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1.5">Sort Order</label>
+            <InputSelect
+              onChange={handleSortOrderChange}
+              options={[
+                { value: "desc", label: "Descending" },
+                { value: "asc", label: "Ascending" },
+              ]}
+              value={sortOrder}
+            />
+          </div>
         </div>
-        <button
+        
+        <motion.button
           onClick={handleResetFilters}
-          className="btn btn-lg w-[calc(100%_-_2rem)] md:w-auto md:btn-sm text-blue-400 mb-4"
+          className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition flex items-center gap-1.5 text-sm shadow-sm"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          Reset Filter
-        </button>
-      </>
+          <X className="w-4 h-4" />
+          Reset Filters
+        </motion.button>
+      </motion.div>
     );
   };
 
   return (
-    <div className="bg-gray-100 z-[2] shadow-none border-b border-gray-200 mb-0">
-      <div className=" mx-auto px-4">
-        <div className="grid grid-cols-3 items-center py-4 gap-3">
-          <div className="col-span-2 md:col-span-1">
+    <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-[100]">
+      <div className="mx-auto px-4">
+        <div className="grid grid-cols-12 items-center py-4 gap-3">
+          {/* Search */}
+          <div className="col-span-12 md:col-span-5">
             <InputText
               value={search}
               onChange={handleSearchChange}
-              icon={<Search className="text-gray-400" />}
-              placeholder="Search by name"
+              icon={<Search className="text-gray-400 w-4 h-4" />}
+              placeholder="Search assets by name or number..."
             />
           </div>
 
-          <div className="flex justify-center md:justify-start">
-            <button
+          {/* Filter button for mobile/desktop */}
+          <div className="col-span-6 md:col-span-2 flex justify-start">
+            <motion.button
               onClick={() => setShowSlideUpToolbar(!showSlideUpToolbar)}
-              className="flex md:hidden btn btn-soft items-center gap-1"
+              className="flex md:hidden items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg shadow-sm text-sm transition"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              {!showSlideUpToolbar ? <Filter size={14} /> : <FilterX size={14} />}{" "}
-              Filter
-            </button>
+              {!showSlideUpToolbar ? <SlidersHorizontal size={16} /> : <X size={16} />}
+              <span>Filters</span>
+            </motion.button>
 
-            <button
+            <motion.button
               onClick={() => setShowToolbar(!showToolbar)}
-              className="hidden md:flex btn btn-soft btn-sm items-center gap-1"
+              className="hidden md:flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg shadow-sm text-sm transition"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              {!showToolbar ? <Filter size={14} /> : <FilterX size={14} />} Filter
-            </button>
+              {!showToolbar ? <SlidersHorizontal size={16} /> : <X size={16} />}
+              <span>Filters</span>
+            </motion.button>
           </div>
 
-          <div className="flex items-center justify-end gap-2">
+          {/* View toggles and actions */}
+          <div className="col-span-6 md:col-span-5 flex items-center justify-end gap-2">
             <AssetViewToggle
               currentView={currentView}
               onChange={setCurrentView}
             />
+            
             <div className="hidden md:block">
               <SelectedAssetsPage />
             </div>
+            
             {role !== "read_only" && (
-              <>
-                <button
-                  onClick={() => setShowForm(!showForm)}
-                  className="btn btn-sm btn-primary btn-soft flex items-center gap-1"
-                >
-                  <PlusCircle className="w-4 h-4" /> 
-                  <span className="hidden md:inline">New Asset</span>
-                  <span className="md:hidden">New</span>
-                </button>
-              </>
+              <motion.button
+                onClick={() => setShowForm(!showForm)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg shadow-sm flex items-center gap-1.5 text-sm"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <PlusCircle className="w-4 h-4" /> 
+                <span className="hidden md:inline">New Asset</span>
+                <span className="md:hidden">New</span>
+              </motion.button>
             )}
           </div>
         </div>
 
+        {/* Desktop filter panel */}
         <AnimatePresence>
           {showToolbar && (
             <motion.div
-              initial={{ height: 0, opacity: 0, overflow: "hidden" }}
-              animate={{ height: "auto", opacity: 1, overflow: "visible" }}
-              exit={{ height: 0, opacity: 0, overflow: "hidden" }}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="pb-4"
+              className="overflow-hidden pb-4"
             >
-              {renderFIlter()}
+              {renderFilter()}
             </motion.div>
           )}
         </AnimatePresence>
 
+        {/* Mobile slide-up filter panel */}
         <SlideUpModal
           modalOpen={showSlideUpToolbar}
           onToggle={setShowSlideUpToolbar}
         >
-          {renderFIlter()}
+          {renderFilter()}
         </SlideUpModal>
 
         {/* TABLE HEADER */}
         {currentView === "table" && (
-          <div className="hidden mt-4 w-full md:grid grid-cols-12 items-center font-bold text-xs bg-white px-4 py-2 text-gray-500 rounded-t-lg border border-gray-200">
-            <div className="col-span-4 pr-4 py-2 flex items-center gap-2">
-              <Checkbox checked={allSelected} onChange={toggleSelectAll} />
-             Asset Name
+          <div className="hidden mt-4 w-full md:grid grid-cols-12 items-center font-medium text-xs bg-white px-4 py-3 text-gray-600 rounded-t-lg border border-gray-200">
+            <div className="col-span-4 pr-4 flex items-center gap-2">
+              <Checkbox 
+                checked={allSelected} 
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => toggleSelectAll(e)} 
+              />
+              <span>Asset Name</span>
             </div>
-            <div className="px-4 py-2 flex items-center">Condition</div>
-            <div className="px-4 py-2 flex items-center"> Code</div>
-            <div className="px-4 py-2 flex items-center">Location</div>
-            <div className="px-4 py-2 col-span-2 flex items-center">Value</div>
-            <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
+            <div className="px-4 flex items-center">Condition</div>
+            <div className="px-4 flex items-center">Code</div>
+            <div className="px-4 flex items-center">Location</div>
+            <div className="px-4 col-span-2 flex items-center">Value</div>
+            <div className="col-span-3 px-4 flex items-center justify-end gap-2">
               Options
             </div>
           </div>
