@@ -3,8 +3,10 @@ import { StyleSheet } from '@react-pdf/renderer';
 // Define styles for PDF
 export const pdfStyles = StyleSheet.create({
   page: {
-    padding: 20,
+    padding: '20mm',
     fontFamily: 'Helvetica',
+    size: 'A4',
+    orientation: 'portrait',
   },
   header: {
     flexDirection: 'row',
@@ -31,8 +33,9 @@ export const pdfStyles = StyleSheet.create({
     width: '48%',
     margin: '1%',
     border: '1pt solid #000',
-    height: 250,
-    marginBottom: 10,
+    height: '60mm',
+    marginBottom: '5mm',
+    breakInside: 'avoid',
   },
   topSection: {
     flexDirection: 'row',
@@ -47,8 +50,9 @@ export const pdfStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   logoImg: {
-    width: 50,
-    height: 50,
+    width: '12mm',
+    height: '12mm',
+    objectFit: 'contain',
   },
   logoText: {
     fontSize: 8,
@@ -131,9 +135,10 @@ export const pdfStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   qrCode: {
-    width: 60,
-    height: 60,
-    marginTop: 5,
+    width: '15mm',
+    height: '15mm',
+    marginTop: '2mm',
+    objectFit: 'contain',
   },
   warning: {
     backgroundColor: 'orange',

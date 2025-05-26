@@ -13,8 +13,8 @@ export const AssetPreviewModal: React.FC<AssetPreviewModalProps> = ({
   onDownload 
 }) => {
   const [columns, setColumns] = useState(2);
-  const [scale, setScale] = useState(0.5);
-  const [gap, setGap] = useState(20);
+  const [scale, setScale] = useState(0.6);
+  const [gap, setGap] = useState(5);
 
   // Handle escape key to close modal
   useEffect(() => {
@@ -69,7 +69,10 @@ export const AssetPreviewModal: React.FC<AssetPreviewModalProps> = ({
         onClick={handleModalClick}
       >
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-800">Print Preview</h2>
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">Print Preview</h2>
+            <p className="text-sm text-gray-600">A4 Page Preview (210mm × 297mm) - 1:1 Scale</p>
+          </div>
           <button 
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full hover:bg-gray-100"
@@ -101,28 +104,33 @@ export const AssetPreviewModal: React.FC<AssetPreviewModalProps> = ({
             {/* Scale Control */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Scale: <span className="text-blue-600">{Math.round(scale * 100)}%</span>
+                Preview Zoom: <span className="text-blue-600">{Math.round(scale * 100)}%</span>
               </label>
               <input 
                 type="range" 
-                min="0.25" 
-                max="1" 
-                step="0.05"
+                min="0.3" 
+                max="1.2" 
+                step="0.1"
                 value={scale} 
                 onChange={(e) => setScale(parseFloat(e.target.value))}
                 className="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer"
               />
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>30%</span>
+                <span>100% (Actual Size)</span>
+                <span>120%</span>
+              </div>
             </div>
             
             {/* Gap Control */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Gap Size: <span className="text-blue-600">{gap}px</span>
+                Gap Size: <span className="text-blue-600">{gap}mm</span>
               </label>
               <input 
                 type="range" 
-                min="5" 
-                max="40" 
+                min="2" 
+                max="20" 
                 value={gap} 
                 onChange={(e) => setGap(parseInt(e.target.value))}
                 className="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer"
@@ -140,16 +148,72 @@ export const AssetPreviewModal: React.FC<AssetPreviewModalProps> = ({
           </div>
           
           <div className="col-span-12 md:col-span-9 overflow-auto max-h-[60vh] p-4 bg-gray-100 rounded-lg">
-            <div style={{ 
-              display: 'grid',
-              gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-              gap: `${gap}px`
-            }}>
-              {assets.map((asset, index) => (
-                <div key={index} className="transform-origin-top-left bg-white">
-                  <AssetPreviewCard asset={asset} scale={scale} />
-                </div>
-              ))}
+            {/* A4 Page Preview Container */}
+            <div 
+              className="mx-auto space-y-4"
+              style={{ 
+                transform: `scale(${scale})`,
+                transformOrigin: 'top center',
+                marginBottom: `${50 * (1 - scale)}px`
+              }}
+            >
+              {(() => {
+                // Calculate items per page based on columns and available space
+                // Assuming each asset card is about 60mm height + gap
+                const cardHeight = 60; // mm
+                const availableHeight = 297 - 40 - 30; // A4 height - padding - header
+                const itemsPerRow = columns;
+                const rowsPerPage = Math.floor(availableHeight / (cardHeight + gap));
+                const itemsPerPage = itemsPerRow * rowsPerPage;
+                
+                const pages = [];
+                for (let i = 0; i < assets.length; i += itemsPerPage) {
+                  pages.push(assets.slice(i, i + itemsPerPage));
+                }
+                
+                return pages.map((pageAssets, pageIndex) => (
+                  <div 
+                    key={pageIndex}
+                    className="bg-white shadow-lg mx-auto relative" 
+                    style={{ 
+                      width: '210mm', 
+                      height: '297mm',
+                      padding: '20mm',
+                      pageBreakAfter: pageIndex < pages.length - 1 ? 'always' : 'auto'
+                    }}
+                  >
+                    {/* Page Header */}
+                    <div className="mb-4">
+                      <h3 className="text-lg font-bold">Assets Report</h3>
+                      <p className="text-sm text-gray-600">
+                        Generated on: {new Date().toLocaleString()} | Page {pageIndex + 1} of {pages.length}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Total Assets: {assets.length} | This page: {pageAssets.length}
+                      </p>
+                    </div>
+                    
+                    {/* Assets Grid */}
+                    <div style={{ 
+                      display: 'grid',
+                      gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+                      gap: `${gap}mm`,
+                      width: '100%'
+                    }}>
+                      {pageAssets.map((asset, index) => (
+                        <div key={index} className="bg-white">
+                          <AssetPreviewCard asset={asset} scale={1} />
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Page Number */}
+                    <div className="absolute bottom-4 right-4 text-xs text-gray-500">
+                      Page {pageIndex + 1}
+                    </div>
+                  </div>
+                ));
+              })()}
             </div>
           </div>
         </div>

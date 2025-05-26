@@ -18,9 +18,7 @@ export const AssetPreviewCard: React.FC<AssetPreviewCardProps> = ({ asset, scale
       className="border border-gray-800 bg-white overflow-hidden flex flex-col"
       style={{ 
         width: `${400 * scale}px`, 
-        height: `${250 * scale}px`,
-        transform: `scale(${scale})`,
-        transformOrigin: 'top left'
+        height: `${250 * scale}px`
       }}
     >
       <div className="flex flex-row h-4/5 border-b border-gray-800">

@@ -82,6 +82,9 @@ The original `asset-print-utils.tsx` file now serves as a compatibility layer, r
 3. **Testing**: Easier to unit test individual components
 4. **Performance**: Better tree-shaking and code splitting
 5. **Developer Experience**: Clearer code organization and easier debugging
+6. **A4 Preview**: True 1:1 scale A4 page preview (210mm × 297mm)
+7. **No Image Cutoff**: Automatic page breaks prevent asset cards from being cut off
+8. **Multi-page Support**: Handles large asset lists across multiple pages
 
 ## Usage Examples
 
