@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     width: '48%',
     margin: '1%',
     border: '1pt solid #000',
-    height: 240,
+    height: 250,
     marginBottom: 10,
   },
   topSection: {
@@ -55,36 +55,44 @@ const styles = StyleSheet.create({
   },
   logoLeft: {
     width: '20%',
-    padding: 10,
+    padding: 8,
     borderRight: '1pt solid #000',
     alignItems: 'center',
     justifyContent: 'center',
   },
   logoImg: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
+  },
+  logoText: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 5,
   },
   mainSection: {
     width: '60%',
     backgroundColor: '#c0d736',
-    padding: 5,
+    padding: 6,
     borderRight: '1pt solid #000',
   },
   title: {
     fontSize: 12,
     fontWeight: 'bold',
     textAlign: 'center',
-    padding: 5,
+    padding: 6,
     borderBottom: '1pt solid #000',
   },
   infoRow: {
     flexDirection: 'row',
     borderBottom: '1pt solid #000',
+    height: 30,
   },
   infoItem: {
     flexDirection: 'column',
-    padding: 5,
+    padding: 4,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   infoType: {
     width: '16.66%',
@@ -98,31 +106,41 @@ const styles = StyleSheet.create({
     width: '33.33%',
   },
   infoLabel: {
-    fontSize: 7,
+    fontSize: 8,
     marginBottom: 2,
+    textAlign: 'center',
   },
   infoValue: {
-    fontSize: 8,
+    fontSize: 9,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   descriptionRow: {
     flexDirection: 'row',
-    height: '50%',
+    flex: 1,
   },
   noteColumn: {
     width: '16.66%',
-    padding: 5,
+    padding: 4,
     borderRight: '1pt solid #000',
     alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   descriptionColumn: {
     width: '83.33%',
-    padding: 5,
+    padding: 4,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  descriptionText: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    lineHeight: 1.2,
   },
   logoRight: {
     width: '20%',
-    padding: 10,
+    padding: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -145,8 +163,9 @@ const styles = StyleSheet.create({
 const generateQRCode = async (text: string): Promise<string> => {
   try {
     const dataUrl = await QRCode.toDataURL(text, {
-      margin: 0,
-      width: 128,
+      margin: 1,
+      width: 200,
+      errorCorrectionLevel: 'M',
       color: {
         dark: '#000000',
         light: '#ffffff',
@@ -161,13 +180,22 @@ const generateQRCode = async (text: string): Promise<string> => {
 
 // PDF Document component with dynamic grid layout
 const AssetsPDF = ({ assets, columnCount = 2 }: { assets: Asset[], columnCount?: number }) => {
-  // Calculate the width percentage based on column count
-  const widthPercentage = `${Math.floor(96 / columnCount)}%`;
+  // Calculate the width percentage based on column count with proper spacing
+  const getWidthPercentage = (columns: number) => {
+    switch (columns) {
+      case 1: return '95%';
+      case 2: return '47%';
+      case 3: return '31%';
+      case 4: return '23%';
+      default: return '47%';
+    }
+  };
   
   // Apply dynamic styling based on column count
   const dynamicAssetWrapper = {
     ...styles.assetWrapper,
-    width: widthPercentage,
+    width: getWidthPercentage(columnCount),
+    marginRight: columnCount > 1 ? '2%' : '0%',
   };
 
   return (
@@ -185,7 +213,11 @@ const AssetsPDF = ({ assets, columnCount = 2 }: { assets: Asset[], columnCount?:
             <View key={index} style={dynamicAssetWrapper}>
               <View style={styles.topSection}>
                 <View style={styles.logoLeft}>
-                  <Text style={{ fontSize: 8, textAlign: 'center' }}>SKK MIGAS</Text>
+                  <Image 
+                    src="/img/skk-migas-logo.png" 
+                    style={styles.logoImg} 
+                  />
+                  <Text style={styles.logoText}>SKK MIGAS</Text>
                 </View>
                 <View style={styles.mainSection}>
                   <Text style={styles.title}>BARANG MILIK NEGARA</Text>
@@ -199,7 +231,7 @@ const AssetsPDF = ({ assets, columnCount = 2 }: { assets: Asset[], columnCount?:
                       <Text style={styles.infoValue}>{asset.assetNo}</Text>
                     </View>
                     <View style={[styles.infoItem, styles.infoYear]}>
-                      <Text style={styles.infoLabel}>Tahun Ip</Text>
+                      <Text style={styles.infoLabel}>Tahun IP</Text>
                       <Text style={styles.infoValue}>{formatDate(asset.pisDate)}</Text>
                     </View>
                   </View>
@@ -209,12 +241,16 @@ const AssetsPDF = ({ assets, columnCount = 2 }: { assets: Asset[], columnCount?:
                     </View>
                     <View style={styles.descriptionColumn}>
                       <Text style={styles.infoLabel}>Deskripsi</Text>
-                      <Text style={styles.infoValue}>{asset.assetName}</Text>
+                      <Text style={styles.descriptionText}>{asset.assetName}</Text>
                     </View>
                   </View>
                 </View>
                 <View style={styles.logoRight}>
-                  <Text style={{ fontSize: 8, textAlign: 'center', marginBottom: 5 }}>HCML</Text>
+                  <Image 
+                    src="/img/hcml-logo.png" 
+                    style={styles.logoImg} 
+                  />
+                  <Text style={styles.logoText}>HCML</Text>
                   {asset.qrCode && (
                     <Image 
                       src={asset.qrCode} 
@@ -249,51 +285,53 @@ const AssetPreviewCard = ({ asset, scale }: { asset: Asset, scale: number }) => 
       className="border border-gray-800 bg-white overflow-hidden flex flex-col"
       style={{ 
         width: `${400 * scale}px`, 
-        height: `${240 * scale}px`,
+        height: `${250 * scale}px`,
         transform: `scale(${scale})`,
         transformOrigin: 'top left'
       }}
     >
       <div className="flex flex-row h-4/5 border-b border-gray-800">
         {/* Logo Left */}
-        <div className="w-1/5 border-r border-gray-800 flex items-center justify-center p-2">
+        <div className="w-1/5 border-r border-gray-800 flex flex-col items-center justify-center p-2">
+          <img src="/img/skk-migas-logo.png" className="w-12 h-12 mb-1" alt="SKK Logo" />
           <div className="text-xs text-center font-bold">SKK MIGAS</div>
         </div>
         
         {/* Main Section */}
         <div className="w-3/5 bg-[#c0d736] border-r border-gray-800">
-          <div className="border-b border-gray-800 font-bold text-center p-1 text-sm">
+          <div className="border-b border-gray-800 font-bold text-center p-1.5 text-sm">
             BARANG MILIK NEGARA
           </div>
           
-          <div className="flex border-b border-gray-800">
-            <div className="w-1/6 border-r border-gray-800 p-1 text-center flex flex-col items-center">
+          <div className="flex border-b border-gray-800 h-8">
+            <div className="w-1/6 border-r border-gray-800 p-1 text-center flex flex-col items-center justify-center">
               <span className="text-xs">Type</span>
               <span className="text-xs font-bold">{asset.projectCode?.code || ''}</span>
             </div>
-            <div className="w-1/2 border-r border-gray-800 p-1 text-center flex flex-col items-center">
+            <div className="w-1/2 border-r border-gray-800 p-1 text-center flex flex-col items-center justify-center">
               <span className="text-xs">Nomor Sinas</span>
               <span className="text-xs font-bold">{asset.assetNo}</span>
             </div>
-            <div className="w-1/3 p-1 text-center flex flex-col items-center">
-              <span className="text-xs">Tahun Ip</span>
+            <div className="w-1/3 p-1 text-center flex flex-col items-center justify-center">
+              <span className="text-xs">Tahun IP</span>
               <span className="text-xs font-bold">{formatDate(asset.pisDate)}</span>
             </div>
           </div>
           
-          <div className="flex h-1/2">
-            <div className="w-1/6 border-r border-gray-800 p-1 text-center flex flex-col items-center">
+          <div className="flex flex-1">
+            <div className="w-1/6 border-r border-gray-800 p-1 text-center flex flex-col items-center justify-start">
               <span className="text-xs">Ket :</span>
             </div>
-            <div className="w-5/6 p-1 text-center flex flex-col items-center">
-              <span className="text-xs">Deskripsi</span>
-              <span className="text-xs font-bold">{asset.assetName}</span>
+            <div className="w-5/6 p-1 text-center flex flex-col items-center justify-center">
+              <span className="text-xs mb-1">Deskripsi</span>
+              <span className="text-xs font-bold leading-tight">{asset.assetName}</span>
             </div>
           </div>
         </div>
         
         {/* Logo Right */}
         <div className="w-1/5 flex flex-col items-center justify-center p-2">
+          <img src="/img/hcml-logo.png" className="w-12 h-12 mb-1" alt="HCML Logo" />
           <div className="text-xs text-center font-bold mb-2">HCML</div>
           {qrUrl && (
             <img src={qrUrl} className="w-[60px] h-[60px]" alt="QR Code" />
