@@ -154,7 +154,12 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
         <Page size="A4" style={styles.page}>
           <View style={styles.header}>
             <Image 
-              src={LOGO_URL}
+              src={`/img/skk-migas-logo.png`}
+              style={styles.logo} 
+              cache={true}
+            />
+             <Image 
+              src={`/img/hcml-logo.png`}
               style={styles.logo} 
               cache={true}
             />
