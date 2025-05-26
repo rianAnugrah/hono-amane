@@ -550,6 +550,10 @@ export const AssetPrintButton = ({ assets }: { assets: Asset[] }) => {
     printAssets(assets, columns);
     handleClosePreview();
   };
+
+  useEffect(() => {
+    console.log("assets", assets);
+  }, [assets]);
   
   return (
     <>
