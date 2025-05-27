@@ -174,6 +174,8 @@ export default function InspectionListPage() {
 
   // Function to fetch inspection details when an inspection is selected
   const handleSelectInspection = async (id: string) => {
+    
+    
     // On mobile, navigate to the detail page
     if (isMobile) {
       navigate(`/inspection/${id}`);
@@ -245,9 +247,9 @@ export default function InspectionListPage() {
 
   // Render the inspections list
   const renderInspectionsList = () => {
-    if (loading) {
-      return <div className="p-4">Loading...</div>;
-    }
+    // if (loading) {
+    //   return <div className="p-4">Loading...</div>;
+    // }
 
     if (error) {
       return (

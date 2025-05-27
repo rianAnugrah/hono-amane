@@ -16,6 +16,7 @@ interface Asset {
   transDate: Date;
   categoryCode: string;
   afeNo?: string | null;
+  type?: string | null;
   adjustedDepre: number;
   poNo?: string | null;
   acqValueIdr: number;
@@ -63,18 +64,19 @@ assetRoutes.get("/", async (c) => {
     const filterAfeNo = c.req.query("afeNo");
     const filterPoNo = c.req.query("poNo");
     const filterTaggingYear = c.req.query("taggingYear");
+    const filterType = c.req.query("type");
 
     // Handle multiple location IDs (comma-separated)
     const locationDescIds = c.req.query("locationDesc_id")
-      ? c.req.query("locationDesc_id").split(',').map(id => parseInt(id.trim()))
+      ? c.req.query("locationDesc_id")!.split(',').map(id => parseInt(id.trim()))
       : undefined;
 
     // Other related entity filters (single values)
     const filterProjectCodeId = c.req.query("projectCode_id")
-      ? parseInt(c.req.query("projectCode_id"))
+      ? parseInt(c.req.query("projectCode_id")!)
       : undefined;
     const filterDetailsLocationId = c.req.query("detailsLocation_id")
-      ? parseInt(c.req.query("detailsLocation_id"))
+      ? parseInt(c.req.query("detailsLocation_id")!)
       : undefined;
 
     // Date range filters
@@ -85,16 +87,16 @@ assetRoutes.get("/", async (c) => {
 
     // Numeric range filters
     const acqValueMin = c.req.query("acqValueMin")
-      ? parseFloat(c.req.query("acqValueMin"))
+      ? parseFloat(c.req.query("acqValueMin")!)
       : undefined;
     const acqValueMax = c.req.query("acqValueMax")
-      ? parseFloat(c.req.query("acqValueMax"))
+      ? parseFloat(c.req.query("acqValueMax")!)
       : undefined;
     const bookValueMin = c.req.query("bookValueMin")
-      ? parseFloat(c.req.query("bookValueMin"))
+      ? parseFloat(c.req.query("bookValueMin")!)
       : undefined;
     const bookValueMax = c.req.query("bookValueMax")
-      ? parseFloat(c.req.query("bookValueMax"))
+      ? parseFloat(c.req.query("bookValueMax")!)
       : undefined;
 
     // Build where conditions object
@@ -130,6 +132,8 @@ assetRoutes.get("/", async (c) => {
       whereConditions.poNo = { contains: filterPoNo, mode: "insensitive" };
     if (filterTaggingYear)
       whereConditions.taggingYear = { equals: filterTaggingYear };
+    if (filterType)
+      whereConditions.type = { contains: filterType, mode: "insensitive" };
 
     // Add relation filters
     if (filterProjectCodeId !== undefined)
@@ -307,6 +311,7 @@ assetRoutes.post("/", async (c) => {
       transDate: new Date(body.transDate),
       categoryCode: body.categoryCode,
       afeNo: body.afeNo ?? null,
+      type: body.type ?? null,
       adjustedDepre: parseFloat(body.adjustedDepre as any),
       poNo: body.poNo ?? null,
       acqValueIdr: parseFloat(body.acqValueIdr as any),
@@ -399,6 +404,7 @@ assetRoutes.put("/:id", async (c) => {
       transDate: body.transDate ? new Date(body.transDate) : old.transDate,
       categoryCode: body.categoryCode ?? old.categoryCode,
       afeNo: body.afeNo ?? old.afeNo,
+      type: body.type ?? old.type,
       adjustedDepre: body.adjustedDepre ?? old.adjustedDepre,
       poNo: body.poNo ?? old.poNo,
       acqValueIdr: body.acqValueIdr ?? old.acqValueIdr,

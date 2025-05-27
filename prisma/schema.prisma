@@ -61,6 +61,7 @@ model Asset {
   transDate          DateTime
   categoryCode       String
   afeNo              String?
+  type               String?
   adjustedDepre      Float
   poNo               String?
   acqValueIdr        Float
