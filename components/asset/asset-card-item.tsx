@@ -230,6 +230,20 @@ const CardItem = ({
             <span className="truncate group-hover:text-gray-800 transition-colors">{asset.projectCode?.code || "N/A"}</span>
           </div>
 
+          {/* Asset Type */}
+          {asset.type && (
+            <div className="flex items-center text-gray-600 group">
+              <Package size={11} className="mr-1 flex-shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+                asset.type === 'HBI' 
+                  ? 'bg-orange-50 text-orange-700' 
+                  : 'bg-teal-50 text-teal-700'
+              }`}>
+                {asset.type}
+              </span>
+            </div>
+          )}
+
           {/* Creation Date (if available) */}
           {creationDate && (
             <div className="flex items-center text-gray-600 group">

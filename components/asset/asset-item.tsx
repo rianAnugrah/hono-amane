@@ -81,7 +81,7 @@ export default function AssetItem({
   ): React.ReactNode {
     if (isLocationIdExists(locationsArray, locationIdToCheck)) {
       return (
-        <div className="col-span-3 px-4 py-2 flex items-center justify-end gap-2">
+        <div className="col-span-2 px-4 py-2 flex items-center justify-end gap-2">
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link
               href={`/asset/${asset.assetNo}`}
@@ -178,7 +178,7 @@ export default function AssetItem({
           transition={{ duration: 0.2 }}
         >
           <div className="w-full grid grid-cols-12 items-center">
-            <div className="col-span-4 pr-4 py-3 flex items-center gap-3 pl-4">
+            <div className="col-span-3 pr-4 py-3 flex items-center gap-3 pl-4">
               <div className="flex items-center">
                 <Checkbox
                   checked={checked}
@@ -204,6 +204,19 @@ export default function AssetItem({
               >
                 {asset.condition}
               </span>
+            </div>
+            <div className="px-4 py-3 flex items-center">
+              {asset.type ? (
+                <span className={`px-2 py-1 rounded-md text-xs font-medium ${
+                  asset.type === 'HBI' 
+                    ? 'bg-orange-50 text-orange-700' 
+                    : 'bg-teal-50 text-teal-700'
+                }`}>
+                  {asset.type}
+                </span>
+              ) : (
+                <span className="text-gray-400 text-xs">-</span>
+              )}
             </div>
             <div className="px-4 py-3 flex items-center">
               <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs">

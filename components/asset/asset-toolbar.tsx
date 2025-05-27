@@ -232,7 +232,7 @@ export default function AssetToolbar({
         {/* TABLE HEADER */}
         {currentView === "table" && (
           <div className="hidden mt-4 w-full md:grid grid-cols-12 items-center font-medium text-xs bg-white px-4 py-3 text-gray-600 rounded-t-lg border border-gray-200">
-            <div className="col-span-4 pr-4 flex items-center gap-2">
+            <div className="col-span-3 pr-4 flex items-center gap-2">
               <Checkbox 
                 checked={allSelected} 
                 onChange={toggleSelectAll} 
@@ -240,10 +240,11 @@ export default function AssetToolbar({
               <span>Asset Name</span>
             </div>
             <div className="px-4 flex items-center">Condition</div>
+            <div className="px-4 flex items-center">Type</div>
             <div className="px-4 flex items-center">Code</div>
             <div className="px-4 flex items-center">Location</div>
             <div className="px-4 col-span-2 flex items-center">Value</div>
-            <div className="col-span-3 px-4 flex items-center justify-end gap-2">
+            <div className="col-span-2 px-4 flex items-center justify-end gap-2">
               Options
             </div>
           </div>
