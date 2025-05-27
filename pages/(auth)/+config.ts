@@ -4,16 +4,16 @@ import vikeReact from "vike-react/config";
 export default {
   // https://vike.dev/clientRouting
   extends: vikeReact,
-  clientRouting: false,
+  clientRouting: true,
   // https://vike.dev/meta
   meta: {
     // Define new setting 'title'
     title: {
-      env: { server: false, client: true },
+      env: { server: true, client: true },
     },
     // Define new setting 'description'
     description: {
-      env: { server: true },
+      env: { server: true, client: true },
     },
     Layout: {
       env: { server: true, client: true },

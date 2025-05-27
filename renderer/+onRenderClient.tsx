@@ -6,8 +6,15 @@ import { PageShell } from './PageShell'
 import { getPageTitle } from './getPageTitle'
 import type { OnRenderClientAsync } from 'vike/types'
 
+// Extend Window interface to include our custom property
+declare global {
+  interface Window {
+    vikeNavigationListenerAdded?: boolean
+  }
+}
+
 // Maintain a single root across navigations
-let root: ReactDOM.Root
+let root: ReactDOM.Root | null = null
 
 const onRenderClient: OnRenderClientAsync = async (pageContext): ReturnType<OnRenderClientAsync> => {
   const { Page, isHydration } = pageContext
@@ -27,34 +34,41 @@ const onRenderClient: OnRenderClientAsync = async (pageContext): ReturnType<OnRe
 
   // For the initial page load: hydrate the page
   if (isHydration) {
-    root = ReactDOM.hydrateRoot(container, page)
+    // Only create root if it doesn't already exist
+    if (!root) {
+      root = ReactDOM.hydrateRoot(container, page)
+    }
     
     // Set up navigation event listener only once
-    window.addEventListener('vike:navigate', async (event: Event) => {
-      // Apply transition class
-      document.body.classList.add('page-transition');
-      
-      // Reset scroll position
-      window.scrollTo(0, 0);
-      
-      try {
-        // Force a page reload for now to ensure proper navigation
-        window.location.reload();
+    if (!window.vikeNavigationListenerAdded) {
+      window.vikeNavigationListenerAdded = true;
+      window.addEventListener('vike:navigate', async (event: Event) => {
+        // Apply transition class
+        document.body.classList.add('page-transition');
         
-        // Once the navigation system is more stable, we could try this instead:
-        // const customEvent = event as CustomEvent;
-        // const url = customEvent.detail.url;
-        // // This would need a proper implementation to get the new page content
-        // // For now, we'll just reload the page
-      } catch (error) {
-        console.error('Navigation error:', error);
-      } finally {
-        document.body.classList.remove('page-transition');
-      }
-    });
+        // Reset scroll position
+        window.scrollTo(0, 0);
+        
+        try {
+          // Force a page reload for now to ensure proper navigation
+          window.location.reload();
+          
+          // Once the navigation system is more stable, we could try this instead:
+          // const customEvent = event as CustomEvent;
+          // const url = customEvent.detail.url;
+          // // This would need a proper implementation to get the new page content
+          // // For now, we'll just reload the page
+        } catch (error) {
+          console.error('Navigation error:', error);
+        } finally {
+          document.body.classList.remove('page-transition');
+        }
+      });
+    }
   } else {
-    // For subsequent navigations: render to the same root
+    // For subsequent navigations: render to the existing root
     if (!root) {
+      // This should not happen in normal flow, but create root as fallback
       root = ReactDOM.createRoot(container)
     }
     

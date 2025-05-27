@@ -1,4 +1,17 @@
+import React, { useState, useEffect } from 'react';
+
 function Logo() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    // Return a placeholder div with the same dimensions during SSR
+    return <div className="w-full h-full" style={{ width: '130px', height: '130px' }} />;
+  }
+
   return (
     <svg
       width="130"
@@ -14,7 +27,7 @@ function Logo() {
       />
       <path
         d="M63 8.54105C64.2376 7.82652 65.7624 7.82652 67 8.54105L112.895 35.0385C114.132 35.753 114.895 37.0735 114.895 38.5026V91.4974C114.895 92.9265 114.132 94.247 112.895 94.9615L67 121.459C65.7624 122.173 64.2376 122.173 63 121.459L17.1051 94.9615C15.8675 94.247 15.1051 92.9265 15.1051 91.4974V38.5026C15.1051 37.0735 15.8675 35.753 17.1051 35.0385L63 8.54105Z"
-        fill="url(#paint0_linear_7_19)"
+        fill="url(#logo_gradient)"
       />
       <path
         fillRule="evenodd"
@@ -30,7 +43,7 @@ function Logo() {
       />
       <defs>
         <linearGradient
-          id="paint0_linear_7_19"
+          id="logo_gradient"
           x1="65"
           y1="7.38635"
           x2="65"
