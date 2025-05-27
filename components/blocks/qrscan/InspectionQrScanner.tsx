@@ -80,7 +80,7 @@ const InspectionQrScanner = ({ onScan }: InspectionQrScannerProps) => {
       });
       
       const availableCameras = await QrScanner.listCameras(true);
-      console.log("Available cameras:", availableCameras);
+      //console.log("Available cameras:", availableCameras);
       
       if (availableCameras.length === 0) {
         setError("No cameras detected.");
@@ -142,7 +142,7 @@ const InspectionQrScanner = ({ onScan }: InspectionQrScannerProps) => {
     }
 
     if (switchingCamera) {
-      console.log("Camera switching in progress, ignoring request");
+      //console.log("Camera switching in progress, ignoring request");
       return;
     }
 
@@ -156,7 +156,7 @@ const InspectionQrScanner = ({ onScan }: InspectionQrScannerProps) => {
 
       const safeIndex = index % cameras.length;
       const selectedCamera = cameras[safeIndex];
-      console.log(`Starting camera: ${selectedCamera.label} (${selectedCamera.id})`);
+      //console.log(`Starting camera: ${selectedCamera.label} (${selectedCamera.id})`);
 
       const qrScanner = new QrScanner(
         videoRef.current,
@@ -174,7 +174,7 @@ const InspectionQrScanner = ({ onScan }: InspectionQrScannerProps) => {
       try {
         await qrScanner.setCamera(selectedCamera.id);
         await qrScanner.start();
-        console.log("Camera started successfully");
+        //console.log("Camera started successfully");
         
         setScanner(qrScanner);
         setCameraOn(true);
@@ -229,7 +229,7 @@ const InspectionQrScanner = ({ onScan }: InspectionQrScannerProps) => {
     }
     
     if (switchingCamera || isLoading) {
-      console.log("Operation in progress, ignoring switch request");
+      //console.log("Operation in progress, ignoring switch request");
       return;
     }
     
@@ -240,7 +240,7 @@ const InspectionQrScanner = ({ onScan }: InspectionQrScannerProps) => {
       await stopCameraInternal();
       
       const nextIndex = (currentCameraIndex + 1) % cameras.length;
-      console.log(`Switching to camera index: ${nextIndex}`);
+      //console.log(`Switching to camera index: ${nextIndex}`);
       
       setTimeout(() => {
         startCameraWithIndex(nextIndex);
@@ -260,7 +260,7 @@ const InspectionQrScanner = ({ onScan }: InspectionQrScannerProps) => {
       }
       
       const availableCameras = await QrScanner.listCameras(true);
-      console.log("Refreshed cameras:", availableCameras);
+      //console.log("Refreshed cameras:", availableCameras);
       setCameras(availableCameras);
       
       if (availableCameras.length === 0) {

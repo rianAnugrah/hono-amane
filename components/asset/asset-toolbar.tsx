@@ -194,9 +194,9 @@ export default function AssetToolbar({
             {role !== "read_only" && (
               <motion.button
                 onClick={() => setShowForm(!showForm)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg shadow-sm flex items-center gap-1.5 text-sm"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="flex items-center gap-1.5 btn btn-sm btn-primary"
+                // whileHover={{ scale: 1.02 }}
+                // whileTap={{ scale: 0.98 }}
               >
                 <PlusCircle className="w-4 h-4" /> 
                 <span className="hidden md:inline">New Asset</span>

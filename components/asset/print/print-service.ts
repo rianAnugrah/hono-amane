@@ -9,7 +9,7 @@ export const printAssets = async (assets: Asset[], columns: number = 2): Promise
       return;
     }
 
-    console.log("Generating PDF for", assets.length, "assets with", columns, "columns");
+    //console.log("Generating PDF for", assets.length, "assets with", columns, "columns");
     
     // Generate QR codes for all assets
     const assetsWithQR = await Promise.all(
@@ -33,7 +33,7 @@ export const printAssets = async (assets: Asset[], columns: number = 2): Promise
     const fileName = `assets-report-${new Date().toISOString().split('T')[0]}.pdf`;
     saveAs(blob, fileName);
     
-    console.log("PDF saved successfully:", fileName);
+    //console.log("PDF saved successfully:", fileName);
   } catch (error) {
     console.error("Error printing assets:", error);
     alert("There was an error printing the assets. Please try again.");

@@ -17,7 +17,7 @@ export const PerformanceMonitor = ({ componentName, enabled = false }: Performan
     const timeSinceLastRender = now - lastRenderTime.current;
     
     if (renderCount.current > 1) {
-      console.log(`🔄 ${componentName} rendered ${renderCount.current} times. Time since last render: ${timeSinceLastRender}ms`);
+      //console.log(`🔄 ${componentName} rendered ${renderCount.current} times. Time since last render: ${timeSinceLastRender}ms`);
     }
     
     lastRenderTime.current = now;

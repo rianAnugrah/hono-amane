@@ -34,14 +34,14 @@ const QrScannerComponent = () => {
         return;
       }
 
-      console.log("Requesting camera permission...");
+      //console.log("Requesting camera permission...");
       // Request camera permission
       await navigator.mediaDevices.getUserMedia({ video: true });
-      console.log("Permission granted, listing cameras...");
+      //console.log("Permission granted, listing cameras...");
 
       // List available cameras
       const availableCameras = await QrScanner.listCameras(true);
-      console.log("Available cameras:", availableCameras);
+      //console.log("Available cameras:", availableCameras);
 
       if (availableCameras.length === 0) {
         setError(
@@ -56,7 +56,7 @@ const QrScannerComponent = () => {
       setPermissionState("granted");
 
       // Auto-start the first camera
-      console.log("Auto-starting first camera...");
+      //console.log("Auto-starting first camera...");
       setTimeout(() => {
         startCameraWithIndex(0);
       }, 500);
@@ -115,12 +115,12 @@ const QrScannerComponent = () => {
         setCurrentCameraIndex(index);
 
         const selectedCamera = cameras[index];
-        console.log(`Starting camera: ${selectedCamera.label} (${selectedCamera.id})`);
+        //console.log(`Starting camera: ${selectedCamera.label} (${selectedCamera.id})`);
 
         const qrScanner = new QrScanner(
           videoRef.current,
           (result) => {
-            console.log("QR code detected:", result.data);
+            //console.log("QR code detected:", result.data);
             setResult(result.data);
           },
           {
@@ -134,7 +134,7 @@ const QrScannerComponent = () => {
         await qrScanner.setCamera(selectedCamera.id);
         await qrScanner.start();
 
-        console.log("Camera activated successfully");
+        //console.log("Camera activated successfully");
         setScanner(qrScanner);
         setCameraOn(true);
       } catch (err) {
@@ -163,7 +163,7 @@ const QrScannerComponent = () => {
   // Stop camera
   const stopCamera = () => {
     if (scanner) {
-      console.log("Stopping camera...");
+      //console.log("Stopping camera...");
       scanner.stop();
       setScanner(null);
       setCameraOn(false);
@@ -178,7 +178,7 @@ const QrScannerComponent = () => {
     }
 
     const nextCameraIndex = (currentCameraIndex + 1) % cameras.length;
-    console.log(`Switching to camera index: ${nextCameraIndex}`);
+    //console.log(`Switching to camera index: ${nextCameraIndex}`);
 
     stopCamera();
     setTimeout(() => {
@@ -191,7 +191,7 @@ const QrScannerComponent = () => {
     try {
       setIsLoading(true);
       const availableCameras = await QrScanner.listCameras(true);
-      console.log("Refreshed cameras:", availableCameras);
+      //console.log("Refreshed cameras:", availableCameras);
       setCameras(availableCameras);
       setError("");
       if (availableCameras.length === 0) {

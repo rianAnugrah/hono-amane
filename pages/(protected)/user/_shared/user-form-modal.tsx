@@ -55,7 +55,7 @@ export default function UserFormModal({
     fetchLocations();
   }, [search, sortOrder]);
 
-  //console.log("FORNM", locations);
+  ////console.log("FORNM", locations);
   // Function to display object as formatted JSON
   // const formatObject = (obj) => {
   //   return JSON.stringify(obj, null, 2);

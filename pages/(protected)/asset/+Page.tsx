@@ -43,7 +43,7 @@ const AssetCrudPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { location } = useUserStore();
 
-  console.log("location", location);
+  //console.log("location", location);
 
   // Fetch assets with filters
   async function fetchAssets() {

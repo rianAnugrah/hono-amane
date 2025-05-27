@@ -22,7 +22,7 @@ export function Page() {
     try {
       const { data } = await axios.get(`/api/stats/all`);
 
-      console.log("Data", data);
+      //console.log("Data", data);
 
       if (data.data) {
         setStats(data.data);
@@ -39,7 +39,7 @@ export function Page() {
     fetchStats();
   }, []);
 
-  //console.log("STATS",stats)
+  ////console.log("STATS",stats)
 
   return (
     <div className="w-full flex flex-col p-4 ">

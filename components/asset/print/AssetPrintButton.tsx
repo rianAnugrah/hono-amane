@@ -22,13 +22,13 @@ export const AssetPrintButton: React.FC<AssetPrintButtonProps> = ({ assets }) =>
   };
 
   useEffect(() => {
-    console.log("assets", assets);
+    //console.log("assets", assets);
   }, [assets]);
   
   return (
     <>
       <button 
-        className="flex items-center gap-1.5 w-full h-full" 
+        className="flex items-center gap-1.5 btn btn-neutral btn-soft btn-sm" 
         onClick={handleOpenPreview}
         disabled={assets.length <= 0}
       >

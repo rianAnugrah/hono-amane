@@ -29,7 +29,7 @@ const QrScannerComponent = () => {
     try {
       setIsLoading(true);
       const cameras = await QrScanner.listCameras();
-      console.log("Available cameras:", cameras);
+      //console.log("Available cameras:", cameras);
       setAvailableCameras(cameras);
       
       if (cameras.length > 0) {
@@ -58,13 +58,13 @@ const QrScannerComponent = () => {
           setScanner(null);
         }
         
-        console.log("Attempting to start camera...", cameraId ? `Camera ID: ${cameraId}` : "Default camera");
+        //console.log("Attempting to start camera...", cameraId ? `Camera ID: ${cameraId}` : "Default camera");
         
         // Create scanner with default options
         const qrScanner = new QrScanner(
           videoRef.current,
           (result) => {
-            console.log("QR code detected:", result.data);
+            //console.log("QR code detected:", result.data);
             setResult(result.data);
             // Don't stop scanner after detection to allow multiple scans
           },
@@ -78,7 +78,7 @@ const QrScannerComponent = () => {
         
         // Start with specified camera or default
         await qrScanner.start();
-        console.log("Camera started successfully");
+        //console.log("Camera started successfully");
         setScanner(qrScanner);
         setCameraOn(true);
         setError("");
@@ -120,7 +120,7 @@ const QrScannerComponent = () => {
         await scanner.setCamera(cameraId);
         await scanner.start();
         setCurrentCameraId(cameraId);
-        console.log("Switched to camera:", cameraId);
+        //console.log("Switched to camera:", cameraId);
       } else {
         await startCameraSimple(cameraId);
       }
@@ -155,7 +155,7 @@ const QrScannerComponent = () => {
     try {
       setIsLoading(true);
       const cameras = await QrScanner.listCameras();
-      console.log("Available cameras (refreshed):", cameras);
+      //console.log("Available cameras (refreshed):", cameras);
       setAvailableCameras(cameras);
       setError("");
     } catch (err) {

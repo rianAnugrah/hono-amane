@@ -113,9 +113,9 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
     setShowForm,
   } = useAssetForm({ 
     onSuccess: (updatedAsset) => {
-      console.log("Asset form successfully saved asset:", updatedAsset);
+      //console.log("Asset form successfully saved asset:", updatedAsset);
       if (updatedAsset && assetToEdit) {
-        console.log("Adding updated asset to inspection from callback");
+        //console.log("Adding updated asset to inspection from callback");
         handleAddAsset(updatedAsset);
       } else {
         // Regular asset management, just refresh the list
@@ -260,7 +260,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
 
   async function handleFetchAssets() {
     try {
-      console.log("Fetching asset by asset number:", scannedAssetNo);
+      //console.log("Fetching asset by asset number:", scannedAssetNo);
       const res = await fetch(`/api/assets/by-asset-number/${scannedAssetNo}`);
       
       if (!res.ok) {
@@ -272,7 +272,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
       let data;
       try {
         data = await res.json();
-        console.log("Fetched asset data:", data);
+        //console.log("Fetched asset data:", data);
       } catch (e) {
         console.error("Error parsing asset data JSON:", e);
         throw new Error("Invalid response format from asset API");
@@ -280,7 +280,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
 
       if (data && data.id) {
         // Successfully found the asset
-        console.log("Asset found, setting up edit form with:", data);
+        //console.log("Asset found, setting up edit form with:", data);
         setAssetToEdit(data);
         setShowAssetEditForm(true);
         setShowQrScanner(false); // Hide scanner after successful scan
@@ -320,12 +320,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
     }
 
     try {
-      console.log("Adding asset to inspection:", {
-        inspectionId,
-        assetId: asset.id,
-        assetVersion: asset.version,
-        assetDetails: { ...asset }
-      });
+     
       
       const requestBody = {
         inspectionId,
@@ -333,7 +328,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
         assetVersion: asset.version
       };
       
-      console.log("Request body for adding asset:", requestBody);
+      //console.log("Request body for adding asset:", requestBody);
       
       const response = await fetch("/api/inspections/items", {
         method: "POST",
@@ -343,7 +338,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
         body: JSON.stringify(requestBody),
       });
 
-      console.log("Add asset response status:", response.status);
+      //console.log("Add asset response status:", response.status);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -354,7 +349,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
       let data;
       try {
         data = await response.json();
-        console.log("Add asset response:", data);
+        //console.log("Add asset response:", data);
       } catch (e) {
         console.error("Error parsing JSON response:", e);
         throw new Error("Invalid response format when adding asset");
@@ -362,12 +357,12 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
 
       // Check if the response is successful
       if (data && (data.success !== false)) {
-        console.log("Successfully added asset to inspection");
+        //console.log("Successfully added asset to inspection");
         
         // The API might return the data directly or in a data property
         const itemData = data.data || data;
         
-        console.log("Item data to add to inspection:", itemData);
+        //console.log("Item data to add to inspection:", itemData);
         
         if (!itemData || !itemData.id) {
           console.error("Response has invalid structure:", data);
@@ -405,7 +400,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
               onInspectionChange();
             }
             
-            console.log("Updated inspection with new asset:", updatedInspection);
+            //console.log("Updated inspection with new asset:", updatedInspection);
           } else {
             console.error("Cannot add asset to inspection: Asset data is missing");
           }
@@ -435,11 +430,11 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
         remark: assetRemarks || null
       };
 
-      console.log("Updating asset with data:", updateData);
+      //console.log("Updating asset with data:", updateData);
 
       // Use axios like useAssetForm does instead of fetch
       const response = await axios.put(`/api/assets/${assetToEdit.id}`, updateData);
-      console.log("Update response:", response.data);
+      //console.log("Update response:", response.data);
       
       const data = response.data;
 
@@ -447,7 +442,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
         throw new Error("Invalid response data from asset update");
       }
 
-      console.log("Asset updated successfully:", data);
+      //console.log("Asset updated successfully:", data);
 
       // Add the updated asset to the inspection
       await handleAddAsset({
@@ -796,7 +791,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
               onClick={async () => {
                 try {
                   // First, get the latest asset version by asset number
-                  console.log("Getting latest asset data for edit button:", assetToEdit.assetNo);
+                  //console.log("Getting latest asset data for edit button:", assetToEdit.assetNo);
                   const latestAssetResponse = await fetch(`/api/assets/by-asset-number/${assetToEdit.assetNo}`);
                   if (!latestAssetResponse.ok) {
                     const errorText = await latestAssetResponse.text();
@@ -805,20 +800,20 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
                   }
                   
                   const latestAsset = await latestAssetResponse.json();
-                  console.log("Latest asset data for edit:", latestAsset);
+                  //console.log("Latest asset data for edit:", latestAsset);
                   
                   if (!latestAsset || !latestAsset.id) {
                     throw new Error("Could not find the latest version of this asset");
                   }
                   
                   // Show the full asset form modal
-                  console.log("Setting up full asset form for editing");
+                  //console.log("Setting up full asset form for editing");
                   
                   // First make sure we close the simple edit form
                   setShowAssetEditForm(false);
                   
                   // Then show the modal form with the asset data
-                  console.log("Starting edit with asset:", latestAsset);
+                  //console.log("Starting edit with asset:", latestAsset);
                   setShowForm(true);
                   startEdit(latestAsset);
                 } catch (error) {

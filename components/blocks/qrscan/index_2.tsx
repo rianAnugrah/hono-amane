@@ -40,7 +40,7 @@ const QrScannerComponent = () => {
               return;
             }
           } catch (e) {
-            console.log("Could not query camera permission status, will try direct access:", e);
+            //console.log("Could not query camera permission status, will try direct access:", e);
           }
         }
         
@@ -63,7 +63,7 @@ const QrScannerComponent = () => {
       
       // Now list available cameras
       const availableCameras = await QrScanner.listCameras();
-      console.log("Available cameras:", availableCameras);
+      //console.log("Available cameras:", availableCameras);
       
       if (availableCameras.length === 0) {
         setError("Tidak ada kamera yang terdeteksi. Periksa apakah perangkat Anda memiliki kamera.");
@@ -136,12 +136,12 @@ const QrScannerComponent = () => {
         setCurrentCameraIndex(index);
         
         const selectedCamera = cameras[index];
-        console.log(`Starting camera: ${selectedCamera.label} (${selectedCamera.id})`);
+        //console.log(`Starting camera: ${selectedCamera.label} (${selectedCamera.id})`);
         
         const qrScanner = new QrScanner(
           videoRef.current,
           (result) => {
-            console.log("QR code detected:", result.data);
+            //console.log("QR code detected:", result.data);
             setResult(result.data);
             // Don't automatically stop camera after detection
           },
@@ -156,7 +156,7 @@ const QrScannerComponent = () => {
         await qrScanner.setCamera(selectedCamera.id);
         
         await qrScanner.start();
-        console.log("Camera activated successfully");
+        //console.log("Camera activated successfully");
         setScanner(qrScanner);
         setCameraOn(true);
         setError("");
@@ -189,7 +189,7 @@ const QrScannerComponent = () => {
   // Fungsi untuk menghentikan kamera
   const stopCamera = () => {
     if (scanner) {
-      console.log("Stopping camera...");
+      //console.log("Stopping camera...");
       scanner.stop();
       setScanner(null);
       setCameraOn(false);
@@ -205,7 +205,7 @@ const QrScannerComponent = () => {
     
     // Calculate next camera index (rotate through available cameras)
     const nextCameraIndex = (currentCameraIndex + 1) % cameras.length;
-    console.log(`Switching to camera index: ${nextCameraIndex}`);
+    //console.log(`Switching to camera index: ${nextCameraIndex}`);
     
     // If scanner is active, restart with new camera
     stopCamera();
@@ -219,10 +219,10 @@ const QrScannerComponent = () => {
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      console.log("Scanning file:", file.name);
+      //console.log("Scanning file:", file.name);
       QrScanner.scanImage(file)
         .then((result) => {
-          console.log("File scan result:", result);
+          //console.log("File scan result:", result);
           setResult(result);
           setError("");
         })
@@ -236,7 +236,7 @@ const QrScannerComponent = () => {
   // Clean up scanner when component unmounts
   useEffect(() => {
     return () => {
-      console.log("Cleaning up scanner...");
+      //console.log("Cleaning up scanner...");
       stopCamera();
     };
   }, []);

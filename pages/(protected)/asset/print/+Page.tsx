@@ -11,13 +11,9 @@ const SelectedAssetsPage = () => {
     useAssetSelectionStore();
 
   return (
-    <button
-      className="btn btn-neutral btn-soft btn-sm"
-      disabled={selectedAssets.length <= 0}
-    >
+    <>
       <AssetPrintButton assets={selectedAssets} />
-      
-    </button>
+    </>
   );
 };
 

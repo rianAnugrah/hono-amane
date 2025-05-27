@@ -38,7 +38,7 @@ const SelectedAssetsPage = () => {
         return;
       }
 
-      console.log("SELECTED_ASSETS COUNT:", assets.length);
+      //console.log("SELECTED_ASSETS COUNT:", assets.length);
 
       // Create formatted content for printing
       const printContent = `

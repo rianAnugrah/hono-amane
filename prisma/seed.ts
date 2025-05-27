@@ -10143,7 +10143,7 @@ async function main() {
       });
 
       if (existingAsset) {
-        console.log(
+        //console.log(
           `Skipping asset ${asset.ASSET_NO}-${asset.LINE_NO}: Already exists (version ${existingAsset.version})`
         );
         continue;
@@ -10177,7 +10177,7 @@ async function main() {
         },
       });
 
-      console.log(`Created asset ${asset.ASSET_NO}-${asset.LINE_NO}`);
+      //console.log(`Created asset ${asset.ASSET_NO}-${asset.LINE_NO}`);
     } catch (error: any) {
       console.error(
         `Error processing asset ${asset.ASSET_NO}-${asset.LINE_NO}:`,
@@ -10189,7 +10189,7 @@ async function main() {
 
 main()
   .then(() => {
-    console.log("Seeding complete");
+    //console.log("Seeding complete");
   })
   .catch((e) => {
     console.error(e);

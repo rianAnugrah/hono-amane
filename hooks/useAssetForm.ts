@@ -60,30 +60,30 @@ export function useAssetForm({ onSuccess }: UseAssetFormProps = {}) {
   // Submit form data to API
   const handleSubmit = useCallback(async () => {
     try {
-      console.log("handleSubmit called with editingId:", editingId, "and form:", form);
+      //console.log("handleSubmit called with editingId:", editingId, "and form:", form);
       setIsSubmitting(true);
       let updatedAsset = null;
       
       if (editingId) {
-        console.log("Updating asset with ID:", editingId);
+        //console.log("Updating asset with ID:", editingId);
         const response = await axios.put(`/api/assets/${editingId}`, form);
-        console.log("Update response:", response.data);
+        //console.log("Update response:", response.data);
         updatedAsset = response.data;
         
         // Fetch the latest version of the asset to ensure we have all fields
         try {
-          console.log("Fetching latest asset version after update");
+          //console.log("Fetching latest asset version after update");
           const refreshResponse = await axios.get(`/api/assets/${response.data.id}`);
           updatedAsset = refreshResponse.data;
-          console.log("Got latest asset version:", updatedAsset);
+          //console.log("Got latest asset version:", updatedAsset);
         } catch (refreshError) {
           console.error("Error fetching latest asset version:", refreshError);
           // Continue with the response data we have
         }
       } else {
-        console.log("Creating new asset");
+        //console.log("Creating new asset");
         const response = await axios.post("/api/assets", form);
-        console.log("Create response:", response.data);
+        //console.log("Create response:", response.data);
         updatedAsset = response.data;
       }
       
@@ -92,7 +92,7 @@ export function useAssetForm({ onSuccess }: UseAssetFormProps = {}) {
       
       // Call the onSuccess callback if provided
       if (onSuccess) {
-        console.log("Calling onSuccess callback with updated asset:", updatedAsset);
+        //console.log("Calling onSuccess callback with updated asset:", updatedAsset);
         onSuccess(updatedAsset);
       }
     } catch (error) {

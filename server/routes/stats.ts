@@ -9,7 +9,7 @@ const statRoutes = new Hono();
  */
 statRoutes.get('/overview', async (c) => {
   try {
-    console.log("Fetching asset overview statistics...");
+    //console.log("Fetching asset overview statistics...");
     
     // Count all assets regardless of status to verify data exists
     const allAssetsCount = await prisma.asset.count();
@@ -91,7 +91,7 @@ statRoutes.get('/overview', async (c) => {
  */
 statRoutes.get('/by-category', async (c) => {
   try {
-    console.log("Fetching asset statistics by category...");
+    //console.log("Fetching asset statistics by category...");
     
     // Count active assets by category with proper grouping
     const categoryStats = await prisma.asset.groupBy({
@@ -135,7 +135,7 @@ statRoutes.get('/by-category', async (c) => {
  */
 statRoutes.get('/by-location', async (c) => {
   try {
-    console.log("Fetching asset statistics by location...");
+    //console.log("Fetching asset statistics by location...");
     
     // Count active assets by location with location description
     const locationStats = await prisma.asset.groupBy({
@@ -190,7 +190,7 @@ statRoutes.get('/by-location', async (c) => {
  */
 statRoutes.get('/by-condition', async (c) => {
   try {
-    console.log("Fetching asset statistics by condition...");
+    //console.log("Fetching asset statistics by condition...");
     
     // Count active assets by condition
     const conditionStats = await prisma.asset.groupBy({
@@ -234,7 +234,7 @@ statRoutes.get('/by-condition', async (c) => {
  */
 statRoutes.get('/all', async (c) => {
   try {
-    console.log("Fetching all asset statistics...");
+    //console.log("Fetching all asset statistics...");
     
     // Count all assets regardless of status to verify data exists
     const allAssetsCount = await prisma.asset.count();

@@ -59,7 +59,7 @@ export default function AssetDetailPage() {
     // Use the assetNo (which is the route parameter) directly
     fetch(`/api/asset-audit/by-asset-number/${assetNumber}`)
       .then(res => {
-        console.log(`Fetching inspection logs for asset number: ${assetNumber}`);
+        //console.log(`Fetching inspection logs for asset number: ${assetNumber}`);
         if (!res.ok) {
           throw new Error(`Error fetching audit logs: ${res.status}`);
         }
@@ -67,7 +67,7 @@ export default function AssetDetailPage() {
       })
       .then(data => {
         // Transform audit data to match our InspectionLog interface
-        console.log(`Fetched ${Array.isArray(data) ? data.length : 0} inspection logs for asset number: ${assetNumber}`);
+        //console.log(`Fetched ${Array.isArray(data) ? data.length : 0} inspection logs for asset number: ${assetNumber}`);
         const formattedLogs: InspectionLog[] = Array.isArray(data) 
           ? data.map(audit => {
               // Get auditor name from auditUsers if available

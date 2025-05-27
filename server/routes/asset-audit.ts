@@ -9,7 +9,7 @@ const prisma = new PrismaClient()
 assetAuditRoute.post('/', async (c) => {
   try {
     const body = await c.req.json()
-    console.log('Received audit data:', JSON.stringify(body, null, 2))
+    //console.log('Received audit data:', JSON.stringify(body, null, 2))
     
     const {
       assetId,
@@ -23,7 +23,7 @@ assetAuditRoute.post('/', async (c) => {
 
     // Validate images is an array
     const imageArray = Array.isArray(images) ? images : []
-    console.log('Processed image array:', imageArray)
+    //console.log('Processed image array:', imageArray)
 
     // Create the audit record
     const audit = await prisma.assetAudit.create({
@@ -52,7 +52,7 @@ assetAuditRoute.post('/', async (c) => {
       }
     })
 
-    console.log('Created audit record:', JSON.stringify(audit, null, 2))
+    //console.log('Created audit record:', JSON.stringify(audit, null, 2))
     return c.json(audit, 201)
   } catch (err: any) {
     console.error('Error creating audit:', err)
@@ -84,10 +84,10 @@ assetAuditRoute.get('/', async (c) => {
       },
     })
 
-    console.log(`Retrieved ${audits.length} audit records`)
+    //console.log(`Retrieved ${audits.length} audit records`)
     // Log the first audit to check the structure
     if (audits.length > 0) {
-      console.log('First audit record:', JSON.stringify(audits[0], null, 2))
+      //console.log('First audit record:', JSON.stringify(audits[0], null, 2))
     }
 
     return c.json(audits)
@@ -121,7 +121,7 @@ assetAuditRoute.get('/by-asset-number/:assetNumber', async (c) => {
       },
     })
 
-    console.log(`Retrieved ${audits.length} audit records for asset number: ${assetNumber}`)
+    //console.log(`Retrieved ${audits.length} audit records for asset number: ${assetNumber}`)
     return c.json(audits)
   } catch (err: any) {
     console.error('Error fetching audits by asset number:', err)
@@ -165,7 +165,7 @@ assetAuditRoute.put('/:id', async (c) => {
   
   try {
     const body = await c.req.json()
-    console.log('Updating audit data:', JSON.stringify(body, null, 2))
+    //console.log('Updating audit data:', JSON.stringify(body, null, 2))
     
     const {
       assetId,
@@ -212,7 +212,7 @@ assetAuditRoute.put('/:id', async (c) => {
       }
     })
 
-    console.log('Updated audit record:', JSON.stringify(updated, null, 2))
+    //console.log('Updated audit record:', JSON.stringify(updated, null, 2))
     return c.json(updated)
   } catch (err: any) {
     console.error('Error updating audit:', err)

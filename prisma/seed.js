@@ -163,7 +163,7 @@ function main() {
 }
 main()
     .then(function () {
-    console.log("Seeding complete");
+    //console.log("Seeding complete");
 })
     .catch(function (e) {
     console.error(e);
