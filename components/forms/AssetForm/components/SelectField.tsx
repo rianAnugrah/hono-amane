@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Check, X, Search } from 'lucide-react';
 
@@ -20,7 +20,7 @@ interface SelectFieldProps {
   disabled?: boolean;
 }
 
-export const SelectField = ({
+const SelectField = memo(({
   name,
   label,
   placeholder = "Select an option",
@@ -133,11 +133,8 @@ export const SelectField = ({
   };
 
   return (
-    <motion.div 
+    <div 
       className="relative mb-4"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
       ref={containerRef}
     >
       {/* Hidden native select for form compatibility */}
@@ -184,107 +181,83 @@ export const SelectField = ({
             <span className={selectedOption ? 'text-gray-900' : 'text-gray-500'}>
               {selectedOption ? selectedOption.label : placeholder}
             </span>
-            <motion.div
-              animate={{ rotate: isOpen ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-              className={`ml-2 ${disabled ? 'opacity-50' : ''}`}
+            <div
+              className={`ml-2 transition-transform duration-150 ${isOpen ? 'rotate-180' : 'rotate-0'} ${disabled ? 'opacity-50' : ''}`}
             >
               <ChevronDown size={18} className="text-gray-500" />
-            </motion.div>
+            </div>
           </div>
           
           {touched && !isOpen && (
             <div className="absolute right-8 top-1/2 -translate-y-1/2">
-              <AnimatePresence>
-                {isValid && (
-                  <motion.span 
-                    initial={{ opacity: 0, scale: 0.7 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.7 }}
-                    className="text-green-500 flex items-center"
-                  >
-                    <Check size={16} />
-                  </motion.span>
-                )}
-                {isInvalid && (
-                  <motion.span 
-                    initial={{ opacity: 0, scale: 0.7 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.7 }}
-                    className="text-red-500 flex items-center"
-                  >
-                    <X size={16} />
-                  </motion.span>
-                )}
-              </AnimatePresence>
+              {isValid && (
+                <span className="text-green-500 flex items-center opacity-100 transition-opacity duration-150">
+                  <Check size={16} />
+                </span>
+              )}
+              {isInvalid && (
+                <span className="text-red-500 flex items-center opacity-100 transition-opacity duration-150">
+                  <X size={16} />
+                </span>
+              )}
             </div>
           )}
         </div>
       </div>
       
       {/* Error message */}
-      <AnimatePresence>
-        {isInvalid && errorMessage && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="text-red-500 text-xs mt-1 pl-1"
-          >
-            {errorMessage}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isInvalid && errorMessage && (
+        <div className="text-red-500 text-xs mt-1 pl-1 transition-opacity duration-150">
+          {errorMessage}
+        </div>
+      )}
       
       {/* Dropdown with search and options */}
-      <AnimatePresence>
-        {isOpen && !disabled && (
-          <motion.div 
-            initial={{ opacity: 0, y: -5, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -5, height: 0 }}
-            transition={{ duration: 0.15 }}
-            className="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
-            style={{ maxHeight: '250px' }}
-          >
-            <div className="max-h-60 overflow-y-auto relative">
-              {searchable && (
-                <div className='sticky top-0 w-full bg-white p-2 border-b border-gray-100'>
-                  <div className="relative">
-                    <input
-                      ref={searchInputRef}
-                      type="text"
-                      className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
-                      placeholder={searchPlaceholder}
-                      value={searchTerm}
-                      onChange={handleSearchChange}
-                    />
-                    <Search size={14} className="absolute left-2.5 top-2 text-gray-400" />
-                  </div>
+      {isOpen && !disabled && (
+        <div 
+          className="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden opacity-100 transition-opacity duration-150"
+          style={{ maxHeight: '250px' }}
+        >
+          <div className="max-h-60 overflow-y-auto relative">
+            {searchable && (
+              <div className='sticky top-0 w-full bg-white p-2 border-b border-gray-100'>
+                <div className="relative">
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
+                    placeholder={searchPlaceholder}
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                  />
+                  <Search size={14} className="absolute left-2.5 top-2 text-gray-400" />
                 </div>
-              )}
-              
-              {filteredOptions.length > 0 ? (
-                filteredOptions.map((option) => (
-                  <motion.div
-                    key={option.value}
-                    whileHover={{ backgroundColor: '#f3f4f6' }}
-                    className={`
-                      px-4 py-2.5 cursor-pointer transition-colors duration-150
-                      ${selectedOption?.value === option.value ? 'bg-blue-50 text-blue-700' : 'text-gray-800'}
-                    `}
-                    onClick={() => handleSelect(option)}
-                  >
-                    {option.label}
-                  </motion.div>
-                ))
-              ) : (
-                <div className="px-4 py-3 text-gray-500 text-sm italic">No options available</div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+              </div>
+            )}
+            
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map((option) => (
+                <div
+                  key={option.value}
+                  className={`
+                    px-4 py-2.5 cursor-pointer transition-colors duration-150 hover:bg-gray-100
+                    ${selectedOption?.value === option.value ? 'bg-blue-50 text-blue-700' : 'text-gray-800'}
+                  `}
+                  onClick={() => handleSelect(option)}
+                >
+                  {option.label}
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-3 text-gray-500 text-sm italic">No options available</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
-};
+});
+
+SelectField.displayName = 'SelectField';
+
+export { SelectField };

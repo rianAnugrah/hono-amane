@@ -46,7 +46,7 @@ export interface SectionStatusState {
 
 // Props for the form field component
 export interface FormFieldProps {
-  name: keyof AssetFormValues;
+  name: string;
   label: string;
   placeholder: string;
   type?: string;
@@ -56,6 +56,7 @@ export interface FormFieldProps {
   validation: ValidationStatus;
   touched: boolean;
   errorMessage: string;
+  icon?: ReactNode;
 }
 
 // Props for the section tab component

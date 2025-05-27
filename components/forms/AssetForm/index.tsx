@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback, memo } from "react";
 import { AnimatePresence } from "framer-motion";
 import { AssetFormValues } from "./types";
 import { getErrorMessage } from "./validation";
@@ -33,7 +33,35 @@ interface AssetFormProps {
   handleCancel: () => void;
 }
 
-export default function AssetForm({
+// Memoize static options to prevent recreation
+const categoryCodeOptions = [
+  { label: "Select", value: "" },
+  { label: "A", value: "A" },
+  { label: "B", value: "B" },
+  { label: "C", value: "C" },
+  { label: "D", value: "D" },
+  { label: "E", value: "E" },
+  { label: "F", value: "F" },
+  { label: "G", value: "G" },
+];
+
+const typeOptions = [
+  { label: "Select", value: "" },
+  { label: "HBI", value: "HBI" },
+  { label: "HBM", value: "HBM" },
+];
+
+const conditionOptions = [
+  { value: "", label: "Select" },
+  { value: "Good", label: "Good" },
+  { value: "Broken", label: "Broken" },
+  { value: "X", label: "X" },
+  { value: "poor", label: "Poor" },
+];
+
+const sections = ["basic", "location", "financial", "depreciation", "dates", "images"];
+
+function AssetForm({
   editingId,
   form,
   handleChange,
@@ -45,16 +73,13 @@ export default function AssetForm({
   const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
   const [projectCodes, setProjectCodes] = useState<ProjectCode[]>([]);
   const [isVerticalMode, setIsVerticalMode] = useState(false);
-
-  const [search, setSearch] = useState("");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [isLoading, setIsLoading] = useState(false);
+
   const { touchedFields, validation, sectionStatus, handleBlur, isFormValid, validateAllFields } =
     useFormValidation(form);
 
-  const sections = ["basic", "location", "financial", "depreciation", "dates", "images"];
-
-  const navigateSection = (next: boolean) => {
+  // Memoize navigation functions
+  const navigateSection = useCallback((next: boolean) => {
     const currentIndex = sections.indexOf(activeSection);
     const newIndex = next ? currentIndex + 1 : currentIndex - 1;
 
@@ -62,84 +87,50 @@ export default function AssetForm({
       setDirection(next ? 1 : -1);
       setActiveSection(sections[newIndex]);
     }
-  };
+  }, [activeSection]);
 
-  const handleSectionClick = (section: string) => {
+  const handleSectionClick = useCallback((section: string) => {
     const currentIndex = sections.indexOf(activeSection);
     const newIndex = sections.indexOf(section);
     setDirection(newIndex > currentIndex ? 1 : -1);
     setActiveSection(section);
-  };
+  }, [activeSection]);
 
-  const categoryCodeOptions = [
-    {
-      label: "Select",
-      value: "",
-    },
-    {
-      label: "A",
-      value: "A",
-    },
-    {
-      label: "B",
-      value: "B",
-    },
-    {
-      label: "C",
-      value: "C",
-    },
-    {
-      label: "D",
-      value: "D",
-    },
-    {
-      label: "E",
-      value: "E",
-    },
-    {
-      label: "F",
-      value: "F",
-    },
-    {
-      label: "G",
-      value: "G",
-    },
-  ];
-
-  const fetchLocations = async () => {
+  // Optimize data fetching with useCallback
+  const fetchLocations = useCallback(async () => {
+    if (isLoading) return; // Prevent multiple simultaneous requests
+    
     setIsLoading(true);
     try {
-      const res = await axios.get("/api/locations", {
-        params: { search, sort: sortOrder },
-      });
+      const res = await axios.get("/api/locations");
       setLocationOptions(res.data);
     } catch (error) {
       console.error("Failed to fetch locations:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isLoading]);
 
-  const fetchProjectCode = async () => {
+  const fetchProjectCode = useCallback(async () => {
+    if (isLoading) return; // Prevent multiple simultaneous requests
+    
     setIsLoading(true);
     try {
       const res = await axios.get("/api/project-codes");
       setProjectCodes(res.data);
     } catch (error) {
-      console.error("Failed to fetch locations:", error);
+      console.error("Failed to fetch project codes:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isLoading]);
 
+  // Fetch data only once
   useEffect(() => {
     fetchLocations();
-  }, [search, sortOrder]);
-
-  useEffect(() => {
     fetchProjectCode();
-  }, []);
-  
+  }, []); // Remove dependencies to fetch only once
+
   // Validate all fields when in edit mode
   useEffect(() => {
     if (editingId) {
@@ -147,14 +138,26 @@ export default function AssetForm({
     }
   }, [editingId, validateAllFields]);
 
-  // Function to display object as formatted JSON
-  const formatObject = (obj: any) => {
-    return JSON.stringify(obj, null, 2);
-  };
-
-  const toggleViewMode = () => {
+  const toggleViewMode = useCallback(() => {
     setIsVerticalMode(!isVerticalMode);
-  };
+  }, [isVerticalMode]);
+
+  // Memoize location and project code options
+  const locationSelectOptions = useMemo(() => [
+    { label: "Select", value: "" },
+    ...locationOptions.map((loc) => ({
+      label: loc.description,
+      value: loc.id,
+    })),
+  ], [locationOptions]);
+
+  const projectCodeSelectOptions = useMemo(() => [
+    { label: "Select", value: "" },
+    ...projectCodes.map((pc) => ({
+      label: pc.code,
+      value: pc.id,
+    })),
+  ], [projectCodes]);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm mb-6 h-full overflow-y-auto relative">
@@ -215,13 +218,7 @@ export default function AssetForm({
                     value={form.projectCode_id}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    options={[
-                      { label: "Select", value: "" },
-                      ...projectCodes.map((pc) => ({
-                        label: pc.code,
-                        value: pc.id,
-                      })),
-                    ]}
+                    options={projectCodeSelectOptions}
                     validation={validation.projectCode_id}
                     touched={touchedFields.has("projectCode_id")}
                     errorMessage={getErrorMessage(
@@ -272,11 +269,7 @@ export default function AssetForm({
                     value={form.type}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    options={[
-                      { label: "Select", value: "" },
-                      { label: "HBI", value: "HBI" },
-                      { label: "HBM", value: "HBM" },
-                    ]}
+                    options={typeOptions}
                     validation={validation.type}
                     touched={touchedFields.has("type")}
                     errorMessage={getErrorMessage("type", validation.type)}
@@ -309,13 +302,7 @@ export default function AssetForm({
                     value={form.locationDesc_id}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    options={[
-                      { label: "Select", value: "" },
-                      ...locationOptions.map((loc) => ({
-                        label: loc.description,
-                        value: loc.id,
-                      })),
-                    ]}
+                    options={locationSelectOptions}
                     searchable={true}
                     searchPlaceholder="Search locations..."
                     validation={validation.locationDesc_id}
@@ -331,13 +318,7 @@ export default function AssetForm({
                     placeholder="Enter asset condition"
                     value={form.condition}
                     onChange={handleChange}
-                    options={[
-                      { value: "", label: "Select" },
-                      { value: "Good", label: "Good" },
-                      { value: "Broken", label: "Broken" },
-                      { value: "X", label: "X" },
-                      { value: "poor", label: "Poor" },
-                    ]}
+                    options={conditionOptions}
                     onBlur={handleBlur}
                     validation={validation.condition}
                     touched={touchedFields.has("condition")}
@@ -515,13 +496,7 @@ export default function AssetForm({
                     value={form.projectCode_id}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    options={[
-                      { label: "Select", value: "" },
-                      ...projectCodes.map((pc) => ({
-                        label: pc.code,
-                        value: pc.id,
-                      })),
-                    ]}
+                    options={projectCodeSelectOptions}
                     validation={validation.projectCode_id}
                     touched={touchedFields.has("projectCode_id")}
                     errorMessage={getErrorMessage(
@@ -572,11 +547,7 @@ export default function AssetForm({
                     value={form.type}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    options={[
-                      { label: "Select", value: "" },
-                      { label: "HBI", value: "HBI" },
-                      { label: "HBM", value: "HBM" },
-                    ]}
+                    options={typeOptions}
                     validation={validation.type}
                     touched={touchedFields.has("type")}
                     errorMessage={getErrorMessage("type", validation.type)}
@@ -608,13 +579,7 @@ export default function AssetForm({
                     value={form.locationDesc_id}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    options={[
-                      { label: "Select", value: "" },
-                      ...locationOptions.map((loc) => ({
-                        label: loc.description,
-                        value: loc.id,
-                      })),
-                    ]}
+                    options={locationSelectOptions}
                     searchable={true}
                     searchPlaceholder="Search locations..."
                     validation={validation.locationDesc_id}
@@ -630,13 +595,7 @@ export default function AssetForm({
                     placeholder="Enter asset condition"
                     value={form.condition}
                     onChange={handleChange}
-                    options={[
-                      { value: "", label: "Select" },
-                      { value: "Good", label: "Good" },
-                      { value: "Broken", label: "Broken" },
-                      { value: "X", label: "X" },
-                      { value: "poor", label: "Poor" },
-                    ]}
+                    options={conditionOptions}
                     onBlur={handleBlur}
                     validation={validation.condition}
                     touched={touchedFields.has("condition")}
@@ -850,3 +809,5 @@ export default function AssetForm({
     </div>
   );
 }
+
+export default memo(AssetForm);

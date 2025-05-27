@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import axios from "axios";
 import { Asset } from "@/pages/(protected)/asset/types";
 import { AssetFormValues } from "@/components/forms/AssetForm/types";
@@ -35,13 +35,13 @@ export function useAssetForm({ onSuccess }: UseAssetFormProps = {}) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Reset form to default values
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setForm(defaultFormValues);
     setEditingId(null);
-  };
+  }, []);
 
   // Handle form field changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
     
     // Handle array values (like images)
@@ -55,10 +55,10 @@ export function useAssetForm({ onSuccess }: UseAssetFormProps = {}) {
     } else {
       setForm(prev => ({ ...prev, [name]: value }));
     }
-  };
+  }, []);
 
   // Submit form data to API
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     try {
       console.log("handleSubmit called with editingId:", editingId, "and form:", form);
       setIsSubmitting(true);
@@ -104,10 +104,10 @@ export function useAssetForm({ onSuccess }: UseAssetFormProps = {}) {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [editingId, form, onSuccess, resetForm]);
 
   // Load asset data into form for editing
-  const startEdit = (asset: Asset) => {
+  const startEdit = useCallback((asset: Asset) => {
     // Convert the Asset object to the expected AssetFormValues structure
     const formValues: AssetFormValues = {
       assetNo: asset.assetNo || "",
@@ -133,19 +133,19 @@ export function useAssetForm({ onSuccess }: UseAssetFormProps = {}) {
     setForm(formValues);
     setEditingId(asset.id);
     setShowForm(true);
-  };
+  }, []);
 
   // Start new asset creation
-  const startCreate = () => {
+  const startCreate = useCallback(() => {
     resetForm();
     setShowForm(true);
-  };
+  }, [resetForm]);
 
   // Cancel editing/creating and close form
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     resetForm();
     setShowForm(false);
-  };
+  }, [resetForm]);
 
   return {
     form,

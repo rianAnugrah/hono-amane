@@ -1,21 +1,21 @@
 import { useCallback } from "react"
 export const useUpload = () => {
-  const folder = import.meta.env.PUBLIC_ENV__UPLOAD_FOLDER || 'uploads'
+  const folder = import.meta.env.UPLOAD_FOLDER || 'uploads'
 
   const apiUpload = `${
-    import.meta.env.PUBLIC_ENV__API_HOST || ''
+    import.meta.env.API_HOST || ''
   }api/sp/file?folder=${folder}&unique=1`
 
   const apiDelete = `${
-    import.meta.env.PUBLIC_ENV__API_HOST || ''
+    import.meta.env.API_HOST || ''
   }api/sp/file?folder=${folder}&name=`
 
   const apiGet = `${
-    import.meta.env.PUBLIC_ENV__API_HOST || ''
+    import.meta.env.API_HOST || ''
   }api/sp/file?folder=${folder}&name=`
 
   const apiPreview = `${
-    import.meta.env.PUBLIC_ENV__API_HOST || ''
+    import.meta.env.API_HOST || ''
   }api/sp/preview?folder=${folder}&name=`
 
   const responseParser = useCallback((response: Record<string, any>) => {
