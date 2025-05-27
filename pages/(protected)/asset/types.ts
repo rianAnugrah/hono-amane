@@ -15,6 +15,7 @@ export interface Asset {
   transDate: string;
   categoryCode: string;
   afeNo?: string | null;
+  type?: string | null;
   adjustedDepre: number;
   poNo?: string | null;
   acqValueIdr: number;

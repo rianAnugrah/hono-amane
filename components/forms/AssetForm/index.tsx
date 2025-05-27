@@ -265,6 +265,22 @@ export default function AssetForm({
                       validation.assetName
                     )}
                   />
+                  <SelectField
+                    name="type"
+                    label="Asset Type"
+                    placeholder="Select asset type"
+                    value={form.type}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    options={[
+                      { label: "Select", value: "" },
+                      { label: "HBI", value: "HBI" },
+                      { label: "HBM", value: "HBM" },
+                    ]}
+                    validation={validation.type}
+                    touched={touchedFields.has("type")}
+                    errorMessage={getErrorMessage("type", validation.type)}
+                  />
                 </div>
               </div>
 
@@ -548,6 +564,22 @@ export default function AssetForm({
                       "assetName",
                       validation.assetName
                     )}
+                  />
+                  <SelectField
+                    name="type"
+                    label="Asset Type"
+                    placeholder="Select asset type"
+                    value={form.type}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    options={[
+                      { label: "Select", value: "" },
+                      { label: "HBI", value: "HBI" },
+                      { label: "HBM", value: "HBM" },
+                    ]}
+                    validation={validation.type}
+                    touched={touchedFields.has("type")}
+                    errorMessage={getErrorMessage("type", validation.type)}
                   />
                 </FormSection>
               )}

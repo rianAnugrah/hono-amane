@@ -11,6 +11,7 @@ export interface AssetFormValues {
   lineNo: string;
   assetName: string;
   categoryCode: string;
+  type: string | null;
   locationDesc_id: number | null;
   detailsLocation_id: number | null;
   condition: string;

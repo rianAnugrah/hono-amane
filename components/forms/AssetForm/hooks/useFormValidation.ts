@@ -10,6 +10,7 @@ export const useFormValidation = (form: AssetFormValues) => {
     lineNo: "untouched",
     assetName: "untouched", 
     categoryCode: "untouched",
+    type: "valid", // Type is optional, so it's always valid
     locationDesc_id: "untouched",
     condition: "untouched",
     acqValue: "untouched",

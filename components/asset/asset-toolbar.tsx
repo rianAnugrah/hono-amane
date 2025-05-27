@@ -20,6 +20,8 @@ export default function AssetToolbar({
   handleSearchChange,
   condition,
   handleConditionChange,
+  type,
+  handleTypeChange,
   sortBy,
   handleSortByChange,
   sortOrder,
@@ -38,6 +40,8 @@ export default function AssetToolbar({
   handleSearchChange: (e: InputEvent) => void;
   condition: string;
   handleConditionChange: (e: SelectEvent) => void;
+  type: string;
+  handleTypeChange: (e: SelectEvent) => void;
   locationDesc_id: string;
   handleLocationChange: (e: SelectEvent) => void;
   sortBy: string;
@@ -45,7 +49,7 @@ export default function AssetToolbar({
   sortOrder: string;
   handleResetFilters: () => void;
   handleSortOrderChange: (e: SelectEvent) => void;
-  toggleSelectAll: (e: InputEvent) => void;
+  toggleSelectAll: () => void;
   currentView: "table" | "card" | "compact";
   setCurrentView: (view: "table" | "card" | "compact") => void;
   allSelected: boolean;
@@ -62,7 +66,7 @@ export default function AssetToolbar({
         exit={{ opacity: 0 }}
         className="space-y-4"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-5 gap-4 pb-2 rounded-lg">
+        <div className="grid grid-cols-1 lg:grid-cols-6 xl:grid-cols-6 gap-4 pb-2 rounded-lg">
           {/* Filter Controls */}
           <div className="md:col-span-2">
             <label className="block text-xs font-medium text-gray-600 mb-1.5">Location</label>
@@ -84,6 +88,19 @@ export default function AssetToolbar({
                 { value: "poor", label: "Poor" },
               ]}
               value={condition}
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1.5">Type</label>
+            <InputSelect
+              onChange={handleTypeChange}
+              options={[
+                { value: "", label: "All Types" },
+                { value: "HBI", label: "HBI" },
+                { value: "HBM", label: "HBM" },
+              ]}
+              value={type}
             />
           </div>
 
@@ -218,7 +235,7 @@ export default function AssetToolbar({
             <div className="col-span-4 pr-4 flex items-center gap-2">
               <Checkbox 
                 checked={allSelected} 
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => toggleSelectAll(e)} 
+                onChange={toggleSelectAll} 
               />
               <span>Asset Name</span>
             </div>

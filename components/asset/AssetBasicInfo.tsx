@@ -11,7 +11,8 @@ import {
   FileText,
   PlusCircle,
   CheckCircle,
-  XCircle
+  XCircle,
+  Layers
 } from "lucide-react";
 import { Asset } from "../../pages/(protected)/asset/types";
 import DetailItem from "./DetailItem";
@@ -133,6 +134,24 @@ const AssetBasicInfo = ({ asset }: { asset: Asset }) => (
         icon={<Package size={16} className="text-purple-500" />}
       />
     </motion.div>
+    
+    {asset.type && (
+      <motion.div variants={itemVariants}>
+        <DetailItem 
+          label="Asset Type" 
+          value={
+            <span className={`px-3 py-1 rounded-md border text-sm font-medium inline-block shadow-sm ${
+              asset.type === 'HBI' 
+                ? 'bg-orange-50 text-orange-700 border-orange-200' 
+                : 'bg-teal-50 text-teal-700 border-teal-200'
+            }`}>
+              {asset.type}
+            </span>
+          }
+          icon={<Layers size={16} className="text-orange-500" />}
+        />
+      </motion.div>
+    )}
     
     <motion.div variants={itemVariants}>
       <DetailItem 

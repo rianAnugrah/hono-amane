@@ -36,6 +36,10 @@ export const validateField = (name: string, value: string | number | null | stri
       // Required and should be at least 3 characters
       return strValue.length >= 3 ? "valid" : "invalid";
     
+    case "type":
+      // Optional field - valid if empty or has value
+      return "valid";
+    
     case "acqValue":
     case "acqValueIdr":
     case "bookValue":

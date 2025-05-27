@@ -28,6 +28,7 @@ const AssetCrudPage = () => {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [search, setSearch] = useState<string>("");
   const [condition, setCondition] = useState<string>("");
+  const [type, setType] = useState<string>("");
   const [locationDesc_id, setLocationDesc_id] = useState<string>("");
   const [projectCode_id, setprojectCode_id] = useState<number | null>(null);
   const [categoryCode, setCategoryCode] = useState<string>("");
@@ -49,7 +50,7 @@ const AssetCrudPage = () => {
     try {
       setIsLoading(true);
       const { data } = await axios.get(
-        `/api/assets?page=${page}&pageSize=${pageSize}&search=${search}&locationDesc_id=${locationDesc_id}&condition=${condition}&sortBy=${sortBy}&sortOrder=${sortOrder}`
+        `/api/assets?page=${page}&pageSize=${pageSize}&search=${search}&locationDesc_id=${locationDesc_id}&condition=${condition}&type=${type}&sortBy=${sortBy}&sortOrder=${sortOrder}`
       );
 
       if (data.assets) {
@@ -71,7 +72,7 @@ const AssetCrudPage = () => {
 
   useEffect(() => {
     fetchAssets();
-  }, [page, pageSize, search, condition, sortBy, sortOrder, locationDesc_id]);
+  }, [page, pageSize, search, condition, type, sortBy, sortOrder, locationDesc_id]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this asset?")) {
@@ -87,13 +88,15 @@ const AssetCrudPage = () => {
   // Filter handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setSearch(e.target.value);
-  const handleConditionChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    setCondition(e.target.value);
+  const handleConditionChange = (e: React.ChangeEvent<HTMLSelectElement> | string) =>
+    setCondition(typeof e === 'string' ? e : e.target.value);
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement> | string) =>
+    setType(typeof e === 'string' ? e : e.target.value);
   const handleLocationChange = (e: any) => setLocationDesc_id(e);
-  const handleSortByChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    setSortBy(e.target.value);
-  const handleSortOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    setSortOrder(e.target.value);
+  const handleSortByChange = (e: React.ChangeEvent<HTMLSelectElement> | string) =>
+    setSortBy(typeof e === 'string' ? e : e.target.value);
+  const handleSortOrderChange = (e: React.ChangeEvent<HTMLSelectElement> | string) =>
+    setSortOrder(typeof e === 'string' ? e : e.target.value);
   const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPageSize(parseInt(e.target.value, 10));
     setPage(1); // Reset to first page when changing page size
@@ -103,6 +106,7 @@ const AssetCrudPage = () => {
   const handleResetFilters = () => {
     setSearch("");
     setCondition("");
+    setType("");
     setLocationDesc_id("");
     setprojectCode_id(null);
     setCategoryCode("");
@@ -176,6 +180,8 @@ const AssetCrudPage = () => {
           handleSearchChange={handleSearchChange}
           condition={condition}
           handleConditionChange={handleConditionChange}
+          type={type}
+          handleTypeChange={handleTypeChange}
           locationDesc_id={locationDesc_id}
           handleLocationChange={handleLocationChange}
           sortBy={sortBy}
