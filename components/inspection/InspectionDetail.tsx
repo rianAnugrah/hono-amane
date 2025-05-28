@@ -90,6 +90,7 @@ type Inspection = {
   notes: string | null;
   inspector: Inspector;
   items: InspectionItem[];
+  status?: 'pending' | 'in_progress' | 'completed' | 'cancelled' | string;
 };
 
 interface InspectionDetailProps {
@@ -178,6 +179,13 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
             <View style={styles.row}>
               <Text style={styles.label}>Inspector:</Text>
               <Text style={styles.value}>{inspection.inspector.name || inspection.inspector.email}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Status:</Text>
+              <Text style={styles.value}>
+                {inspection.status === 'in_progress' ? 'In Progress' : 
+                 inspection.status ? inspection.status.charAt(0).toUpperCase() + inspection.status.slice(1) : 'Pending'}
+              </Text>
             </View>
           </View>
           
@@ -584,6 +592,42 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
     }
   };
 
+  // Update inspection status
+  const handleUpdateInspectionStatus = async (newStatus: string) => {
+    if (!inspectionId) return;
+
+    try {
+      const response = await fetch(`/api/inspections/${inspectionId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update status: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && inspection) {
+        const updatedInspection = { ...inspection, status: newStatus };
+        setInspection(updatedInspection);
+        
+        // Notify parent component of change if callback provided
+        if (onInspectionChange) {
+          onInspectionChange();
+        }
+      } else {
+        throw new Error(data.error || "Failed to update status");
+      }
+    } catch (err) {
+      console.error("Error updating inspection status:", err);
+      setError("Failed to update inspection status. Please try again.");
+    }
+  };
+
   // Handle QR scan result
   const handleQrScanResult = (assetNo: string) => {
     if (assetNo.trim()) {
@@ -946,6 +990,28 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
               {inspection.inspector.name || inspection.inspector.email}
             </span>
           </p>
+          
+          {/* Inspection Status */}
+          <div className="mt-3 flex items-center gap-3">
+            <span className="text-sm font-medium text-gray-700">Status:</span>
+            <div className="relative">
+              <select
+                value={inspection.status || 'pending'}
+                onChange={(e) => handleUpdateInspectionStatus(e.target.value)}
+                className={`text-sm px-3 py-1.5 rounded-full border-0 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer ${
+                  inspection.status === 'completed' ? 'bg-green-100 text-green-800' :
+                  inspection.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                  inspection.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                  'bg-yellow-100 text-yellow-800'
+                }`}
+              >
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
         </div>
         <div className="flex gap-2">
           <motion.button
@@ -1161,7 +1227,6 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
                         {item.asset.condition}
                       </span>
                     </td>
-                   
                     <td className="px-4 py-2.5 text-sm">{item.assetVersion}</td>
                     <td className="px-4 py-2.5 text-sm">
                       <motion.button

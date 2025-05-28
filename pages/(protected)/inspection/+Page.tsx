@@ -39,6 +39,7 @@ export default function InspectionListPage() {
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [filterByInspector, setFilterByInspector] = useState("");
+  const [filterByStatus, setFilterByStatus] = useState("");
   const [filterByDateRange, setFilterByDateRange] = useState<{
     start: string;
     end: string;
@@ -151,6 +152,13 @@ export default function InspectionListPage() {
       );
     }
 
+    // Apply status filter
+    if (filterByStatus) {
+      filtered = filtered.filter(
+        (inspection) => (inspection.status || 'pending') === filterByStatus
+      );
+    }
+
     // Apply date range filter
     if (filterByDateRange.start || filterByDateRange.end) {
       filtered = filtered.filter((inspection) => {
@@ -170,7 +178,7 @@ export default function InspectionListPage() {
     }
 
     setFilteredInspections(filtered);
-  }, [inspections, searchQuery, filterByInspector, filterByDateRange]);
+  }, [inspections, searchQuery, filterByInspector, filterByStatus, filterByDateRange]);
 
   // Function to fetch inspection details when an inspection is selected
   const handleSelectInspection = async (id: string) => {
@@ -281,7 +289,7 @@ export default function InspectionListPage() {
         transition={{ duration: 0.3 }}
       >
         {/* Summary Stats Cards */}
-        <div className="grid grid-cols-1  gap-4 p-4 bg-white border-b border-gray-200">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-white border-b border-gray-200">
           <motion.div 
             className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 overflow-hidden relative hover:shadow-md transition-all"
             whileHover={{ y: -2 }}
@@ -291,14 +299,14 @@ export default function InspectionListPage() {
             <p className="text-3xl font-bold mt-2">{inspections.length}</p>
             <p className="text-xs text-gray-400 mt-1">All recorded inspections</p>
           </motion.div>
-          {/* <motion.div 
+          <motion.div 
             className="bg-white p-5 rounded-xl shadow-sm border border-amber-200 overflow-hidden relative hover:shadow-md transition-all"
             whileHover={{ y: -2 }}
           >
             <span className="absolute top-0 right-0 w-16 h-16 -mr-4 -mt-4 bg-amber-100 rounded-full opacity-30"></span>
             <h3 className="text-sm font-medium text-amber-600">Pending</h3>
             <p className="text-3xl font-bold text-amber-600 mt-2">
-              {inspections.filter(i => i.status === 'pending').length || 0}
+              {inspections.filter(i => i.status === 'pending' || !i.status).length}
             </p>
             <p className="text-xs text-gray-400 mt-1">Require attention</p>
           </motion.div>
@@ -309,10 +317,10 @@ export default function InspectionListPage() {
             <span className="absolute top-0 right-0 w-16 h-16 -mr-4 -mt-4 bg-green-100 rounded-full opacity-30"></span>
             <h3 className="text-sm font-medium text-green-600">Completed</h3>
             <p className="text-3xl font-bold text-green-600 mt-2">
-              {inspections.filter(i => i.status === 'completed').length || 0}
+              {inspections.filter(i => i.status === 'completed').length}
             </p>
             <p className="text-xs text-gray-400 mt-1">Successfully finalized</p>
-          </motion.div> */}
+          </motion.div>
         </div>
         
         {/* Toolbar */}
@@ -348,7 +356,16 @@ export default function InspectionListPage() {
                         Inspection on{" "}
                         {new Date(inspection.date).toLocaleDateString()}
                       </h2>
-                   
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        status === 'completed' ? 'bg-green-100 text-green-800' :
+                        status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                        status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {status === 'in_progress' ? 'In Progress' : 
+                         status === 'not_applicable' ? 'N/A' :
+                         status.charAt(0).toUpperCase() + status.slice(1)}
+                      </span>
                     </div>
                     <p className="text-sm text-gray-500">
                       Inspector: {inspectorName}
@@ -564,7 +581,7 @@ export default function InspectionListPage() {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {/* Inspector filter */}
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-gray-700">
@@ -581,6 +598,24 @@ export default function InspectionListPage() {
                       {inspector.name}
                     </option>
                   ))}
+                </select>
+              </div>
+
+              {/* Status filter */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-gray-700">
+                  Status
+                </label>
+                <select
+                  value={filterByStatus}
+                  onChange={(e) => setFilterByStatus(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border-gray-300 bg-white shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
                 </select>
               </div>
 
@@ -618,7 +653,7 @@ export default function InspectionListPage() {
               </div>
 
               {/* Clear filters button */}
-              <div className="sm:col-span-2 flex justify-between items-center mt-2">
+              <div className="sm:col-span-3 flex justify-between items-center mt-2">
                 <div className="text-sm text-gray-500">
                   <span className="font-medium">{filteredInspections.length}</span>{" "}
                   {filteredInspections.length === 1
@@ -632,6 +667,7 @@ export default function InspectionListPage() {
                   onClick={() => {
                     setSearchQuery("");
                     setFilterByInspector("");
+                    setFilterByStatus("");
                     setFilterByDateRange({ start: "", end: "" });
                   }}
                   className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg shadow-sm hover:bg-gray-50 transition-colors"

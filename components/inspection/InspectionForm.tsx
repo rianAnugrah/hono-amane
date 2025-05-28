@@ -23,6 +23,7 @@ const InspectionForm = ({ onBack, onSuccess, isStandalone = false }: InspectionF
   const [inspectorId, setInspectorId] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
+  const [status, setStatus] = useState('pending');
   
   // Fetch users for inspector selection
   useEffect(() => {
@@ -57,6 +58,7 @@ const InspectionForm = ({ onBack, onSuccess, isStandalone = false }: InspectionF
           inspector_id: inspectorId,
           date,
           notes: notes.trim() || null,
+          status,
         }),
       });
       
@@ -188,6 +190,31 @@ const InspectionForm = ({ onBack, onSuccess, isStandalone = false }: InspectionF
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mb-5">
+          <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+            Status
+          </label>
+          <div className="relative">
+            <select
+              id="status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="block w-full border border-gray-300 rounded-lg shadow-sm p-2.5 pl-4 pr-10 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-colors bg-white"
+              required
+            >
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
               </svg>
             </div>
           </div>
