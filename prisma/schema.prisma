@@ -156,6 +156,7 @@ model Inspection {
   inspector_id String
   date         DateTime          @default(now())
   notes        String?
+  status       String            @default("pending") // pending, in_progress, completed, cancelled
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
   items        InspectionItem[]
@@ -167,6 +168,10 @@ model InspectionItem {
   inspectionId  String
   assetId       String
   assetVersion  Int
+  status        String     @default("pending") // pending, inspected, failed, passed, not_applicable
+  notes         String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
   inspection    Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
   asset         Asset      @relation(fields: [assetId], references: [id])
 

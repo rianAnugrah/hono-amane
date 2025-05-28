@@ -259,8 +259,8 @@ export default function InspectionListPage() {
 
     if (inspections.length === 0) {
       return (
-        <div className="p-4 bg-gray-50 text-gray-600 rounded-lg">
-          No inspection records found.
+        <div className="p-4 bg-gray-50 flex items-center justify-center text-gray-600 rounded-lg text-center w-full h-full">
+          <p>No inspection records found.</p>
         </div>
       );
     }

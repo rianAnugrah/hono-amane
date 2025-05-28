@@ -177,7 +177,11 @@ export default function AssetItem({
           whileHover="hover"
           transition={{ duration: 0.2 }}
         >
-          <div className="w-full grid grid-cols-12 items-center">
+           <Link
+                href={`/asset/${asset.assetNo}`}
+                className="w-full grid grid-cols-12 items-center"
+          >
+         
             <div className="col-span-3 pr-4 py-3 flex items-center gap-3 pl-4">
               <div className="flex items-center">
                 <Checkbox
@@ -185,11 +189,13 @@ export default function AssetItem({
                   onChange={() => onSelectAsset(asset)}
                 />
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-row items-center gap-4">
                 {/* Image thumbnail with better styling */}
                 {renderAssetThumbnail()}
+                <div className="flex flex-col">
                 <div className="font-medium text-gray-900">{asset.assetName}</div>
                 <span className="text-gray-500 font-mono text-[10px]">{asset.assetNo}</span>
+                </div>
               </div>
             </div>
             <div className="px-4 py-3 flex items-center">
@@ -236,7 +242,7 @@ export default function AssetItem({
             </div>
             {role !== "read_only" &&
               renderEditButton(location, asset.locationDesc_id || 0)}
-          </div>
+          </Link>
           
           {/* Asset detail section with animations */}
           <AnimatePresence>
