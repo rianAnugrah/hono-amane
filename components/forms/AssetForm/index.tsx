@@ -226,6 +226,18 @@ function AssetForm({
                       validation.projectCode_id
                     )}
                   />
+                    <SelectField
+                    name="type"
+                    label="Asset Type"
+                    placeholder="Select asset type"
+                    value={form.type}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    options={typeOptions}
+                    validation={validation.type}
+                    touched={touchedFields.has("type")}
+                    errorMessage={getErrorMessage("type", validation.type)}
+                  />
                   <FormField
                     name="assetNo"
                     label="Asset No"
@@ -262,18 +274,7 @@ function AssetForm({
                       validation.assetName
                     )}
                   />
-                  <SelectField
-                    name="type"
-                    label="Asset Type"
-                    placeholder="Select asset type"
-                    value={form.type}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    options={typeOptions}
-                    validation={validation.type}
-                    touched={touchedFields.has("type")}
-                    errorMessage={getErrorMessage("type", validation.type)}
-                  />
+                
                 </div>
               </div>
 
@@ -504,6 +505,18 @@ function AssetForm({
                       validation.projectCode_id
                     )}
                   />
+                   <SelectField
+                    name="type"
+                    label="Asset Type"
+                    placeholder="Select asset type"
+                    value={form.type}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    options={typeOptions}
+                    validation={validation.type}
+                    touched={touchedFields.has("type")}
+                    errorMessage={getErrorMessage("type", validation.type)}
+                  />
                   <FormField
                     name="assetNo"
                     label="Asset No"
@@ -540,18 +553,7 @@ function AssetForm({
                       validation.assetName
                     )}
                   />
-                  <SelectField
-                    name="type"
-                    label="Asset Type"
-                    placeholder="Select asset type"
-                    value={form.type}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    options={typeOptions}
-                    validation={validation.type}
-                    touched={touchedFields.has("type")}
-                    errorMessage={getErrorMessage("type", validation.type)}
-                  />
+                 
                 </FormSection>
               )}
 

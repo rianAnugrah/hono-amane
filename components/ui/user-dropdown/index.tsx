@@ -37,7 +37,9 @@ export default function UserDropDown({
                 ) : (
                   ""
                 )}
-                <span className="truncate">{role}</span>
+                <span className="truncate">
+                  {role === 'admin' ? 'Admin' : role === 'pic' ? 'PIC' : role === 'read_only' ? 'Read only' : role}
+                </span>
               </div>
             </div>
           </div>
