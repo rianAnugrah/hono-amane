@@ -199,30 +199,30 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
     // Special handling for images
     if (fieldName === 'images') {
       return (
-        <div key={fieldName} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-          <div className="flex items-center gap-2 mb-3">
+        <div key={fieldName} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+          <div className="flex items-center gap-2 mb-4">
             <Camera size={16} className="text-blue-500" />
             <span className="font-semibold text-gray-800">{friendlyName}</span>
           </div>
           <div className="space-y-3">
             {change.removedCount && change.removedCount > 0 && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <div className="text-red-700 flex items-center gap-2 mb-2 text-sm font-medium">
+                <div className="text-red-700 flex items-center gap-2 mb-3 text-sm font-medium">
                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                   Removed {change.removedCount} image{change.removedCount !== 1 ? 's' : ''}
                 </div>
                 
                 {/* Preview of removed images */}
                 {Array.isArray(change.old) && change.old.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {change.old.slice(0, 3).map((img: string, i: number) => (
-                      <div key={i} className="w-16 h-16 rounded-lg overflow-hidden border border-red-300 opacity-70 relative bg-gray-100">
+                      <div key={i} className="aspect-square rounded-lg overflow-hidden border border-red-300 opacity-70 relative bg-gray-100">
                         <div className="absolute inset-0 bg-red-100/50 backdrop-blur-[1px]"></div>
                         <img src={img} alt={`Removed ${i+1}`} className="w-full h-full object-cover" />
                       </div>
                     ))}
                     {change.old.length > 3 && (
-                      <div className="flex items-center justify-center w-16 h-16 border border-red-300 rounded-lg bg-red-100 text-red-700 font-medium text-xs">
+                      <div className="aspect-square flex items-center justify-center border border-red-300 rounded-lg bg-red-100 text-red-700 font-medium text-xs">
                         +{change.old.length - 3}
                       </div>
                     )}
@@ -233,25 +233,25 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
             
             {change.addedCount && change.addedCount > 0 && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <div className="text-green-700 flex items-center gap-2 mb-2 text-sm font-medium">
+                <div className="text-green-700 flex items-center gap-2 mb-3 text-sm font-medium">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   Added {change.addedCount} image{change.addedCount !== 1 ? 's' : ''}
                 </div>
                 
                 {/* Preview of added images */}
                 {Array.isArray(change.new) && change.new.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {change.new.slice(0, 3).map((img: string, i: number) => (
                       <motion.div 
                         key={i} 
-                        className="w-16 h-16 rounded-lg overflow-hidden border border-green-300 shadow-sm bg-gray-100"
+                        className="aspect-square rounded-lg overflow-hidden border border-green-300 shadow-sm bg-gray-100"
                         whileHover={{ scale: 1.05 }}
                       >
                         <img src={img} alt={`Added ${i+1}`} className="w-full h-full object-cover" />
                       </motion.div>
                     ))}
                     {change.new.length > 3 && (
-                      <div className="flex items-center justify-center w-16 h-16 border border-green-300 rounded-lg bg-green-100 text-green-700 font-medium text-xs">
+                      <div className="aspect-square flex items-center justify-center border border-green-300 rounded-lg bg-green-100 text-green-700 font-medium text-xs">
                         +{change.new.length - 3}
                       </div>
                     )}
@@ -271,22 +271,26 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
     return (
       <motion.div 
         key={fieldName} 
-        className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+        className="bg-gray-50 rounded-xl p-4 border border-gray-200"
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
       >
         <div className="flex items-center gap-2 mb-3">
           {getFieldIcon(fieldName)}
-          <span className="font-semibold text-gray-800">{friendlyName}</span>
+          <span className="font-semibold text-gray-800 text-sm">{friendlyName}</span>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm line-through">
-            {formatValue(change.old)}
+        <div className="space-y-2">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">
+            <span className="text-xs text-red-600 block mb-1">From:</span>
+            <span className="line-through">{formatValue(change.old)}</span>
           </div>
-          <ArrowRight size={16} className="text-gray-400" />
+          <div className="flex justify-center">
+            <ArrowRight size={16} className="text-gray-400" />
+          </div>
           <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded-lg text-sm font-medium">
-            {formatValue(change.new)}
+            <span className="text-xs text-green-600 block mb-1">To:</span>
+            <span>{formatValue(change.new)}</span>
           </div>
         </div>
       </motion.div>
@@ -356,7 +360,7 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
 
   return (
     <motion.div 
-      className="space-y-4"
+      className="space-y-3"
       variants={listVariants}
       initial="hidden"
       animate="visible"
@@ -372,50 +376,52 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
           <motion.div 
             key={version.id} 
             className={`bg-white border rounded-xl overflow-hidden shadow-sm transition-all duration-200 ${
-              isExpanded ? 'border-blue-200 ring-4 ring-blue-50' : 'border-gray-200 hover:border-gray-300'
+              isExpanded ? 'border-blue-200 ring-2 ring-blue-100' : 'border-gray-200 hover:border-gray-300'
             }`}
             variants={itemVariants}
             whileHover={{ y: -1, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}
           >
             <motion.div 
-              className="flex items-center justify-between p-6 cursor-pointer group"
+              className="flex items-center justify-between p-4 cursor-pointer group"
               onClick={() => toggleVersionDetails(version.id)}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 {isFirst ? (
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white shadow-md">
-                    <ThumbsUp size={20} />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white shadow-md flex-shrink-0">
+                    <ThumbsUp size={16} />
                   </div>
                 ) : (
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
-                    <Clock size={20} />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md flex-shrink-0">
+                    <Clock size={16} />
                   </div>
                 )}
                 
-                <div>
-                  <div className="flex items-center gap-3 mb-1">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1">
                     <span className="font-bold text-lg text-gray-800">Version {version.version}</span>
                     {isFirst && (
-                      <span className="text-xs px-3 py-1 bg-green-100 text-green-700 rounded-full font-semibold border border-green-200">
+                      <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-semibold border border-green-200 flex-shrink-0">
                         Current
                       </span>
                     )}
                   </div>
                   
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <span className="inline-flex items-center gap-1">
-                      <Calendar size={14} />
-                      {date.toLocaleDateString(undefined, {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })} at {date.toLocaleTimeString(undefined, {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
+                  <div className="space-y-1">
+                    <div className="text-sm text-gray-500 flex items-center gap-1">
+                      <Calendar size={12} />
+                      <span className="truncate">
+                        {date.toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })} at {date.toLocaleTimeString(undefined, {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
                     {changeCount > 0 && index !== versions.length - 1 && (
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full border border-blue-200 font-medium">
+                      <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded-full border border-blue-200 font-medium text-xs">
                         {changeCount} change{changeCount !== 1 ? 's' : ''}
                       </span>
                     )}
@@ -426,14 +432,14 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
               <motion.div
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0 ${
                   isExpanded 
                     ? 'bg-blue-100 text-blue-600' 
                     : 'bg-gray-100 text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-600'
                 }`}
               >
                 <ChevronDown 
-                  size={20} 
+                  size={18} 
                   className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : 'rotate-0'}`} 
                 />
               </motion.div>
@@ -448,17 +454,17 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <div className="px-6 pb-6 border-t border-gray-100">
+                  <div className="px-4 pb-4 border-t border-gray-100">
                     {index === versions.length - 1 ? (
-                      <div className="flex flex-col items-center justify-center py-8 bg-gray-50 rounded-xl">
+                      <div className="flex flex-col items-center justify-center py-8 bg-gray-50 rounded-xl mt-4">
                         <FileArchive size={24} className="mb-3 text-gray-500" />
                         <p className="font-semibold text-gray-700">Initial Version</p>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-gray-500 mt-1 text-center">
                           Created on {new Date(version.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     ) : changeCount > 0 ? (
-                      <div className="space-y-4 mt-4">
+                      <div className="space-y-3 mt-4">
                         {Object.entries(changes).map(([field, change]) => 
                           formatChange(field, change)
                         )}
@@ -466,7 +472,7 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
                     ) : (
                       <div className="flex flex-col items-center justify-center py-8 bg-gray-50 rounded-xl mt-4">
                         <p className="font-semibold text-gray-700">No Changes in This Version</p>
-                        <p className="text-sm text-gray-500 mt-1">This version was saved without modifications</p>
+                        <p className="text-sm text-gray-500 mt-1 text-center">This version was saved without modifications</p>
                       </div>
                     )}
                   </div>
