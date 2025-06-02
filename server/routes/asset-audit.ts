@@ -54,9 +54,10 @@ assetAuditRoute.post('/', async (c) => {
 
     //console.log('Created audit record:', JSON.stringify(audit, null, 2))
     return c.json(audit, 201)
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error creating audit:', err)
-    return c.json({ error: 'Failed to create asset audit', details: err.message }, 500)
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+    return c.json({ error: 'Failed to create asset audit', details: errorMessage }, 500)
   }
 })
 
@@ -91,9 +92,10 @@ assetAuditRoute.get('/', async (c) => {
     }
 
     return c.json(audits)
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error fetching audits:', err)
-    return c.json({ error: 'Failed to fetch audit records', details: err.message }, 500)
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+    return c.json({ error: 'Failed to fetch audit records', details: errorMessage }, 500)
   }
 })
 
@@ -123,9 +125,10 @@ assetAuditRoute.get('/by-asset-number/:assetNumber', async (c) => {
 
     //console.log(`Retrieved ${audits.length} audit records for asset number: ${assetNumber}`)
     return c.json(audits)
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error fetching audits by asset number:', err)
-    return c.json({ error: 'Failed to fetch audit records by asset number', details: err.message }, 500)
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+    return c.json({ error: 'Failed to fetch audit records by asset number', details: errorMessage }, 500)
   }
 });
 
@@ -153,9 +156,10 @@ assetAuditRoute.get('/:id', async (c) => {
     }
 
     return c.json(audit)
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error fetching audit:', err)
-    return c.json({ error: 'Failed to fetch audit record', details: err.message }, 500)
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+    return c.json({ error: 'Failed to fetch audit record', details: errorMessage }, 500)
   }
 })
 
@@ -214,9 +218,10 @@ assetAuditRoute.put('/:id', async (c) => {
 
     //console.log('Updated audit record:', JSON.stringify(updated, null, 2))
     return c.json(updated)
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error updating audit:', err)
-    return c.json({ error: 'Failed to update asset audit', details: err.message }, 500)
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+    return c.json({ error: 'Failed to update asset audit', details: errorMessage }, 500)
   }
 })
 
@@ -233,9 +238,10 @@ assetAuditRoute.delete('/:id', async (c) => {
     // Then delete the audit
     await prisma.assetAudit.delete({ where: { id } })
     return c.json({ message: 'Deleted successfully' })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error deleting audit:', err)
-    return c.json({ error: 'Failed to delete asset audit', details: err.message }, 500)
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+    return c.json({ error: 'Failed to delete asset audit', details: errorMessage }, 500)
   }
 })
 

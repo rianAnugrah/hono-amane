@@ -27,7 +27,7 @@ export const printAssets = async (assets: Asset[], columns: number = 2): Promise
     
     // Create the PDF document
     const pdfDocument = React.createElement(AssetsPDF, { assets: assetsWithQR, columnCount: columns });
-    const blob = await pdf(pdfDocument as any).toBlob();
+    const blob = await pdf(pdfDocument as React.ReactElement).toBlob();
     
     // Save the PDF file
     const fileName = `assets-report-${new Date().toISOString().split('T')[0]}.pdf`;

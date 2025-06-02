@@ -17,6 +17,11 @@ export default tseslint.config(
       "*.js",
       "*.cjs",
       "*.mjs",
+      
+      // Generated Prisma files
+      "generated/**/*",
+      "prisma/generated/**/*",
+      "prisma/seed.js",
     ],
   },
   eslint.configs.recommended,
@@ -73,6 +78,13 @@ export default tseslint.config(
       react: {
         version: "detect",
       },
+    },
+    
+    rules: {
+      // Disable react-in-jsx-scope since we're using the new JSX Transform
+      "react/react-in-jsx-scope": "off",
+      // Disable prop-types since we're using TypeScript
+      "react/prop-types": "off",
     },
   },
 );

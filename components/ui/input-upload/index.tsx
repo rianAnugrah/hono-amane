@@ -18,7 +18,7 @@ import {
 } from "react-dropzone-esm"
 import { uploadFile, useUpload } from "@/hooks/use-upload"
 
-export interface DropzoneState extends _DropzoneState {}
+export type DropzoneState = _DropzoneState;
 
 export interface DropzoneProps
   extends Omit<_DropzoneProps, "children" | "onDrop"> {
@@ -35,7 +35,7 @@ export interface DropzoneProps
 
 export type FileItemProps = {
   href: string
-  onDelete: (...args: any) => void
+  onDelete: (file?: string) => void
   disabled?: boolean
   preview?: boolean
 }

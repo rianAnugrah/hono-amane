@@ -92,7 +92,8 @@ const AssetCrudPage = () => {
     setCondition(typeof e === 'string' ? e : e.target.value);
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement> | string) =>
     setType(typeof e === 'string' ? e : e.target.value);
-  const handleLocationChange = (e: any) => setLocationDesc_id(e);
+  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement> | string) =>
+    setLocationDesc_id(typeof e === 'string' ? e : e.target.value);
   const handleSortByChange = (e: React.ChangeEvent<HTMLSelectElement> | string) =>
     setSortBy(typeof e === 'string' ? e : e.target.value);
   const handleSortOrderChange = (e: React.ChangeEvent<HTMLSelectElement> | string) =>

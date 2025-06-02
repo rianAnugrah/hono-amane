@@ -163,72 +163,75 @@ function PageShell({
         };
         set_user(authData);
       }
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        console.log(`User not found in database, attempting auto-registration for: ${email}`);
-        // User not found - auto register with read_only permissions
-        try {
-          const response = await axios.post('/api/users/register-request', {
-            email: email.toLowerCase(),
-            name: name || '',
-          });
-          
-          if (response.status === 201 && response.data.user) {
-            const newUser = response.data.user;
-            console.log(`User auto-registered successfully: ${newUser.email}, role: ${newUser.role}`);
-            // Set user data with the newly registered user
-            set_user({
-              email: newUser.email.toLowerCase(),
-              name: newUser.name,
-              isAuth: true,
-              location: newUser.userLocations,
-              role: newUser.role,
-              id: newUser.id,
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const error = err as { response?: { status?: number } };
+        if (error.response?.status === 404) {
+          console.log(`User not found in database, attempting auto-registration for: ${email}`);
+          // User not found - auto register with read_only permissions
+          try {
+            const response = await axios.post('/api/users/register-request', {
+              email: email.toLowerCase(),
+              name: name || '',
             });
+            
+            if (response.status === 201 && response.data.user) {
+              const newUser = response.data.user;
+              console.log(`User auto-registered successfully: ${newUser.email}, role: ${newUser.role}`);
+              // Set user data with the newly registered user
+              set_user({
+                email: newUser.email.toLowerCase(),
+                name: newUser.name,
+                isAuth: true,
+                location: newUser.userLocations,
+                role: newUser.role,
+                id: newUser.id,
+              });
+              return;
+            }
+            
+            // If registration was unsuccessful, redirect to unauthorized
+            console.error("Auto-registration failed, redirecting to unauthorized");
+            window.location.href = '/unauthorized';
+          } catch (registerError) {
+            console.error("Error during auto-registration", registerError);
+            window.location.href = '/unauthorized';
+          }
+        } else if (error.response?.status === 401 || error.response?.status === 403) {
+          // Only redirect to unauthorized for actual authorization errors
+          console.error("User authorization error, redirecting to unauthorized");
+          window.location.href = '/unauthorized';
+        } else {
+          // For other errors (network, server errors, etc.), retry up to 2 times
+          const isRetryableError = !error.response || error.response.status >= 500 || error.code === 'NETWORK_ERROR';
+          
+          if (isRetryableError && retryCount < 2) {
+            console.warn(`Retrying user profile check (attempt ${retryCount + 1}/3):`, error.message);
+            // Retry after a short delay
+            setTimeout(() => {
+              checkUserProfile(email, name, retryCount + 1);
+            }, 1000 * (retryCount + 1)); // Exponential backoff: 1s, 2s
             return;
           }
           
-          // If registration was unsuccessful, redirect to unauthorized
-          console.error("Auto-registration failed, redirecting to unauthorized");
-          window.location.href = '/unauthorized';
-        } catch (registerError) {
-          console.error("Error during auto-registration", registerError);
-          window.location.href = '/unauthorized';
-        }
-      } else if (err.response?.status === 401 || err.response?.status === 403) {
-        // Only redirect to unauthorized for actual authorization errors
-        console.error("User authorization error, redirecting to unauthorized");
-        window.location.href = '/unauthorized';
-      } else {
-        // For other errors (network, server errors, etc.), retry up to 2 times
-        const isRetryableError = !err.response || err.response.status >= 500 || err.code === 'NETWORK_ERROR';
-        
-        if (isRetryableError && retryCount < 2) {
-          console.warn(`Retrying user profile check (attempt ${retryCount + 1}/3):`, err.message);
-          // Retry after a short delay
-          setTimeout(() => {
-            checkUserProfile(email, name, retryCount + 1);
-          }, 1000 * (retryCount + 1)); // Exponential backoff: 1s, 2s
-          return;
-        }
-        
-        // After max retries or for non-retryable errors, log but don't redirect
-        console.error("Error checking user profile (non-critical):", err.message);
-        // Keep the user authenticated with the session data we already have
-        // The session verification already set basic user data
-        
-        // As a fallback, ensure the user has at least basic access with session data
-        // This prevents registered users from being locked out due to database issues
-        if (!role || !id) {
-          console.warn("Applying fallback user permissions due to database lookup failure");
-          set_user({
-            email: email.toLowerCase(),
-            name: name || email.split('@')[0],
-            isAuth: true,
-            location: [],
-            role: "read_only", // Fallback to read-only access
-            id: `fallback_${email.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
-          });
+          // After max retries or for non-retryable errors, log but don't redirect
+          console.error("Error checking user profile (non-critical):", error.message);
+          // Keep the user authenticated with the session data we already have
+          // The session verification already set basic user data
+          
+          // As a fallback, ensure the user has at least basic access with session data
+          // This prevents registered users from being locked out due to database issues
+          if (!role || !id) {
+            console.warn("Applying fallback user permissions due to database lookup failure");
+            set_user({
+              email: email.toLowerCase(),
+              name: name || email.split('@')[0],
+              isAuth: true,
+              location: [],
+              role: "read_only", // Fallback to read-only access
+              id: `fallback_${email.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+            });
+          }
         }
       }
     }

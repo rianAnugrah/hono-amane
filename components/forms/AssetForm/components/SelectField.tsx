@@ -8,15 +8,15 @@ interface SelectFieldProps {
   placeholder?: string;
   value: string | number | null;
   options: { value: string | number; label: string }[];
-  onChange: (e: any) => void;
-  onBlur?: (e: any) => void;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement> | { target: { value: string | number; name: string }; currentTarget: { value: string | number; name: string } }) => void;
+  onBlur?: (e: React.FocusEvent<HTMLSelectElement> | { target: { name: string } }) => void;
   validation?: "valid" | "invalid" | "empty" | "untouched" | undefined;
   touched?: boolean;
   errorMessage?: string;
   icon?: React.ReactNode;
   searchable?: boolean;
   searchPlaceholder?: string;
-  searchInput?:any;
+  searchInput?: string;
   disabled?: boolean;
 }
 
@@ -56,7 +56,9 @@ const SelectField = memo(({
     function handleClickOutside(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        onBlur && onBlur({ target: { name } });
+        if (onBlur) {
+          onBlur({ target: { name } });
+        }
       }
     }
     
@@ -104,7 +106,9 @@ const SelectField = memo(({
     onChange(event);
     
     // Also trigger blur for validation
-    onBlur && onBlur(event);
+    if (onBlur) {
+      onBlur(event);
+    }
   };
 
   // Filter options based on search term
@@ -128,7 +132,9 @@ const SelectField = memo(({
       setSearchTerm('');
     } else {
       // Trigger blur validation when closing
-      onBlur && onBlur({ target: { name } });
+      if (onBlur) {
+        onBlur({ target: { name } });
+      }
     }
   };
 

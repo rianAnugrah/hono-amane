@@ -12,10 +12,24 @@ interface Asset {
   assetName: string;
 }
 
+// Define proper interfaces for type safety
+interface AuditFormData {
+  assetId: string;
+  checkedById: string;
+  status: string;
+  remarks: string;
+  images: string[];
+}
+
+interface User {
+  id: string;
+  name: string;
+}
+
 // Props for the AuditForm component
 interface AuditFormProps {
   assetId?: string;
-  onSubmit: (formData: any) => Promise<void>;
+  onSubmit: (formData: AuditFormData) => Promise<void>;
   onCancel?: () => void;
   showAssetSelector?: boolean;
   isCompact?: boolean;
@@ -39,7 +53,7 @@ export default function AuditForm({
   const [assets, setAssets] = useState<Asset[]>([]);
   const [attachments, setAttachments] = useState<string[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   const [form, setForm] = useState({
     assetId: assetId || "",
@@ -90,16 +104,17 @@ export default function AuditForm({
     setSubmitError(null);
     
     // Ensure images are properly set in the form
-    const formData = {
+    const formData: AuditFormData = {
       ...form,
       images: Array.isArray(form.images) ? form.images : []
     };
     
     try {
       await onSubmit(formData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error submitting audit:", error);
-      setSubmitError(error.message || "An error occurred");
+      const errorMessage = error instanceof Error ? error.message : "An error occurred";
+      setSubmitError(errorMessage);
     }
   };
 

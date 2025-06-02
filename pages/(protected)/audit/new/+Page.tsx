@@ -2,10 +2,17 @@ import { useState } from "react";
 import { navigate } from "vike/client/router";
 import AuditForm from "@/components/audit/AuditForm";
 
+interface AuditFormData {
+  assetId: string;
+  condition: string;
+  notes?: string;
+  images?: string[];
+}
+
 export default function NewAssetAuditPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: AuditFormData) => {
     setIsSubmitting(true);
     
     try {

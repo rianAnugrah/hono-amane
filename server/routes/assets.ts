@@ -37,9 +37,58 @@ interface Asset {
   images?: string[];  // Making this optional to avoid TypeScript errors
 
   // Relations (optional for when they are included)
-  projectCode?: any;
-  locationDesc?: any;
-  detailsLocation?: any;
+  projectCode?: {
+    id: number;
+    name: string;
+    description?: string | null;
+  };
+  locationDesc?: {
+    id: number;
+    name: string;
+    description?: string | null;
+  };
+  detailsLocation?: {
+    id: number;
+    name: string;
+    description?: string | null;
+  };
+}
+
+interface WhereConditions {
+  deletedAt?: null;
+  isLatest?: boolean;
+  OR?: Array<{
+    assetName?: { contains: string; mode: string };
+    assetNo?: { contains: string; mode: string };
+    remark?: { contains: string; mode: string };
+  }>;
+  condition?: { equals: string };
+  assetNo?: { contains: string; mode: string };
+  lineNo?: { contains: string; mode: string };
+  categoryCode?: { equals: string };
+  afeNo?: { contains: string; mode: string };
+  poNo?: { contains: string; mode: string };
+  taggingYear?: { equals: string };
+  type?: { contains: string; mode: string };
+  projectCode_id?: number;
+  locationDesc_id?: { in: number[] };
+  detailsLocation_id?: number;
+  pisDate?: {
+    gte?: Date;
+    lte?: Date;
+  };
+  transDate?: {
+    gte?: Date;
+    lte?: Date;
+  };
+  acqValue?: {
+    gte?: number;
+    lte?: number;
+  };
+  bookValue?: {
+    gte?: number;
+    lte?: number;
+  };
 }
 
 // GET all assets with search, filter, sort, and pagination
@@ -312,13 +361,13 @@ assetRoutes.post("/", async (c) => {
       categoryCode: body.categoryCode,
       afeNo: body.afeNo ?? null,
       type: body.type ?? null,
-      adjustedDepre: parseFloat(body.adjustedDepre as any),
+      adjustedDepre: parseFloat(String(body.adjustedDepre)),
       poNo: body.poNo ?? null,
-      acqValueIdr: parseFloat(body.acqValueIdr as any),
-      acqValue: parseFloat(body.acqValue as any),
-      accumDepre: parseFloat(body.accumDepre as any),
-      ytdDepre: parseFloat(body.ytdDepre as any),
-      bookValue: parseFloat(body.bookValue as any),
+      acqValueIdr: parseFloat(String(body.acqValueIdr)),
+      acqValue: parseFloat(String(body.acqValue)),
+      accumDepre: parseFloat(String(body.accumDepre)),
+      ytdDepre: parseFloat(String(body.ytdDepre)),
+      bookValue: parseFloat(String(body.bookValue)),
       taggingYear: body.taggingYear ?? null,
       images: body.images || [], // Set images with a default empty array
     };
@@ -346,21 +395,22 @@ assetRoutes.post("/", async (c) => {
     const asset = await prisma.asset.create({ data: createData });
 
     return c.json(asset, 201);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating asset:", error);
 
-    const isPrismaError = error.code && error.meta;
+    const isPrismaError = error && typeof error === 'object' && 'code' in error && 'meta' in error;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
     return c.json(
       {
         error: "Failed to create asset",
-        message: error.message,
+        message: errorMessage,
         ...(isPrismaError && {
           prisma: {
-            code: error.code,
-            target: error.meta?.target,
-            cause: error.meta?.cause,
-            details: error.meta,
+            code: (error as { code: string }).code,
+            target: (error as { meta?: { target?: unknown } }).meta?.target,
+            cause: (error as { meta?: { cause?: unknown } }).meta?.cause,
+            details: (error as { meta?: unknown }).meta,
           },
         }),
         raw:
@@ -439,21 +489,22 @@ assetRoutes.put("/:id", async (c) => {
     const newAsset = await prisma.asset.create({ data: createData });
 
     return c.json(newAsset);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updating asset:", error);
 
-    const isPrismaError = error.code && error.meta;
+    const isPrismaError = error && typeof error === 'object' && 'code' in error && 'meta' in error;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
     return c.json(
       {
         error: "Failed to update asset",
-        message: error.message,
+        message: errorMessage,
         ...(isPrismaError && {
           prisma: {
-            code: error.code,
-            target: error.meta?.target,
-            cause: error.meta?.cause,
-            details: error.meta,
+            code: (error as { code: string }).code,
+            target: (error as { meta?: { target?: unknown } }).meta?.target,
+            cause: (error as { meta?: { cause?: unknown } }).meta?.cause,
+            details: (error as { meta?: unknown }).meta,
           },
         }),
         raw:
