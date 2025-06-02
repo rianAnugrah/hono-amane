@@ -114,90 +114,128 @@ export default function AssetDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[40vh]">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      <div className="min-h-screen bg-gray-50">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+            <p className="text-gray-600 font-medium">Loading asset details...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!asset) {
     return (
-      <div className="p-6 text-center">
-        <p className="text-gray-700">Asset not found</p>
-        <Link href="/asset" className="text-blue-600 hover:underline inline-flex items-center gap-1 mt-4">
-          <ArrowLeft size={16} />
-          Back to Assets
-        </Link>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-4xl mx-auto px-6 py-12">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+              <FileText className="w-8 h-8 text-gray-400" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Asset not found</h2>
+            <p className="text-gray-600 mb-6">The asset you're looking for doesn't exist or has been removed.</p>
+            <Link 
+              href="/asset" 
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              <ArrowLeft size={16} />
+              Back to Assets
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
 
   const renderAssetInfoSection = () => (
-    <div className="flex flex-col  gap-6 h-[calc(100vh-200px)] overflow-y-auto">
-      <AssetMediaSection asset={asset} />
+    <div className="space-y-8">
+      {/* Media Section */}
+      <div className="lg:hidden">
+        <AssetMediaSection asset={asset} />
+      </div>
 
-      {/* Right column: Asset Details */}
-      <div className="flex-grow grid grid-cols-1  gap-x-8 gap-y-0">
-        <AssetBasicInfo asset={asset} />
-        <AssetFinancialInfo asset={asset} />
+      {/* Information Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left: Media (Desktop Only) */}
+        <div className="hidden lg:block">
+          <AssetMediaSection asset={asset} />
+        </div>
+
+        {/* Middle & Right: Asset Details */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <AssetBasicInfo asset={asset} />
+          </div>
+          
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <AssetFinancialInfo asset={asset} />
+          </div>
+        </div>
       </div>
     </div>
   );
   
   const renderVersionHistorySection = () => (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-          <History size={20} className="text-blue-500" />
-          Version History
-        </h2>
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-blue-100 rounded-lg">
+          <History size={20} className="text-blue-600" />
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold text-gray-800">Version History</h2>
+          <p className="text-sm text-gray-600">Track changes and updates to this asset</p>
+        </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden p-4">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <AssetVersionHistory assetNo={asset.assetNo} />
       </div>
     </div>
   );
 
   return (
-    <div className="w-full mx-auto">
+    <div className="min-h-screen bg-gray-50">
       <AssetHeader />
 
-      {/* Mobile Tab Navigation - Only visible on mobile */}
-      <div className="md:hidden border-b border-gray-200">
-        <div className="flex">
-          <button
-            onClick={() => setActiveTab('info')}
-            className={`flex-1 py-3 px-4 text-sm font-medium ${
-              activeTab === 'info' 
-                ? 'text-blue-600 border-b-2 border-blue-500' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <div className="flex items-center justify-center gap-1.5">
-              <Info size={16} />
-              Asset Info
-            </div>
-          </button>
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`flex-1 py-3 px-4 text-sm font-medium ${
-              activeTab === 'history' 
-                ? 'text-blue-600 border-b-2 border-blue-500' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <div className="flex items-center justify-center gap-1.5">
-              <History size={16} />
-              History
-            </div>
-          </button>
+      {/* Mobile Tab Navigation */}
+      <div className="lg:hidden bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab('info')}
+              className={`flex-1 py-4 px-6 text-sm font-medium transition-colors ${
+                activeTab === 'info' 
+                  ? 'text-blue-600 border-b-2 border-blue-500 bg-blue-50/50' 
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Info size={18} />
+                Asset Information
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`flex-1 py-4 px-6 text-sm font-medium transition-colors ${
+                activeTab === 'history' 
+                  ? 'text-blue-600 border-b-2 border-blue-500 bg-blue-50/50' 
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <History size={18} />
+                Version History
+              </div>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="p-6">
-        {/* Mobile view (tab-based) */}
-        <div className="md:hidden">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Mobile View (Tab-based) */}
+        <div className="lg:hidden">
           <AnimatePresence mode="wait">
             {activeTab === 'info' ? (
               <motion.div
@@ -205,7 +243,7 @@ export default function AssetDetailPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.3 }}
               >
                 {renderAssetInfoSection()}
               </motion.div>
@@ -215,7 +253,7 @@ export default function AssetDetailPage() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.3 }}
               >
                 {renderVersionHistorySection()}
               </motion.div>
@@ -223,17 +261,17 @@ export default function AssetDetailPage() {
           </AnimatePresence>
         </div>
 
-        {/* Desktop view (split view) */}
-        <div className="hidden md:flex w-full gap-6">
-          {/* Asset Info Section */}
-          <div>
+        {/* Desktop View (Split Layout) */}
+        <div className="hidden lg:block space-y-12">
+          {/* Asset Information Section */}
+          <section>
             {renderAssetInfoSection()}
-          </div>
+          </section>
 
-          {/* Asset Version History Section - Always visible on desktop */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
+          {/* Version History Section */}
+          <section>
             {renderVersionHistorySection()}
-          </div>
+          </section>
         </div>
       </div>
     </div>
