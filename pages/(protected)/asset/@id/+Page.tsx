@@ -133,11 +133,11 @@ export default function AssetDetailPage() {
   }
 
   const renderAssetInfoSection = () => (
-    <div className="flex flex-col md:flex-row gap-6">
+    <div className="flex flex-col  gap-6 h-[calc(100vh-200px)] overflow-y-auto">
       <AssetMediaSection asset={asset} />
 
       {/* Right column: Asset Details */}
-      <div className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-0">
+      <div className="flex-grow grid grid-cols-1  gap-x-8 gap-y-0">
         <AssetBasicInfo asset={asset} />
         <AssetFinancialInfo asset={asset} />
       </div>
@@ -224,7 +224,7 @@ export default function AssetDetailPage() {
         </div>
 
         {/* Desktop view (split view) */}
-        <div className="hidden md:block">
+        <div className="hidden md:flex w-full gap-6">
           {/* Asset Info Section */}
           <div>
             {renderAssetInfoSection()}

@@ -62,28 +62,32 @@ export function LocationSelector({
     setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
+  // Create the search input component for the dropdown
+  const searchInput = (
+    <div className="flex items-center gap-2">
+      <InputText
+        value={search}
+        icon={<Search />}
+        onChange={handleSearchChange}
+        placeholder="Search locations..."
+      />
+      <button
+        type="button"
+        onClick={resetSearch}
+        className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+      >
+        Reset
+      </button>
+    </div>
+  );
+
   return (
     <div className="">
-      {/* Search Input */}
-      <div className="flex items-center gap-2 mb-4">
-        <InputText
-          value={search}
-          icon={<Search />}
-          onChange={handleSearchChange}
-          placeholder="Search locations..."
-        />
-        <button
-          type="button"
-          onClick={resetSearch}
-          className="btn btn-error"
-        >
-          Reset
-        </button>
-      </div>
-
-      {/* Location select */}
+      {/* Location select with integrated search */}
       {locations.length > 0 && (
         <InputSelect
+          label={label}
+          placeholder={placeholder}
           options={[
             { label: "All Locations", value: "" },
             ...locations.map((loc) => ({
@@ -92,6 +96,7 @@ export function LocationSelector({
             })),
           ]}
           value={value ? String(value) : ""}
+          searchInput={searchInput}
           onChange={(e) => {
             // Handle different types of events/values
             if (typeof e === "string" || typeof e === "number") {
