@@ -113,7 +113,7 @@ export function Page() {
 
         <DashboardItem
           title="Categories"
-          value={stats?.categories.totalCategories}
+          value={stats?.categories?.totalCategories || 0}
           href="/category"
           buttonLabel="Manage category"
           icon={<BookCopy />}
@@ -121,7 +121,7 @@ export function Page() {
 
         <DashboardItem
           title="Locations"
-          value={stats?.locations?.totalLocations}
+          value={stats?.locations?.totalLocations || 0}
           href="/location"
           buttonLabel="Manage location"
           icon={<MapPin />}

@@ -1,3 +1,4 @@
+import React from "react";
 import {
   BarChart,
   Bar,
@@ -28,8 +29,20 @@ interface ChartStats {
   };
 }
 
+// Define the chart data type
+interface ChartDataItem {
+  name: string;
+  value: number;
+}
+
+interface ChartData {
+  locations: ChartDataItem[];
+  categories: ChartDataItem[];
+  conditions: ChartDataItem[];
+}
+
 export default function DashboardCharts({ stats }: { stats: ChartStats | null }) {
-  const [chartData, setChartData] = useState({
+  const [chartData, setChartData] = useState<ChartData>({
     locations: [],
     categories: [],
     conditions: []
@@ -68,7 +81,7 @@ export default function DashboardCharts({ stats }: { stats: ChartStats | null })
   }, [stats]);
 
   // Helper functions
-  const renderBarLabel = ({ x, y, width, value }) => (
+  const renderBarLabel = ({ x, y, width, value }: { x: number; y: number; width: number; value: number }) => (
     <text
       x={x + width / 2}
       y={y - 5}
@@ -81,7 +94,7 @@ export default function DashboardCharts({ stats }: { stats: ChartStats | null })
     </text>
   );
 
-  const shortenLabel = (label) => {
+  const shortenLabel = (label: string) => {
     return label.length > MAX_LABEL_LENGTH 
       ? `${label.slice(0, MAX_LABEL_LENGTH)}...` 
       : label;

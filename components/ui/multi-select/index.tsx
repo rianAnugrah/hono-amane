@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, X } from 'lucide-react';
 
@@ -52,7 +52,7 @@ export default function MultiSelect({
     option.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSelect = (option: { value: string; label: string }) => {
+  const handleSelect = (option: { value: string | number; label: string }) => {
     const isSelected = selectedOptions.some(item => item.value === option.value);
     let newSelectedOptions;
     
@@ -71,7 +71,7 @@ export default function MultiSelect({
     onChange(newValues);
   };
 
-  const removeOption = (optionToRemove: { value: string; label: string }, event: React.MouseEvent) => {
+  const removeOption = (optionToRemove: { value: string | number; label: string }, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent the dropdown from toggling
     
     const newSelectedOptions = selectedOptions.filter(

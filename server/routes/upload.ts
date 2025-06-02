@@ -30,7 +30,7 @@ async function saveFile(file: File): Promise<{
   const buffer = await file.arrayBuffer();
   const filePath = join(UPLOAD_DIR, filename);
   
-  await writeFile(filePath, Buffer.from(buffer));
+  await writeFile(filePath, new Uint8Array(buffer));
   
   return {
     filename,

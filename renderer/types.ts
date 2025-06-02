@@ -1,8 +1,10 @@
+import React from 'react';
+
 // https://vike.dev/pageContext#typescript
 declare global {
   namespace Vike {
     interface PageContext {
-      Page: () => React.ReactElement
+      Page?: () => React.ReactNode
       data?: {
         /** Value for <title> defined dynamically by /pages/some-page/+data.js */
         title?: string

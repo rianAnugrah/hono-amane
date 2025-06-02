@@ -1,5 +1,5 @@
 import { Link } from "@/renderer/Link";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { UserFilterToolbar } from "@/pages/(protected)/user/_shared/user-filter-toolbar";
 import { PlusCircle } from "lucide-react";
@@ -121,7 +121,10 @@ export default function UserFormModal({
                       }
                     ]}
                     value={form.role || "read_only"}
-                    onChange={(e) => setForm({ ...form, role: e.target.value })}
+                    onChange={(e) => {
+                      const value = typeof e === 'string' ? e : e.target.value;
+                      setForm({ ...form, role: value });
+                    }}
                   />
                 )}
               </div>
