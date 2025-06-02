@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Asset } from "@/pages/(protected)/asset/types";
 import { 
   History, 
@@ -32,8 +32,8 @@ interface AssetVersion extends Asset {
 
 // Define interface for the change object
 interface ChangeItem {
-  old: any;
-  new: any;
+  old: unknown;
+  new: unknown;
   removedCount?: number;
   addedCount?: number;
   currentCount?: number;
@@ -98,8 +98,8 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
     ];
     
     fieldsToCompare.forEach(field => {
-      const currentValue = (currentVersion as any)[field];
-      const previousValue = (previousVersion as any)[field];
+      const currentValue = (currentVersion as unknown as Record<string, unknown>)[field];
+      const previousValue = (previousVersion as unknown as Record<string, unknown>)[field];
       
       if (currentValue !== previousValue) {
         changes[field] = {
@@ -160,15 +160,15 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
 
   // Format the change in a user-friendly way
   const formatChange = (fieldName: string, change: ChangeItem) => {
-    const formatValue = (value: any) => {
+    const formatValue = (value: unknown) => {
       if (value === null || value === undefined) return 'N/A';
       if (value instanceof Date || (typeof value === 'string' && value.includes('T'))) {
-        return formatDate(value);
+        return formatDate(value as string);
       }
       if (typeof value === 'number') {
         return value.toLocaleString();
       }
-      return value;
+      return String(value);
     };
 
     // Friendly field names

@@ -3,17 +3,23 @@ import { XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import AuditForm from "@/components/audit/AuditForm";
 
+interface InspectionFormData {
+  assetId?: string;
+  condition?: string;
+  notes?: string;
+  inspectorId?: string;
+  [key: string]: unknown;
+}
+
 // New Inspection Form component
 const NewInspectionForm = ({
   assetId,
   onSubmit,
   onCancel,
-  id
 }: {
   assetId?: string;
-  onSubmit: (formData: any) => Promise<void>;
+  onSubmit: (formData: InspectionFormData) => Promise<void>;
   onCancel: () => void;
-  id: string;
 }) => (
   <motion.div 
     initial={{ opacity: 0, y: -10 }}
@@ -42,7 +48,7 @@ const NewInspectionForm = ({
             throw new Error(errorData.error || "Unknown error");
           }
           
-          await onSubmit(formData);
+          await onSubmit(formData as InspectionFormData);
         } catch (error) {
           console.error("Error submitting audit:", error);
           throw error;

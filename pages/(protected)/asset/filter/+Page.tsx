@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Asset } from './types'; // Adjust this import to your types file
+import React, { useState, useEffect } from 'react';
+import { Asset } from '../types'; // Import from parent directory
 import { QRCodeCanvas } from 'qrcode.react';
 
 const AssetsPage = () => {

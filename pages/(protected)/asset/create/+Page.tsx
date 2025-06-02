@@ -1,5 +1,5 @@
 // File: pages/assets/create.jsx (atau sesuai struktur Vike Anda)
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 export default function AssetCreatePage() {
   const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ export default function AssetCreatePage() {
 
   const [message, setMessage] = useState('');
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -30,7 +30,7 @@ export default function AssetCreatePage() {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const response = await fetch('/api/assets', {
@@ -66,7 +66,7 @@ export default function AssetCreatePage() {
         setMessage(`Error: ${errorData.message || 'Failed to create asset'}`);
       }
     } catch (error) {
-      setMessage(`Error: ${error.message}`);
+      setMessage(`Error: ${(error as Error).message}`);
     }
   };
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Logo from "@/components/svg/logo";
 import "@/renderer/PageShell.css";
 

@@ -4,15 +4,15 @@ import React, { useEffect, useRef, useState } from "react";
 import QrScanner from "qr-scanner";
 
 const QrScannerComponent = () => {
-  const videoRef = useRef(null);
-  const fileInputRef = useRef(null);
-  const [scanner, setScanner] = useState(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [scanner, setScanner] = useState<QrScanner | null>(null);
   const [result, setResult] = useState("");
   const [cameraOn, setCameraOn] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [availableCameras, setAvailableCameras] = useState([]);
-  const [currentCameraId, setCurrentCameraId] = useState(null);
+  const [availableCameras, setAvailableCameras] = useState<QrScanner.Camera[]>([]);
+  const [currentCameraId, setCurrentCameraId] = useState<string>("");
   
   // Camera auto start attempt
   useEffect(() => {
@@ -28,87 +28,62 @@ const QrScannerComponent = () => {
   const listCamerasAndStart = async () => {
     try {
       setIsLoading(true);
+      setError("");
       const cameras = await QrScanner.listCameras();
       //console.log("Available cameras:", cameras);
       setAvailableCameras(cameras);
       
       if (cameras.length > 0) {
-        startCameraSimple(cameras[0].id);
+        const camera = cameras[0]; // Use first camera by default
+        await startCameraSimple(camera.id);
       } else {
-        setError("Tidak ada kamera yang ditemukan pada perangkat Anda.");
-        setIsLoading(false);
+        setError("Tidak ada kamera yang ditemukan");
       }
     } catch (err) {
       console.error("Failed to list cameras:", err);
-      setError("Gagal mendapatkan daftar kamera: " + err.message);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError("Gagal mengakses kamera: " + errorMessage);
+    } finally {
       setIsLoading(false);
     }
   };
   
   // Simplified camera start function - now with camera ID parameter
-  const startCameraSimple = async (cameraId = null) => {
-    if (videoRef.current) {
-      try {
-        setIsLoading(true);
-        setError("");
-        
-        // If we have an existing scanner, clean it up first
-        if (scanner) {
-          scanner.stop();
-          setScanner(null);
-        }
-        
-        //console.log("Attempting to start camera...", cameraId ? `Camera ID: ${cameraId}` : "Default camera");
-        
-        // Create scanner with default options
-        const qrScanner = new QrScanner(
-          videoRef.current,
-          (result) => {
-            //console.log("QR code detected:", result.data);
-            setResult(result.data);
-            // Don't stop scanner after detection to allow multiple scans
-          },
-          {
-            highlightScanRegion: true,
-            highlightCodeOutline: true,
-            returnDetailedScanResult: true,
-            preferredCamera: cameraId
-          }
-        );
-        
-        // Start with specified camera or default
-        await qrScanner.start();
-        //console.log("Camera started successfully");
-        setScanner(qrScanner);
-        setCameraOn(true);
-        setError("");
-        
-        // Store the active camera ID
-        const activeCamera = cameraId || qrScanner._activeCamera?.id;
-        setCurrentCameraId(activeCamera);
-        
-      } catch (err) {
-        console.error("Camera start failed:", err);
-        
-        let errorMsg = "Gagal mengakses kamera";
-        if (err.name === "NotAllowedError") {
-          errorMsg = "Izin kamera ditolak. Silakan aktifkan kamera di pengaturan browser Anda.";
-        } else if (err.name === "NotFoundError") {
-          errorMsg = "Tidak ada kamera yang ditemukan pada perangkat Anda.";
-        } else if (err.name === "NotReadableError") {
-          errorMsg = "Kamera sedang digunakan oleh aplikasi lain.";
-        }
-        
-        setError(errorMsg);
-        setCameraOn(false);
-      } finally {
-        setIsLoading(false);
+  const startCameraSimple = async (cameraId: string | null = null) => {
+    if (!videoRef.current) {
+      setError("Video element not found");
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      setError("");
+      
+      const newScanner = new QrScanner(videoRef.current, (result) => {
+        const qrResult = result as QrScanner.ScanResult | string;
+        setResult(typeof qrResult === 'string' ? qrResult : qrResult.data);
+      });
+      
+      if (cameraId) {
+        await newScanner.setCamera(cameraId);
+        setCurrentCameraId(cameraId);
       }
+      
+      await newScanner.start();
+      setScanner(newScanner);
+      setCameraOn(true);
+      //console.log("Camera started with ID:", cameraId);
+    } catch (err) {
+      console.error("Failed to start camera:", err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError("Gagal memulai kamera: " + errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
   
   // Switch to a specific camera by ID
-  const switchToCamera = async (cameraId) => {
+  const switchToCamera = async (cameraId: string) => {
     if (cameraId === currentCameraId) return; // Skip if it's the same camera
     
     try {
@@ -126,7 +101,8 @@ const QrScannerComponent = () => {
       }
     } catch (err) {
       console.error("Failed to switch camera:", err);
-      setError("Gagal mengganti kamera: " + err.message);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError("Gagal mengganti kamera: " + errorMessage);
       
       // Try to restart the original camera
       try {
@@ -160,15 +136,16 @@ const QrScannerComponent = () => {
       setError("");
     } catch (err) {
       console.error("Failed to refresh camera list:", err);
-      setError("Gagal memperbarui daftar kamera: " + err.message);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError("Gagal memperbarui daftar kamera: " + errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
   
   // Handle file upload for QR scanning
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
       setError("");
       QrScanner.scanImage(file)
@@ -277,7 +254,7 @@ const QrScannerComponent = () => {
           className="hidden"
         />
         <button
-          onClick={() => fileInputRef.current.click()}
+          onClick={() => fileInputRef.current?.click()}
           className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
         >
           Upload Gambar QR

@@ -31,19 +31,13 @@ const CardItem = ({
   onSelectAsset,
   role,
   handleEdit,
-  location,
   handleDelete,
-  isExpanded,
-  onToggle,
 }: {
   asset: Asset;
-  isExpanded: boolean;
   role: string;
-  onToggle: (id: string) => void;
   handleEdit: (asset: Asset) => void;
   handleDelete: (id: string) => void;
   checked: boolean;
-  location: any;
   onSelectAsset: (asset: Asset) => void;
 }) => {
   // Track image loading errors

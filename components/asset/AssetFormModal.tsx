@@ -1,3 +1,4 @@
+import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import AssetForm from "@/components/forms/AssetForm";
 import { AssetFormValues } from "@/components/forms/AssetForm/types";

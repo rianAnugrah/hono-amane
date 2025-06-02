@@ -4,16 +4,16 @@ import React, { useEffect, useRef, useState } from "react";
 import QrScanner from "qr-scanner";
 
 const QrScannerComponent = () => {
-  const videoRef = useRef(null);
-  const fileInputRef = useRef(null);
-  const [scanner, setScanner] = useState(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [scanner, setScanner] = useState<QrScanner | null>(null);
   const [result, setResult] = useState("");
   const [cameraOn, setCameraOn] = useState(false);
   const [error, setError] = useState("");
-  const [cameras, setCameras] = useState([]);
+  const [cameras, setCameras] = useState<QrScanner.Camera[]>([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [permissionState, setPermissionState] = useState("prompt"); // 'prompt', 'granted', 'denied'
+  const [permissionState, setPermissionState] = useState<PermissionState>("prompt"); // 'prompt', 'granted', 'denied'
   
   // Check camera permissions and load available cameras on component mount
   useEffect(() => {
@@ -22,7 +22,7 @@ const QrScannerComponent = () => {
         // First, check if we have camera permissions
         if (navigator.permissions && navigator.permissions.query) {
           try {
-            const permissionStatus = await navigator.permissions.query({ name: 'camera' });
+            const permissionStatus = await navigator.permissions.query({ name: 'camera' as PermissionName });
             setPermissionState(permissionStatus.state);
             
             // Listen for permission changes
@@ -48,7 +48,8 @@ const QrScannerComponent = () => {
         await loadCameras();
       } catch (err) {
         console.error("Camera initialization failed:", err);
-        setError("Gagal menginisialisasi kamera: " + err.message);
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
+        setError("Gagal menginisialisasi kamera: " + errorMessage);
         setIsInitializing(false);
       }
     };
@@ -84,16 +85,21 @@ const QrScannerComponent = () => {
       }
     } catch (err) {
       console.error("Failed to list cameras:", err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
       
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-        setError("Akses kamera ditolak. Silakan berikan izin kamera di pengaturan browser Anda.");
-        setPermissionState("denied");
-      } else if (err.name === "NotFoundError") {
-        setError("Tidak ada kamera yang terdeteksi pada perangkat Anda.");
-      } else if (err.name === "NotReadableError") {
-        setError("Kamera sedang digunakan oleh aplikasi lain. Tutup aplikasi lain yang menggunakan kamera.");
+      if (err instanceof Error) {
+        if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+          setError("Akses kamera ditolak. Silakan berikan izin kamera di pengaturan browser Anda.");
+          setPermissionState("denied");
+        } else if (err.name === "NotFoundError") {
+          setError("Tidak ada kamera yang terdeteksi pada perangkat Anda.");
+        } else if (err.name === "NotReadableError") {
+          setError("Kamera sedang digunakan oleh aplikasi lain. Tutup aplikasi lain yang menggunakan kamera.");
+        } else {
+          setError(`Tidak dapat mengakses kamera: ${errorMessage}`);
+        }
       } else {
-        setError(`Tidak dapat mengakses kamera: ${err.message}`);
+        setError(`Tidak dapat mengakses kamera: ${errorMessage}`);
       }
       
       setIsInitializing(false);
@@ -109,18 +115,19 @@ const QrScannerComponent = () => {
       await loadCameras();
     } catch (err) {
       console.error("Camera permission request failed:", err);
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      if (err instanceof Error && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
         setError("Akses kamera ditolak. Silakan berikan izin kamera di pengaturan browser Anda.");
         setPermissionState("denied");
       } else {
-        setError(`Tidak dapat mengakses kamera: ${err.message}`);
+        setError(`Tidak dapat mengakses kamera: ${errorMessage}`);
       }
       setIsInitializing(false);
     }
   };
   
   // Start camera with specific index
-  const startCameraWithIndex = async (index) => {
+  const startCameraWithIndex = async (index: number) => {
     if (videoRef.current && cameras.length > 0) {
       try {
         // Ensure any existing scanner is stopped
@@ -141,8 +148,8 @@ const QrScannerComponent = () => {
         const qrScanner = new QrScanner(
           videoRef.current,
           (result) => {
-            //console.log("QR code detected:", result.data);
-            setResult(result.data);
+            const qrResult = result as QrScanner.ScanResult | string;
+            setResult(typeof qrResult === 'string' ? qrResult : qrResult.data);
             // Don't automatically stop camera after detection
           },
           {
@@ -162,12 +169,13 @@ const QrScannerComponent = () => {
         setError("");
       } catch (err) {
         console.error("Failed to start camera:", err);
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
         
-        if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        if (err instanceof Error && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
           setError("Akses kamera ditolak. Silakan berikan izin kamera di pengaturan browser Anda.");
           setPermissionState("denied");
         } else {
-          setError(`Gagal mengakses kamera: ${err.message}`);
+          setError(`Gagal mengakses kamera: ${errorMessage}`);
         }
         
         setCameraOn(false);
@@ -216,8 +224,8 @@ const QrScannerComponent = () => {
   };
 
   // Fungsi untuk menangani upload file
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
       //console.log("Scanning file:", file.name);
       QrScanner.scanImage(file)
@@ -317,7 +325,7 @@ const QrScannerComponent = () => {
           className="hidden"
         />
         <button
-          onClick={() => fileInputRef.current.click()}
+          onClick={() => fileInputRef.current?.click()}
           className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
         >
           Upload Gambar QR
