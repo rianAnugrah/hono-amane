@@ -1,17 +1,11 @@
 // https://vike.dev/onRenderClient
 export { onRenderClient }
 
+import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { PageShell } from './PageShell'
 import { getPageTitle } from './getPageTitle'
 import type { OnRenderClientAsync } from 'vike/types'
-
-// Extend Window interface to include our custom property
-declare global {
-  interface Window {
-    vikeNavigationListenerAdded?: boolean
-  }
-}
 
 // Maintain a single root across navigations
 let root: ReactDOM.Root | null = null
@@ -38,40 +32,14 @@ const onRenderClient: OnRenderClientAsync = async (pageContext): ReturnType<OnRe
     if (!root) {
       root = ReactDOM.hydrateRoot(container, page)
     }
-    
-    // Set up navigation event listener only once
-    if (!window.vikeNavigationListenerAdded) {
-      window.vikeNavigationListenerAdded = true;
-      window.addEventListener('vike:navigate', async (event: Event) => {
-        // Apply transition class
-        document.body.classList.add('page-transition');
-        
-        // Reset scroll position
-        window.scrollTo(0, 0);
-        
-        try {
-          // Force a page reload for now to ensure proper navigation
-          window.location.reload();
-          
-          // Once the navigation system is more stable, we could try this instead:
-          // const customEvent = event as CustomEvent;
-          // const url = customEvent.detail.url;
-          // // This would need a proper implementation to get the new page content
-          // // For now, we'll just reload the page
-        } catch (error) {
-          console.error('Navigation error:', error);
-        } finally {
-          document.body.classList.remove('page-transition');
-        }
-      });
-    }
   } else {
     // For subsequent navigations: render to the existing root
     if (!root) {
-      // This should not happen in normal flow, but create root as fallback
+      // Create root if it doesn't exist (fallback)
       root = ReactDOM.createRoot(container)
     }
     
+    // Render the new page content
     root.render(page)
   }
 
