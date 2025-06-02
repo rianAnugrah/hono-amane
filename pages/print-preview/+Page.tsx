@@ -297,7 +297,7 @@ body {
       printWindow.document.open();
       printWindow.document.write(printContent);
       printWindow.document.close();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error printing assets:", error);
       alert("There was an error printing the assets. Please try again.");
     }

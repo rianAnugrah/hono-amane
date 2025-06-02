@@ -22,6 +22,8 @@ type User = {
   updatedAt: string;
   password?: string;
   locationIds?: number[]; // use this instead of `location` or `locationId`
+  locations?: Array<{ id: number; description?: string }>;
+  location?: { id: number; description?: string };
 };
 
 type UserFormProps = {
@@ -116,8 +118,7 @@ export default function UserFormModal({
                       {
                         value: "pic",
                         label: "PIC",
-                      },
-                      ,
+                      }
                     ]}
                     value={form.role || "read_only"}
                     onChange={(e) => setForm({ ...form, role: e.target.value })}

@@ -89,8 +89,8 @@ users.get("/", async (c) => {
         q
           ? {
               OR: [
-                { name: { contains: q, mode: "insensitive" } },
-                { email: { contains: q, mode: "insensitive" } },
+                { name: { contains: q, mode: "insensitive" as const } },
+                { email: { contains: q, mode: "insensitive" as const } },
               ],
             }
           : {},
@@ -103,13 +103,13 @@ users.get("/", async (c) => {
               },
             }
           : {},
-      ],
+      ].filter(condition => Object.keys(condition).length > 0),
     };
 
     const [rawUsers, total] = await Promise.all([
       prisma.users.findMany({
         where,
-        orderBy: { [sort]: order === "asc" ? "asc" : "desc" },
+        orderBy: { [sort as string]: order === "asc" ? "asc" : "desc" },
         skip,
         take: pageSize,
         include: {

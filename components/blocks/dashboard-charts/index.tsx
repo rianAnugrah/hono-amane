@@ -16,7 +16,19 @@ import { useState, useEffect } from "react";
 const COLORS = ["#FF4D4D", "#4CAF50", "#2196F3", "#9C27B0"];
 const MAX_LABEL_LENGTH = 8;
 
-export default function DashboardCharts({ stats }) {
+interface ChartStats {
+  locations?: {
+    data: Array<{ location: string; count: number }>;
+  };
+  categories?: {
+    data: Array<{ category: string; count: number }>;
+  };
+  conditions?: {
+    data: Array<{ condition: string; count: number }>;
+  };
+}
+
+export default function DashboardCharts({ stats }: { stats: ChartStats | null }) {
   const [chartData, setChartData] = useState({
     locations: [],
     categories: [],

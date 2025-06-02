@@ -15,7 +15,27 @@ import {
 import React, { useState, useEffect } from "react";
 
 export function Page() {
-  const [stats, setStats] = useState(null);
+  interface DashboardStats {
+    overview?: {
+      totalAssets?: number;
+      totalAcqValueIdr?: number;
+      totalBookValue?: number;
+    };
+    categories: {
+      totalCategories: number;
+      data: Array<{ category: string; count: number }>;
+    };
+    locations: {
+      totalLocations: number;
+      data: Array<{ location: string; count: number }>;
+    };
+    conditions: {
+      totalConditions: number;
+      data: Array<{ condition: string; count: number }>;
+    };
+  }
+
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const { role } = useUserStore();
 
   const fetchStats = async () => {
@@ -85,7 +105,7 @@ export function Page() {
       <div className="grid grid-cols-2 xl:grid-cols-4 w-full  gap-4">
         <DashboardItem
           title="Assets"
-          value={stats?.overview?.totalAssets | 0}
+          value={stats?.overview?.totalAssets || 0}
           href="/asset"
           buttonLabel="View all asset"
           icon={<Archive />}

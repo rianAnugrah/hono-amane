@@ -15,9 +15,9 @@ type User = {
   createdAt: string;
   updatedAt: string;
   password: string;
-  locations?: Array<{ id: string; description?: string }>;
-  location?: { id: string; description?: string };
-  locationIds?: string[];
+  locations?: Array<{ id: number; description?: string }>;
+  location?: { id: number; description?: string };
+  locationIds?: number[];
 };
 
 export default function Page() {

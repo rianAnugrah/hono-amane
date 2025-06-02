@@ -10,7 +10,7 @@ type Props = {
     q?: string;
     role?: string;
     placement?: string;
-    locationId?: any;
+    locationId?: number | string;
     sort?: string;
     order?: string;
   };
@@ -37,7 +37,7 @@ export function UserFilterToolbar({
   const handleReset = () => {
     setQ("");
     setRole("");
-    setLocationId("");
+    setLocationId("" as string);
     setSort("createdAt");
     setOrder("desc");
     onChange({});

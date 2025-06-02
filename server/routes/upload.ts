@@ -10,8 +10,8 @@ const UPLOAD_DIR = join(process.cwd(), 'uploads');
 (async () => {
   try {
     await mkdir(UPLOAD_DIR, { recursive: true });
-  } catch (err) {
-    console.error('Gagal membuat direktori upload:', err);
+  } catch (error) {
+    console.error('Gagal membuat direktori upload:', error);
   }
 })();
 

@@ -2,7 +2,8 @@
 
 import eslint from "@eslint/js";
 import react from "eslint-plugin-react/configs/recommended.js";
-import globals from "globals";
+// Alternative: Define globals manually if package issues persist
+// import globals from "globals/index.js";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
@@ -47,8 +48,24 @@ export default tseslint.config(
     languageOptions: {
       ...react.languageOptions,
       globals: {
-        ...globals.serviceworker,
-        ...globals.browser,
+        // Manual globals definition as alternative
+        window: "readonly",
+        document: "readonly",
+        navigator: "readonly",
+        console: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+        fetch: "readonly",
+        URL: "readonly",
+        URLSearchParams: "readonly",
+        // Service Worker globals
+        self: "readonly",
+        caches: "readonly",
+        clients: "readonly",
+        registration: "readonly",
+        skipWaiting: "readonly",
       },
     },
 
