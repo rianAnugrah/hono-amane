@@ -15,6 +15,9 @@ export default {
     guard: {
       env: { server: true, client: true },
     },
+    Layout: {
+      env: { server: true, client: true },
+    },
   },
   hydrationCanBeAborted: true,
 } satisfies Config;

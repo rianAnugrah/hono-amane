@@ -1,4 +1,4 @@
-import { usePageContext } from "@/renderer/usePageContext";
+import { usePageContext } from "vike-react/usePageContext";
 import React, { ReactElement } from "react";
 
 export default function MobileLink({

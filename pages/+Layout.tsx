@@ -1,12 +1,8 @@
-export { PageShell };
-
 import React, { useEffect, useRef } from "react";
-import logoUrl from "./logo.svg";
-import { PageContextProvider } from "./usePageContext";
-import { Link } from "./Link";
-import type { PageContext } from "vike/types";
-import "./css/index.css";
-import "./PageShell.css";
+import { usePageContext } from "vike-react/usePageContext";
+import { Link } from "@/renderer/Link";
+import "@/renderer/css/index.css";
+import "@/renderer/PageShell.css";
 import Navbar from "@/components/ui/navigation";
 import TopBar from "@/components/ui/top-bar";
 import autoAnimate from "@formkit/auto-animate";
@@ -27,16 +23,11 @@ const PROTECTED_PATTERNS = [
   '/(protected)',
 ];
 
-function PageShell({
-  children,
-  pageContext,
-}: {
-  children: React.ReactNode;
-  pageContext: PageContext;
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   const parent = useRef(null);
   const { email, name, isAuth, set_user, location, role, id } = useUserStore();
   const sessionCheckedRef = useRef(false);
+  const pageContext = usePageContext();
   
   // Check if current page is public or requires auth
   const isAuthPage = pageContext.urlPathname?.includes('(auth)');
@@ -131,7 +122,9 @@ function PageShell({
   }, [isProtectedPage, isAuth]);
   
   useEffect(() => {
-    parent.current && autoAnimate(parent.current);
+    if (parent.current) {
+      autoAnimate(parent.current);
+    }
   }, [parent]);
 
   useEffect(() => {
@@ -164,9 +157,9 @@ function PageShell({
         set_user(authData);
       }
     } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const error = err as { response?: { status?: number } };
-        if (error.response?.status === 404) {
+      if (axios.isAxiosError(err)) {
+        const status = err.response?.status;
+        if (status === 404) {
           console.log(`User not found in database, attempting auto-registration for: ${email}`);
           // User not found - auto register with read_only permissions
           try {
@@ -197,16 +190,16 @@ function PageShell({
             console.error("Error during auto-registration", registerError);
             window.location.href = '/unauthorized';
           }
-        } else if (error.response?.status === 401 || error.response?.status === 403) {
+        } else if (status === 401 || status === 403) {
           // Only redirect to unauthorized for actual authorization errors
           console.error("User authorization error, redirecting to unauthorized");
           window.location.href = '/unauthorized';
         } else {
           // For other errors (network, server errors, etc.), retry up to 2 times
-          const isRetryableError = !error.response || error.response.status >= 500 || error.code === 'NETWORK_ERROR';
+          const isRetryableError = !status || status >= 500;
           
           if (isRetryableError && retryCount < 2) {
-            console.warn(`Retrying user profile check (attempt ${retryCount + 1}/3):`, error.message);
+            console.warn(`Retrying user profile check (attempt ${retryCount + 1}/3):`, err.message);
             // Retry after a short delay
             setTimeout(() => {
               checkUserProfile(email, name, retryCount + 1);
@@ -215,7 +208,7 @@ function PageShell({
           }
           
           // After max retries or for non-retryable errors, log but don't redirect
-          console.error("Error checking user profile (non-critical):", error.message);
+          console.error("Error checking user profile (non-critical):", err.message);
           // Keep the user authenticated with the session data we already have
           // The session verification already set basic user data
           
@@ -233,35 +226,24 @@ function PageShell({
             });
           }
         }
+      } else {
+        console.error("Non-Axios error checking user profile:", err);
       }
     }
   };
 
   return (
-    <React.StrictMode>
-      <PageContextProvider pageContext={pageContext}>
-        <Layout>
-          <Navbar />
-          <div className="w-full md:w-full flex flex-col h-[100vh]">
-            <div
-              className="flex w-full flex-col max-h-[calc(100svh_-_0rem)] overflow-y-auto md:p-0 "
-              ref={parent}
-            >
-            
-              {/* Scrollable Content */}
-              <div className="overflow-y-auto  bg-gray-100 rounded-b-lg pb-10 lg:pb-0">{children}</div>
-            </div>
-          </div>
-        </Layout>
-      </PageContextProvider>
-    </React.StrictMode>
-  );
-}
-
-function Layout({ children }: { children: React.ReactNode }) {
-  return (
     <div className="w-full h-[100svh] relative flex bg-gray-100">
-      {children}
+      <Navbar />
+      <div className="w-full md:w-full flex flex-col h-[100vh]">
+        <div
+          className="flex w-full flex-col max-h-[calc(100svh_-_0rem)] overflow-y-auto md:p-0 "
+          ref={parent}
+        >
+          {/* Scrollable Content */}
+          <div className="overflow-y-auto bg-gray-100 rounded-b-lg pb-10 lg:pb-0">{children}</div>
+        </div>
+      </div>
     </div>
   );
-}
+} 

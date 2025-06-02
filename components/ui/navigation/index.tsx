@@ -25,7 +25,7 @@ import {
   User2,
 } from "lucide-react";
 import { Link } from "@/renderer/Link";
-import { usePageContext } from "@/renderer/usePageContext";
+import { usePageContext } from "vike-react/usePageContext";
 import DesktopLink from "./desktop-link";
 import MobileLink from "./mobile-link";
 import { AnimatePresence, motion } from "framer-motion";
