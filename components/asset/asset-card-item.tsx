@@ -25,6 +25,7 @@ import {
   getInitials,
   hasValidImages,
 } from "@/components/utils/ImageUtils";
+import SmoothImageLoader from "../blocks/smooth-image-loader";
 
 const CardItem = ({
   asset,
@@ -102,12 +103,12 @@ const CardItem = ({
     }
 
     return (
-      <img
-        src={getAssetImageUrl()}
+      <SmoothImageLoader
+        src={getAssetImageUrl() || ""}
         alt={asset.assetName}
         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         onError={() => setImageError(true)}
-        loading="lazy"
+        loading="eager"
       />
     );
   };
@@ -140,55 +141,54 @@ const CardItem = ({
             {asset.assetName}
           </h3>
 
-          
-            {/* Asset Details */}
-            <div className="flex flex-row items-center space-x-1 text-xs">
-              {/* Asset Type */}
-              
-                <div className="flex items-center text-gray-600 group">
-                  <Package
-                    size={11}
-                    className="mr-0 flex-shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors"
-                  />
-                  {asset.type && (
-                  <span
-                    className={`px-2 py-1 ml-1 rounded-md text-xs font-medium ${
-                      asset.type === "HBI"
-                        ? "bg-gray-700 text-gray-50"
-                        : "bg-gray-50 text-gray-700"
-                    }`}
-                  >
-                    {asset.type}
-                  </span>
-                                )}
-                </div>
+          {/* Asset Details */}
+          <div className="flex flex-row items-center space-x-1 text-xs">
+            {/* Asset Type */}
 
-
-              {/* Asset Condition */}
-              {asset.condition && (
-                <div className="flex items-center">
-                  <span
-                    className={`px-2 py-1 rounded-md text-xs font-medium ${getConditionStyle(asset.condition)}`}
-                  >
-                    {asset.condition}
-                  </span>
-                </div>
+            <div className="flex items-center text-gray-600 group">
+              <Package
+                size={11}
+                className="mr-0 flex-shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors"
+              />
+              {asset.type && (
+                <span
+                  className={`px-2 py-1 ml-1 rounded-md text-xs font-medium ${
+                    asset.type === "HBI"
+                      ? "bg-gray-700 text-gray-50"
+                      : "bg-gray-50 text-gray-700"
+                  }`}
+                >
+                  {asset.type}
+                </span>
               )}
             </div>
-           
-            {/* Location */}
-            <div className="flex items-start text-gray-600 group">
-              <MapPin
-                size={11}
-                className="mr-1 mt-0.5 flex-shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors"
-              />
-              <span className="truncate leading-tight group-hover:text-gray-800 transition-colors">
-                {asset.locationDesc?.description || "N/A"}
-                {asset.detailsLocation?.description &&
-                  ` - ${truncate(asset.detailsLocation.description, 15)}`}
-              </span>
-            </div>
 
+            {/* Asset Condition */}
+            {asset.condition && (
+              <div className="flex items-center">
+                <span
+                  className={`px-2 py-1 rounded-md text-xs font-medium ${getConditionStyle(
+                    asset.condition
+                  )}`}
+                >
+                  {asset.condition}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Location */}
+          <div className="flex items-start text-gray-600 group">
+            <MapPin
+              size={11}
+              className="mr-1 mt-0.5 flex-shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors"
+            />
+            <span className="truncate leading-tight group-hover:text-gray-800 transition-colors">
+              {asset.locationDesc?.description || "N/A"}
+              {asset.detailsLocation?.description &&
+                ` - ${truncate(asset.detailsLocation.description, 15)}`}
+            </span>
+          </div>
 
           {/* Price and Actions */}
           <div className="flex items-center group">
