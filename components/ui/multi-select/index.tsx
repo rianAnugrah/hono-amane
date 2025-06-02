@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, X } from 'lucide-react';
 
@@ -22,7 +23,7 @@ export default function MultiSelect({
 }: MultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<{ value: string | number; label: string }[]>([]);
-
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const [searchTerm, setSearchTerm] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -46,6 +47,18 @@ export default function MultiSelect({
     );
     setSelectedOptions(matched);
   }, [values, options]);
+
+  // Calculate dropdown position when opening
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 4, // Add 4px spacing
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+    }
+  }, [isOpen]);
 
   // Filter options based on search term
   const filteredOptions = options.filter(option => 
@@ -142,56 +155,64 @@ export default function MultiSelect({
         </div>
       </div>
       
-      {/* Dropdown options with animation */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -10, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
-          >
-            <div className="max-h-60 overflow-y-auto py-0">
-              <div className="sticky top-0 w-full bg-white">
-                {SearchInput}
-              </div>
-              
-              {filteredOptions.length > 0 ? (
-                filteredOptions.map((option) => {
-                  const isSelected = selectedOptions.some(item => item.value === option.value);
-                  
-                  return (
-                    <motion.div
-                      key={option.value}
-                      whileHover={{ backgroundColor: '#f3f4f6' }}
-                      className={`px-4 py-2 cursor-pointer flex items-center gap-2 ${
-                        isSelected ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
-                      }`}
-                      onClick={() => handleSelect(option)}
-                    >
-                      <div className={`w-4 h-4 border rounded flex items-center justify-center ${
-                        isSelected ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
-                      }`}>
-                        {isSelected && (
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                          </svg>
-                        )}
-                      </div>
-                      <span>{option.label}</span>
-                    </motion.div>
-                  );
-                })
-              ) : (
-                <div className="px-4 py-3 text-sm text-gray-500">
-                  No options found
+      {/* Dropdown options rendered via portal */}
+      {typeof window !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+              style={{ 
+                top: dropdownPosition.top,
+                left: dropdownPosition.left,
+                width: dropdownPosition.width
+              }}
+            >
+              <div className="max-h-60 overflow-y-auto py-0">
+                <div className="sticky top-0 w-full bg-white">
+                  {SearchInput}
                 </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                
+                {filteredOptions.length > 0 ? (
+                  filteredOptions.map((option) => {
+                    const isSelected = selectedOptions.some(item => item.value === option.value);
+                    
+                    return (
+                      <motion.div
+                        key={option.value}
+                        whileHover={{ backgroundColor: '#f3f4f6' }}
+                        className={`px-4 py-2 cursor-pointer flex items-center gap-2 ${
+                          isSelected ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                        }`}
+                        onClick={() => handleSelect(option)}
+                      >
+                        <div className={`w-4 h-4 border rounded flex items-center justify-center ${
+                          isSelected ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+                        }`}>
+                          {isSelected && (
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          )}
+                        </div>
+                        <span>{option.label}</span>
+                      </motion.div>
+                    );
+                  })
+                ) : (
+                  <div className="px-4 py-3 text-sm text-gray-500">
+                    No options found
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
