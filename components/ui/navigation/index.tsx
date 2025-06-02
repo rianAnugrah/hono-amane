@@ -299,9 +299,9 @@ function DesktopNav() {
         </Link>
       </div>
 
+      <div className="flex flex-grow flex-col"></div>
       <LocationDisplay size={isCompact ? 0 : 3} orientation="vertical" />
       
-      <div className="flex flex-grow flex-col"></div>
     </nav>
   );
 }

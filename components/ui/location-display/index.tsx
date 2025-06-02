@@ -19,6 +19,7 @@ export default function LocationDisplay({ size = 2 , orientation = "horizontal" 
           text={loc?.location?.description}
           icon={<MapPin size={12} />}
           color="blue"
+          variant="light"
         />
       ))}
 
@@ -44,6 +45,7 @@ export default function LocationDisplay({ size = 2 , orientation = "horizontal" 
                       text={loc?.location?.description}
                       icon={<MapPin size={12} />}
                       color="gray"
+                      variant="light"
                     />
                   ))}
               </div>
