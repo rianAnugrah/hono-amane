@@ -144,14 +144,15 @@ const CardItem = ({
             {/* Asset Details */}
             <div className="flex flex-row items-center space-x-1 text-xs">
               {/* Asset Type */}
-              {asset.type && (
+              
                 <div className="flex items-center text-gray-600 group">
                   <Package
                     size={11}
-                    className="mr-1 flex-shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors"
+                    className="mr-0 flex-shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors"
                   />
+                  {asset.type && (
                   <span
-                    className={`px-2 py-1 rounded-md text-xs font-medium ${
+                    className={`px-2 py-1 ml-1 rounded-md text-xs font-medium ${
                       asset.type === "HBI"
                         ? "bg-gray-700 text-gray-50"
                         : "bg-gray-50 text-gray-700"
@@ -159,8 +160,9 @@ const CardItem = ({
                   >
                     {asset.type}
                   </span>
+                                )}
                 </div>
-              )}
+
 
               {/* Asset Condition */}
               {asset.condition && (
@@ -199,7 +201,7 @@ const CardItem = ({
             </p>
           </div>
           {/* Price and Actions */}
-          <div className="mt-auto pt-2 border-gray-100 w-full group-hover:h-[3rem] h-0 overflow-hidden transition-all duration-300">
+          <div className="mt-auto pt-2 border-gray-100 w-full group-hover:h-[3rem] md:h-0 overflow-hidden transition-all duration-300">
             <div className="flex items-center justify-between w-full">
               {/* View Details Link */}
               <motion.div
