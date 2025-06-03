@@ -17,8 +17,15 @@ export const getWidthPercentage = (columns: number): string => {
   }
 };
 
+// Define Asset interface for type safety
+interface Asset {
+  id: string;
+  assetNo: string;
+  assetName: string;
+}
+
 // Validation function for print assets
-export const validateAssetsForPrint = (assets: any[]): boolean => {
+export const validateAssetsForPrint = (assets: Asset[]): boolean => {
   if (!assets || assets.length === 0) {
     alert("No assets are selected for printing. Please select at least one asset.");
     return false;

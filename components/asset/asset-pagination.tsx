@@ -117,27 +117,3 @@ export default function AssetPagination({
 }
 
 
-
-
-const PileSelect =({onChange, options, label}) => {
-
-  return (
-    <div className="flex flex-col gap-2">
-      <div>
-        {label}
-      </div>
-      {
-        options.map((option, index) => {
-            return(
-                <div className="border cursor-pointer" onClick={(option) => onChange(option.value)}>
-                  {option.label}
-                </div>
-            )
-        })
-      }
-      <div>
-
-</div>
-    </div>
-  )
-}

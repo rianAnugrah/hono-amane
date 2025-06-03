@@ -1,33 +1,34 @@
 import { useCallback } from "react"
+
 export const useUpload = () => {
-  const folder = import.meta.env.UPLOAD_FOLDER || 'uploads'
+  const folder = import.meta.env.PUBLIC_ENV__UPLOAD_FOLDER || 'uploads'
 
   const apiUpload = `${
-    import.meta.env.API_HOST || ''
+    import.meta.env.PUBLIC_ENV__API_HOST || ''
   }api/sp/file?folder=${folder}&unique=1`
 
   const apiDelete = `${
-    import.meta.env.API_HOST || ''
+    import.meta.env.PUBLIC_ENV__API_HOST || ''
   }api/sp/file?folder=${folder}&name=`
 
   const apiGet = `${
-    import.meta.env.API_HOST || ''
+    import.meta.env.PUBLIC_ENV__API_HOST || ''
   }api/sp/file?folder=${folder}&name=`
 
   const apiPreview = `${
-    import.meta.env.API_HOST || ''
+    import.meta.env.PUBLIC_ENV__API_HOST || ''
   }api/sp/preview?folder=${folder}&name=`
 
-  const responseParser = useCallback((response: Record<string, any>) => {
-    const name = response["Name"]
+  const responseParser = useCallback((response: Record<string, unknown>) => {
+    const name = response["Name"] as string
     return `${apiGet}${name}`
-  }, [])
+  }, [apiGet])
 
   const onDelete = useCallback((file: string) => {
     const name = file.split("/").pop()
     const url = `${apiDelete}${name}`
     return fetch(url, { method: "DELETE" })
-  }, [])
+  }, [apiDelete])
 
   return {
     url: apiUpload,
@@ -41,14 +42,14 @@ export async function uploadFile(
   file: File,
   onProgress?: (percentage: number) => void,
   name = "file",
-): Promise<any> {
-  return await new Promise<string>((resolve, reject) => {
+): Promise<Record<string, unknown>> {
+  return await new Promise<Record<string, unknown>>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
     if (onProgress) onProgress(0)
     xhr.open("POST", url)
 
     xhr.onload = () => {
-      const resp = JSON.parse(xhr.responseText)
+      const resp = JSON.parse(xhr.responseText) as Record<string, unknown>
       resolve(resp)
     }
     xhr.onerror = (evt) => {

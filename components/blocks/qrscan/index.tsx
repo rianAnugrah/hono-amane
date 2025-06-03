@@ -127,21 +127,22 @@ const QrScannerComponent = () => {
     }
   };
 
-  const handleCameraError = (err: any) => {
+  const handleCameraError = (err: unknown) => {
     console.error("Camera error:", err);
-    if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+    const error = err as Error;
+    if (error.name === "NotAllowedError" || error.name === "PermissionDeniedError") {
       setError("Camera access denied.");
       setPermissionState("denied");
-    } else if (err.name === "NotFoundError") {
+    } else if (error.name === "NotFoundError") {
       setError("No camera found.");
-    } else if (err.name === "NotReadableError") {
+    } else if (error.name === "NotReadableError") {
       setError("Camera is in use by another application.");
-    } else if (err.name === "AbortError") {
+    } else if (error.name === "AbortError") {
       setError("Camera operation aborted.");
-    } else if (err.name === "OverconstrainedError") {
+    } else if (error.name === "OverconstrainedError") {
       setError("Camera does not meet the requested constraints.");
     } else {
-      setError(`Failed to load camera: ${err.message}`);
+      setError(`Failed to load camera: ${error.message || 'Unknown error'}`);
     }
     setCameraOn(false);
     setSwitchingCamera(false);
@@ -296,8 +297,9 @@ const QrScannerComponent = () => {
           startCameraWithIndex(0);
         }, 500);
       }
-    } catch (err: any) {
-      setError("Failed to refresh cameras: " + err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError("Failed to refresh cameras: " + errorMessage);
     } finally {
       setIsLoading(false);
     }

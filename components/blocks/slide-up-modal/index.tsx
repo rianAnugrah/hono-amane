@@ -44,7 +44,7 @@ const SlideUpModal = ({
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="absolute bottom-0 bg-white h-2/5 rounded-t-4xl w-full py-4"
+              className="absolute bottom-0 bg-white h-[560px] rounded-t-4xl w-full p-4"
               id="content"
             >
               <div

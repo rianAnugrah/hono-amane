@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { navigate } from "vike/client/router";
-import { usePageContext } from "@/renderer/usePageContext";
+import { usePageContext } from "vike-react/usePageContext";
 import { Asset } from "../types";
 import { useAssetForm } from "@/hooks/useAssetForm";
 import AssetForm from "@/components/forms/AssetForm";

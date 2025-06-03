@@ -152,7 +152,7 @@ statRoutes.get('/by-location', async (c) => {
     // Get location descriptions
     const locations = await prisma.locationDesc.findMany({
       where: {
-        id: { in: locationStats.map(stat => stat.locationDesc_id) }
+        id: { in: locationStats.map(stat => stat.locationDesc_id).filter(Boolean) as number[] }
       }
     });
 
@@ -161,7 +161,7 @@ statRoutes.get('/by-location', async (c) => {
     
     // Transform to more usable format with location descriptions
     const formattedLocationStats = locationStats.map(stat => ({
-      location: locationMap.get(stat.locationDesc_id) || 'Unknown Location',
+      location: locationMap.get(stat.locationDesc_id!) || 'Unknown Location',
       count: stat._count.id
     }));
     
@@ -289,7 +289,7 @@ statRoutes.get('/all', async (c) => {
     // Get location descriptions
     const locations = await prisma.locationDesc.findMany({
       where: {
-        id: { in: locationStats.map(stat => stat.locationDesc_id) }
+        id: { in: locationStats.map(stat => stat.locationDesc_id).filter(Boolean) as number[] }
       }
     });
 
@@ -298,7 +298,7 @@ statRoutes.get('/all', async (c) => {
     
     // Transform location stats with descriptions
     const formattedLocationStats = locationStats.map(stat => ({
-      location: locationMap.get(stat.locationDesc_id) || 'Unknown Location',
+      location: locationMap.get(stat.locationDesc_id!) || 'Unknown Location',
       count: stat._count.id
     })).sort((a, b) => b.count - a.count);
     

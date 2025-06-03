@@ -10,8 +10,8 @@ const UPLOAD_DIR = join(process.cwd(), 'uploads');
 (async () => {
   try {
     await mkdir(UPLOAD_DIR, { recursive: true });
-  } catch (err) {
-    console.error('Gagal membuat direktori upload:', err);
+  } catch (error) {
+    console.error('Gagal membuat direktori upload:', error);
   }
 })();
 
@@ -30,7 +30,7 @@ async function saveFile(file: File): Promise<{
   const buffer = await file.arrayBuffer();
   const filePath = join(UPLOAD_DIR, filename);
   
-  await writeFile(filePath, Buffer.from(buffer));
+  await writeFile(filePath, new Uint8Array(buffer));
   
   return {
     filename,

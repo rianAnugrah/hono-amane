@@ -9,7 +9,7 @@ export function hashPassword(password: string) {
 }
 
 export function verifyPassword(password: string, passwordHash: string) {
-  return bcrypt.compareSync(passwordHash, password)
+  return bcrypt.compareSync(password, passwordHash)
 }
 
 //export * from "../shared/utils"

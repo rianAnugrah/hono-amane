@@ -70,8 +70,8 @@ export default function LocationList({ refresh, onRefreshComplete }: LocationLis
       try {
         await axios.delete(`/api/locations/${id}`);
         fetchLocations();
-      } catch (err: any) {
-        const errorMessage = err.response?.data?.error || 'Failed to delete location';
+      } catch (err: unknown) {
+        const errorMessage = (err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to delete location';
         alert(errorMessage);
         console.error('Failed to delete location:', err);
       }

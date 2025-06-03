@@ -1,60 +1,50 @@
-# hono-amane
+# Project Title
 
-todo list 
+## Description
+A brief description of what the project does and its purpose.
 
-- Add Master Data
---- Location
---- Category
---- Condition
-- Add Location select to User
-- Add location select to asset
-- Create Print Sticker UI
+## Technologies Used
+- ReactJS
+- Vite
+- TypeScript
+- TailwindCSS
+- Hono
+- Node.js
+- Postgres
+- Prisma
+- Axios
 
-Issue 
-- Ui 
-- Guard
+## Installation Instructions
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/your-repo.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd your-repo
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+4. Set up the database (if applicable):
+   ```bash
+   npx prisma migrate dev
+   ```
 
-# Hono Amane Project
-
-## Apple-Inspired Design System
-
-We've implemented a consistent, Apple-inspired design system throughout the application. This design system ensures a cohesive user experience with clean, minimalist UI components.
-
-### Key Design Principles
-
-- **Clean, minimalist design** with ample white space
-- **Subtle animations and transitions** for a fluid experience
-- **Consistent rounded corners** and visual hierarchy
-- **Accessible controls** with proper keyboard navigation
-- **Clear error states** and validation
-
-### Design System Components
-
-Our design system includes the following components:
-
-- **Button**: Multiple variants (primary, secondary, tertiary, danger, success), sizes, and icon support
-- **InputText**: Floating label design with validation states
-- **Checkbox**: Animated checkboxes with proper accessibility support
-- **Switch**: Apple-like toggle switches with smooth animations
-- **Badge**: Multiple colors and variants for status indicators
-- **Select**: Dropdown with search capabilities and keyboard navigation
-- **DatePicker**: Calendar component with range selection support
-
-### Design System Demo
-
-To see all the components in action, visit the design system demo page at:
-
+## Usage
+Instructions on how to run the project:
+```bash
+npm run dev
 ```
-/design-system
-```
+Then open your browser and go to `http://localhost:3000`.
 
-### Usage Guidelines
+## Contributing
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes and commit them (`git commit -m 'Add new feature'`).
+4. Push to the branch (`git push origin feature-branch`).
+5. Open a pull request.
 
-When developing new components or modifying existing ones:
-
-1. Use the existing components from the design system whenever possible
-2. Follow the established patterns for layout, spacing, and typography
-3. Maintain accessibility by supporting keyboard navigation and screen readers
-4. Use provided color tokens for consistency
-
-For more detailed information on each component, please refer to the component source code in `components/ui/`.
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

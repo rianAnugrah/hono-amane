@@ -14,7 +14,8 @@ detailsLocationRoute.post('/', async (c) => {
       data: { description },
     });
     return c.json(detail, 201);
-  } catch (err) {
+  } catch (error) {
+    console.error('Error creating details location:', error);
     return c.json({ error: 'Failed to create details location' }, 400);
   }
 });
@@ -48,7 +49,8 @@ detailsLocationRoute.put('/:id', async (c) => {
       data: { description },
     });
     return c.json(updated);
-  } catch (err) {
+  } catch (error) {
+    console.error('Error updating details location:', error);
     return c.json({ error: 'Failed to update details location' }, 400);
   }
 });
@@ -60,7 +62,8 @@ detailsLocationRoute.delete('/:id', async (c) => {
   try {
     await prisma.detailsLocation.delete({ where: { id } });
     return c.json({ message: 'Deleted successfully' });
-  } catch (err) {
+  } catch (error) {
+    console.error('Error deleting details location:', error);
     return c.json({ error: 'Failed to delete details location' }, 400);
   }
 });

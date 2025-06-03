@@ -72,7 +72,7 @@ export default function AssetToolbar({
             <label className="block text-xs font-medium text-gray-600 mb-1.5">Location</label>
             <LocationSelector
               value={locationDesc_id}
-              onChange={(value: any) => handleLocationChange(value)}
+              onChange={(value: string | number) => handleLocationChange(String(value))}
             />
           </div>
 
@@ -144,7 +144,7 @@ export default function AssetToolbar({
   };
 
   return (
-    <div className="bg-gray-100 border-b border-gray-200 sticky top-0 z-[100]">
+    <div className="bg-gray-100 border-b border-gray-200 sticky top-0 z-[100] overflow-visible">
       <div className="mx-auto px-4">
         <div className="grid grid-cols-12 items-center py-4 gap-3">
           {/* Search */}

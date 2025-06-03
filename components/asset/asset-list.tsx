@@ -146,7 +146,7 @@ export default function AssetList({
 
   return (
     <motion.div 
-      className="w-full mx-auto px-4 py-6"
+      className="w-full mx-auto sm:px-4 sm:py-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}

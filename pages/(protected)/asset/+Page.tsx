@@ -92,7 +92,8 @@ const AssetCrudPage = () => {
     setCondition(typeof e === 'string' ? e : e.target.value);
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement> | string) =>
     setType(typeof e === 'string' ? e : e.target.value);
-  const handleLocationChange = (e: any) => setLocationDesc_id(e);
+  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement> | string) =>
+    setLocationDesc_id(typeof e === 'string' ? e : e.target.value);
   const handleSortByChange = (e: React.ChangeEvent<HTMLSelectElement> | string) =>
     setSortBy(typeof e === 'string' ? e : e.target.value);
   const handleSortOrderChange = (e: React.ChangeEvent<HTMLSelectElement> | string) =>
@@ -194,7 +195,7 @@ const AssetCrudPage = () => {
         />
       </div>
 
-      <div className="flex-grow overflow-auto bg-gray-100">
+      <div className="flex-grow overflow-auto bg-gray-100 pb-16">
         <AssetList
           assets={assets}
           handleEdit={startEdit}
@@ -207,7 +208,7 @@ const AssetCrudPage = () => {
       </div>
 
       {!isLoading && assets.length > 0 && (
-        <div className="sticky bottom-8 md:-bottom-0 z-10 ">
+        <div className="relative md:sticky bottom-16 md:-bottom-0 z-10 ">
           <AssetPagination
             page={page}
             pageSize={pageSize}

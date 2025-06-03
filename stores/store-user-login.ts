@@ -1,12 +1,17 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+type Location = {
+  id: number;
+  description: string;
+};
+
 type User = {
   email: string;
   isAuth: boolean;
   name: string;
   role: string;
-  location: any;
+  location: Location[];
   id: string;
 };
 

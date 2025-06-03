@@ -2,16 +2,16 @@ import React, { useEffect, useRef, useState } from "react";
 import QrScanner from "qr-scanner";
 
 const QrScannerComponent = () => {
-  const videoRef = useRef(null);
-  const fileInputRef = useRef(null);
-  const [scanner, setScanner] = useState(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [scanner, setScanner] = useState<QrScanner | null>(null);
   const [result, setResult] = useState("");
   const [cameraOn, setCameraOn] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [cameras, setCameras] = useState([]);
+  const [cameras, setCameras] = useState<QrScanner.Camera[]>([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
-  const [permissionState, setPermissionState] = useState("prompt");
+  const [permissionState, setPermissionState] = useState<PermissionState>("prompt");
 
   // Auto-start camera after page load
   useEffect(() => {
@@ -61,16 +61,15 @@ const QrScannerComponent = () => {
         startCameraWithIndex(0);
       }, 500);
     } catch (err) {
-      console.error("Failed to load cameras:", err);
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+      console.error("Failed to list cameras:", err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      if (err instanceof Error && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
         setError("Akses kamera ditolak. Silakan izinkan kamera di pengaturan browser Anda.");
         setPermissionState("denied");
-      } else if (err.name === "NotFoundError") {
-        setError("Tidak ada kamera yang ditemukan pada perangkat Anda.");
-      } else if (err.name === "NotReadableError") {
-        setError("Kamera sedang digunakan oleh aplikasi lain. Tutup aplikasi lain yang menggunakan kamera.");
+      } else if (err instanceof Error && err.name === "NotFoundError") {
+        setError("Tidak ada kamera yang terdeteksi pada perangkat Anda.");
       } else {
-        setError(`Gagal memuat kamera: ${err.message}`);
+        setError(`Gagal mengakses kamera: ${errorMessage}`);
       }
       setIsLoading(false);
     }
@@ -85,18 +84,19 @@ const QrScannerComponent = () => {
       await loadCameras();
     } catch (err) {
       console.error("Camera permission request failed:", err);
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      if (err instanceof Error && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
         setError("Akses kamera ditolak. Silakan izinkan kamera di pengaturan browser Anda.");
         setPermissionState("denied");
       } else {
-        setError(`Gagal meminta izin kamera: ${err.message}`);
+        setError(`Gagal mengakses kamera: ${errorMessage}`);
       }
       setIsLoading(false);
     }
   };
 
   // Start camera with specific index
-  const startCameraWithIndex = async (index) => {
+  const startCameraWithIndex = async (index: number) => {
     if (videoRef.current && cameras.length > 0) {
       try {
         setIsLoading(true);
@@ -139,11 +139,12 @@ const QrScannerComponent = () => {
         setCameraOn(true);
       } catch (err) {
         console.error("Failed to start camera:", err);
-        if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
+        if (err instanceof Error && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
           setError("Akses kamera ditolak. Silakan izinkan kamera di pengaturan browser Anda.");
           setPermissionState("denied");
         } else {
-          setError(`Gagal mengakses kamera: ${err.message}`);
+          setError(`Gagal mengakses kamera: ${errorMessage}`);
         }
         setCameraOn(false);
       } finally {
@@ -199,15 +200,16 @@ const QrScannerComponent = () => {
       }
     } catch (err) {
       console.error("Failed to refresh cameras:", err);
-      setError("Gagal memperbarui daftar kamera: " + err.message);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError("Gagal memperbarui daftar kamera: " + errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   // Handle file upload
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
       setError("");
       QrScanner.scanImage(file)
@@ -320,7 +322,7 @@ const QrScannerComponent = () => {
           className="hidden"
         />
         <button
-          onClick={() => fileInputRef.current.click()}
+          onClick={() => fileInputRef.current?.click()}
           className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
         >
           Upload Gambar QR

@@ -31,6 +31,7 @@ interface AssetFormProps {
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: () => void;
   handleCancel: () => void;
+  hasToolbar?: boolean;
 }
 
 // Memoize static options to prevent recreation
@@ -67,12 +68,13 @@ function AssetForm({
   handleChange,
   handleSubmit,
   handleCancel,
+  hasToolbar = true,
 }: AssetFormProps) {
   const [activeSection, setActiveSection] = useState("basic");
   const [direction, setDirection] = useState(0);
   const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
   const [projectCodes, setProjectCodes] = useState<ProjectCode[]>([]);
-  const [isVerticalMode, setIsVerticalMode] = useState(false);
+  const [isVerticalMode, setIsVerticalMode] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const { touchedFields, validation, sectionStatus, handleBlur, isFormValid, validateAllFields } =
@@ -165,8 +167,9 @@ function AssetForm({
         {editingId ? "Edit" : "Create"} Asset
       </h2>
 
-      <div className="absolute right-8 top-6 flex items-center gap-2">
-        <button 
+      {hasToolbar && (
+        <div className="absolute right-8 top-6 flex items-center gap-2">
+          <button 
           className={`btn btn-sm ${isVerticalMode ? 'btn-ghost' : 'btn-primary'}`} 
           onClick={toggleViewMode} 
           title="Slide View"
@@ -180,8 +183,9 @@ function AssetForm({
         >
           <ScrollText size={18} />
         </button>
-        <button className="btn btn-ghost" onClick={handleCancel}><X /></button>
-      </div>
+          <button className="btn btn-ghost" onClick={handleCancel}><X /></button>
+        </div>
+      )}
       
       {/* Navigation Tabs - only show in slide mode */}
       {!isVerticalMode && (

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, memo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Check, X, Search } from 'lucide-react';
 
@@ -8,15 +9,15 @@ interface SelectFieldProps {
   placeholder?: string;
   value: string | number | null;
   options: { value: string | number; label: string }[];
-  onChange: (e: any) => void;
-  onBlur?: (e: any) => void;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement> | { target: { value: string | number; name: string }; currentTarget: { value: string | number; name: string } }) => void;
+  onBlur?: (e: React.FocusEvent<HTMLSelectElement> | { target: { name: string } }) => void;
   validation?: "valid" | "invalid" | "empty" | "untouched" | undefined;
   touched?: boolean;
   errorMessage?: string;
   icon?: React.ReactNode;
   searchable?: boolean;
   searchPlaceholder?: string;
-  searchInput?:any;
+  searchInput?: string;
   disabled?: boolean;
 }
 
@@ -43,6 +44,7 @@ const SelectField = memo(({
   
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const [selectedOption, setSelectedOption] = useState(() => {
     return options.find(option => option.value === value) || null;
   });
@@ -56,7 +58,9 @@ const SelectField = memo(({
     function handleClickOutside(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        onBlur && onBlur({ target: { name } });
+        if (onBlur) {
+          onBlur({ target: { name } });
+        }
       }
     }
     
@@ -83,6 +87,18 @@ const SelectField = memo(({
     }
   }, [value, options]);
 
+  // Calculate dropdown position when opening
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 4, // Add 4px spacing
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+    }
+  }, [isOpen]);
+
   const handleSelect = (option: { value: string | number; label: string }) => {
     setSelectedOption(option);
     setIsOpen(false);
@@ -104,7 +120,9 @@ const SelectField = memo(({
     onChange(event);
     
     // Also trigger blur for validation
-    onBlur && onBlur(event);
+    if (onBlur) {
+      onBlur(event);
+    }
   };
 
   // Filter options based on search term
@@ -128,7 +146,9 @@ const SelectField = memo(({
       setSearchTerm('');
     } else {
       // Trigger blur validation when closing
-      onBlur && onBlur({ target: { name } });
+      if (onBlur) {
+        onBlur({ target: { name } });
+      }
     }
   };
 
@@ -212,47 +232,61 @@ const SelectField = memo(({
         </div>
       )}
       
-      {/* Dropdown with search and options */}
-      {isOpen && !disabled && (
-        <div 
-          className="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden opacity-100 transition-opacity duration-150"
-          style={{ maxHeight: '250px' }}
-        >
-          <div className="max-h-60 overflow-y-auto relative">
-            {searchable && (
-              <div className='sticky top-0 w-full bg-white p-2 border-b border-gray-100'>
-                <div className="relative">
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
-                    placeholder={searchPlaceholder}
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                  />
-                  <Search size={14} className="absolute left-2.5 top-2 text-gray-400" />
-                </div>
+      {/* Dropdown rendered via portal */}
+      {typeof window !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {isOpen && !disabled && (
+            <motion.div 
+              initial={{ opacity: 0, y: -5, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -5, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+              style={{ 
+                top: dropdownPosition.top,
+                left: dropdownPosition.left,
+                width: dropdownPosition.width,
+                maxHeight: '250px'
+              }}
+            >
+              <div className="max-h-60 overflow-y-auto relative">
+                {searchable && (
+                  <div className='sticky top-0 w-full bg-white p-2 border-b border-gray-100'>
+                    <div className="relative">
+                      <input
+                        ref={searchInputRef}
+                        type="text"
+                        className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
+                        placeholder={searchPlaceholder}
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                      />
+                      <Search size={14} className="absolute left-2.5 top-2 text-gray-400" />
+                    </div>
+                  </div>
+                )}
+                
+                {filteredOptions.length > 0 ? (
+                  filteredOptions.map((option) => (
+                    <div
+                      key={option.value}
+                      className={`
+                        px-4 py-2.5 cursor-pointer transition-colors duration-150 hover:bg-gray-100
+                        ${selectedOption?.value === option.value ? 'bg-blue-50 text-blue-700' : 'text-gray-800'}
+                      `}
+                      onClick={() => handleSelect(option)}
+                    >
+                      {option.label}
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-gray-500 text-sm italic">No options available</div>
+                )}
               </div>
-            )}
-            
-            {filteredOptions.length > 0 ? (
-              filteredOptions.map((option) => (
-                <div
-                  key={option.value}
-                  className={`
-                    px-4 py-2.5 cursor-pointer transition-colors duration-150 hover:bg-gray-100
-                    ${selectedOption?.value === option.value ? 'bg-blue-50 text-blue-700' : 'text-gray-800'}
-                  `}
-                  onClick={() => handleSelect(option)}
-                >
-                  {option.label}
-                </div>
-              ))
-            ) : (
-              <div className="px-4 py-3 text-gray-500 text-sm italic">No options available</div>
-            )}
-          </div>
-        </div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
       )}
     </div>
   );

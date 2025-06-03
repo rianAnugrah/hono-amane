@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Logo from "@/components/svg/logo";
 import "@/renderer/PageShell.css";
 
@@ -59,11 +59,11 @@ function Page() {
         <Logo />
         <h1 className="text-2xl font-bold">Asset Management</h1>
 
-        {error && (
+        {/* {error && (
           <div className="bg-red-800 text-white px-4 py-2 rounded text-center max-w-xs mb-2">
             {error}
           </div>
-        )}
+        )} */}
 
         <a
           href={loading ? '#' : loginUrl}

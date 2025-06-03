@@ -1,5 +1,5 @@
 // pages/users/[id]/+Page.tsx
-import { usePageContext } from '@/renderer/usePageContext';
+import { usePageContext } from 'vike-react/usePageContext';
 import { useEffect, useState } from 'react';
 
 

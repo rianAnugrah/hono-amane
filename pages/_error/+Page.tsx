@@ -1,6 +1,7 @@
 export { Page }
 
-import { usePageContext } from '../../renderer/usePageContext'
+import React from 'react';
+import { usePageContext } from 'vike-react/usePageContext'
 
 function Page() {
   const pageContext = usePageContext()

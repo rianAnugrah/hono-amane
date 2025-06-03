@@ -64,22 +64,14 @@ export default function AssetItem({
   checked: boolean;
   onSelectAsset: (asset: Asset) => void;
 }) {
-  const { location, role } = useUserStore();
+  const userStore = useUserStore();
+  const role = userStore.role;
   const hasImages = hasValidImages(asset.images);
   const [imageError, setImageError] = useState(false);
 
-  function isLocationIdExists(
-    locationsArray: LocationItem[],
-    locationIdToCheck: number
-  ): boolean {
-    return locationsArray.some((item) => item.locationId === locationIdToCheck);
-  }
-
-  function renderEditButton(
-    locationsArray: LocationItem[],
-    locationIdToCheck: number
-  ): React.ReactNode {
-    if (isLocationIdExists(locationsArray, locationIdToCheck)) {
+  // Simplified render edit button that always shows when role is not read-only
+  function renderEditButton(): React.ReactNode {
+    if (role !== "read_only") {
       return (
         <div className="col-span-2 px-4 py-2 flex items-center justify-end gap-2">
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -240,8 +232,7 @@ export default function AssetItem({
                 </span>
               </div>
             </div>
-            {role !== "read_only" &&
-              renderEditButton(location, asset.locationDesc_id || 0)}
+            {renderEditButton()}
           </Link>
           
           {/* Asset detail section with animations */}
@@ -269,10 +260,7 @@ export default function AssetItem({
           onSelectAsset={onSelectAsset}
           role={role}
           handleEdit={handleEdit}
-          location={location}
           handleDelete={handleDelete}
-          isExpanded={isExpanded}
-          onToggle={onToggle}
         />
       )}
     </motion.div>

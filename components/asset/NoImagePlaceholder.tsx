@@ -39,39 +39,17 @@ const NoImagePlaceholder: React.FC<NoImagePlaceholderProps> = ({
   return (
     <div
       className={`${className} flex items-center flex-col justify-center relative`}
-      style={{backgroundColor:bgColor}}
-     
-      
+      style={{backgroundColor: bgColor}}
     >
-      {/* Background */}
-      <rect width="200" height="200" fill={bgColor} />
-      
-
       <ImageIcon size={120} className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/10'  />
       
       {/* Asset initials */}
-      <div
-        x="100"
-        y="115"
-        fontFamily="sans-serif"
-        fontSize="40"
-        fontWeight="bold"
-        textAnchor="middle"
-       
-        className='text-5xl font-extrabold text-gray-400'
-      >
+      <div className='text-5xl font-extrabold text-gray-400'>
         {initials}
       </div>
       
       {/* "No Image" label */}
-      <div
-        x="100"
-        y="145"
-        fontFamily="sans-serif"
-        fontSize="12"
-        textAnchor="middle"
-        className={`text-xl text-gray-400 leading-10`}
-      >
+      <div className={`text-xl text-gray-400 leading-10`}>
         No Image Available
       </div> 
     </div>

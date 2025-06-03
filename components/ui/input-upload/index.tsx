@@ -18,7 +18,7 @@ import {
 } from "react-dropzone-esm"
 import { uploadFile, useUpload } from "@/hooks/use-upload"
 
-export interface DropzoneState extends _DropzoneState {}
+export type DropzoneState = _DropzoneState;
 
 export interface DropzoneProps
   extends Omit<_DropzoneProps, "children" | "onDrop"> {
@@ -35,7 +35,7 @@ export interface DropzoneProps
 
 export type FileItemProps = {
   href: string
-  onDelete: (...args: any) => void
+  onDelete: (file?: string) => void
   disabled?: boolean
   preview?: boolean
 }
@@ -71,7 +71,7 @@ export const FileItem = ({
       >
         <Icon className={"text-primary h-10 w-10 pt-2 pl-2"} />
         <div className="flex flex-col gap-0 px-2">
-          <a href={href} target="_blank">
+          <a href={href} target="_blank" rel="noreferrer">
             <span className="block h-[38px] overflow-hidden text-[0.85rem] leading-snug font-medium break-all text-ellipsis">
               {name.split(".").slice(0, -1).join(".")}
             </span>

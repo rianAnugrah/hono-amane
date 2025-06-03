@@ -1,16 +1,16 @@
+import React, { useState, useEffect } from "react";
+import { ReactNode } from "react";
 import { LocationSelector } from "@/components/blocks/location-selector";
 import InputSelect from "@/components/ui/input-select";
 import InputText from "@/components/ui/input-text";
 import { Search } from "lucide-react";
-import { useState, useEffect } from "react";
-import { ReactNode } from "react";
 
 type Props = {
   defaultValues?: {
     q?: string;
     role?: string;
     placement?: string;
-    locationId?: any;
+    locationId?: number | string;
     sort?: string;
     order?: string;
   };
@@ -25,13 +25,19 @@ export function UserFilterToolbar({
 }: Props) {
   const [q, setQ] = useState(defaultValues.q || "");
   const [role, setRole] = useState(defaultValues.role || "");
-  const [locationId, setLocationId] = useState(defaultValues.locationId || 1);
+  const [locationId, setLocationId] = useState<string | number>(defaultValues.locationId || 1);
   const [sort, setSort] = useState(defaultValues.sort || "createdAt");
   const [order, setOrder] = useState(defaultValues.order || "desc");
 
   // Trigger onChange whenever any filter state changes
   useEffect(() => {
-    onChange({ q, role, locationId, sort, order });
+    onChange({ 
+      q, 
+      role, 
+      locationId: String(locationId), // Convert to string
+      sort, 
+      order 
+    });
   }, [q, role, locationId, sort, order, onChange]);
 
   const handleReset = () => {
@@ -64,7 +70,10 @@ export function UserFilterToolbar({
 
       <InputSelect
         value={role}
-        onChange={(e) => setRole(e.target.value)}
+        onChange={(e) => {
+          const value = typeof e === 'string' ? e : e.target.value;
+          setRole(value);
+        }}
         options={[
           { value: "admin", label: "Admin" },
           { value: "pic", label: "PIC" },
@@ -75,7 +84,10 @@ export function UserFilterToolbar({
 
       <InputSelect
         value={sort}
-        onChange={(e) => setSort(e.target.value)}
+        onChange={(e) => {
+          const value = typeof e === 'string' ? e : e.target.value;
+          setSort(value);
+        }}
         options={[
           { value: "createdAt", label: "Created Date" },
           { value: "name", label: "Name" },
@@ -86,7 +98,10 @@ export function UserFilterToolbar({
 
       <InputSelect
         value={order}
-        onChange={(e) => setOrder(e.target.value)}
+        onChange={(e) => {
+          const value = typeof e === 'string' ? e : e.target.value;
+          setOrder(value);
+        }}
         options={[
           { value: "asc", label: "Ascending" },
           { value: "desc", label: "Descending" },

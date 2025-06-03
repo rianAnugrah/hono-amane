@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 import { formatDate } from "@/components/utils/formatting";
 import { Asset } from "../(protected)/asset/types";
-import AssetPrintItem from "../../components/asset/asset-print-item";
+import AssetPrintItem from "@/components/asset/asset-print-item";
 
 const SelectedAssetsPage = () => {
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -297,7 +297,7 @@ body {
       printWindow.document.open();
       printWindow.document.write(printContent);
       printWindow.document.close();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error printing assets:", error);
       alert("There was an error printing the assets. Please try again.");
     }
@@ -327,7 +327,16 @@ body {
 
       <div className="space-y-4" id="printable-div">
         {assets.map((asset) => (
-          <AssetPrintItem key={asset.id} asset={asset} isExpanded={false} />
+          <AssetPrintItem 
+            key={asset.id} 
+            asset={asset} 
+            isExpanded={false}
+            onToggle={() => {}}
+            handleEdit={() => {}}
+            handleDelete={() => {}}
+            checked={false}
+            onSelectAsset={() => {}}
+          />
         ))}
       </div>
     </div>

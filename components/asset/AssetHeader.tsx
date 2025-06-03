@@ -34,7 +34,7 @@ const AssetHeader = () => {
 
   return (
     <motion.div 
-      className="flex flex-col border-b border-gray-200  sticky top-0 z-10 "
+      className="flex flex-col border-b border-gray-200 bg-gray-100  sticky top-0 z-10 "
       variants={containerVariants}
       initial="hidden"
       animate="visible"

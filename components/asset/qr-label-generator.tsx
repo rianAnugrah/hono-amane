@@ -309,7 +309,7 @@ const SettingsPanel = ({
             <label className="block text-sm mb-1">Data Format</label>
             <select
               value={settings.qrDataFormat}
-              onChange={(e) => onSettingsChange({ ...settings, qrDataFormat: e.target.value as any })}
+              onChange={(e) => onSettingsChange({ ...settings, qrDataFormat: e.target.value as 'assetNo' | 'id' | 'custom' })}
               className="w-full px-2 py-1 border rounded text-sm"
             >
               <option value="assetNo">Asset Number</option>

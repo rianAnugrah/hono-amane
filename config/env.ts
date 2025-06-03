@@ -9,6 +9,7 @@ interface Env {
   APP_DOMAIN?: string;
   APP_CRONTIME?: string;
   DATABASE_URL?: string;
+  NODE_ENV?: string;
 }
 
 // Create a safely typed env object
@@ -20,6 +21,7 @@ const env: Env = {
   APP_DOMAIN: import.meta.env.VITE_APP_DOMAIN || '.hcml.co.id',
   APP_CRONTIME: import.meta.env.VITE_APP_CRONTIME || '"* 12 * * *"',
   DATABASE_URL: import.meta.env.DATABASE_URL || '',
+  NODE_ENV: import.meta.env.NODE_ENV || '',
 };
 
 // Validate required variables

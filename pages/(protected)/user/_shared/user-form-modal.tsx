@@ -1,5 +1,5 @@
 import { Link } from "@/renderer/Link";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { UserFilterToolbar } from "@/pages/(protected)/user/_shared/user-filter-toolbar";
 import { PlusCircle } from "lucide-react";
@@ -22,6 +22,8 @@ type User = {
   updatedAt: string;
   password?: string;
   locationIds?: number[]; // use this instead of `location` or `locationId`
+  locations?: Array<{ id: number; description?: string }>;
+  location?: { id: number; description?: string };
 };
 
 type UserFormProps = {
@@ -116,11 +118,13 @@ export default function UserFormModal({
                       {
                         value: "pic",
                         label: "PIC",
-                      },
-                      ,
+                      }
                     ]}
                     value={form.role || "read_only"}
-                    onChange={(e) => setForm({ ...form, role: e.target.value })}
+                    onChange={(e) => {
+                      const value = typeof e === 'string' ? e : e.target.value;
+                      setForm({ ...form, role: value });
+                    }}
                   />
                 )}
               </div>

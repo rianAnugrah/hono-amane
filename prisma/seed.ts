@@ -67,10 +67,10 @@ async function main() {
       });
 
       console.log(`Created asset ${asset.assetNo}-${asset.lineNo}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(
         `Error processing asset ${asset.assetNo}-${asset.lineNo}:`,
-        error.message
+        error instanceof Error ? error.message : String(error)
       );
     }
   }
