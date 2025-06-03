@@ -1,6 +1,7 @@
 import React from 'react';
 import { usePageContext } from "vike-react/usePageContext";
 import { navigate } from 'vike/client/router';
+import { useAuth } from '@/hooks/useAuth';
 
 export { Link };
 
@@ -12,6 +13,7 @@ function Link(props: {
   const pageContext = usePageContext();
   const { urlPathname } = pageContext;
   const { href, className, children, ...rest } = props;
+  const { isAuthenticated, isProtectedRoute } = useAuth();
   
   const isActive =
     href === "/" ? urlPathname === href : urlPathname.startsWith(href);
@@ -33,6 +35,14 @@ function Link(props: {
       return;
     }
 
+    // Check if trying to navigate to a protected route while not authenticated
+    if (isProtectedRoute(href) && !isAuthenticated) {
+      e.preventDefault();
+      // Redirect to login instead
+      navigate('/login');
+      return;
+    }
+
     // Prevent default browser navigation
     e.preventDefault();
     
@@ -43,11 +53,32 @@ function Link(props: {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      
+      // Check authentication for protected routes
+      if (isProtectedRoute(href) && !isAuthenticated) {
+        navigate('/login');
+        return;
+      }
+      
+      // Only navigate if it's a different URL
+      if (href !== urlPathname) {
+        navigate(href);
+      }
+    }
+  };
+
   return (
     <a 
       href={href} 
       className={classNames} 
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="link"
+      aria-label={typeof children === 'string' ? children : undefined}
       {...rest}
     >
       {children}

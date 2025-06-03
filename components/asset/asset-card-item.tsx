@@ -120,7 +120,7 @@ const CardItem = ({
       <>
         {/* Content Container */}
         <div
-          className="p-4 gap-2 flex flex-col relative sm:absolute bottom-0 left-0 right-0 bg-white/25 backdrop-blur rounded-2xl m-1"
+          className="p-4 gap-2 flex flex-col relative sm:absolute bottom-0 left-0 right-0 bg-white/25 backdrop-blur-xs rounded-2xl m-1"
           // style={{ height: "210px" }}
         >
           {/* Asset ID & Category */}
@@ -195,9 +195,9 @@ const CardItem = ({
           <div className="flex items-center group">
             <TriangleAlert
               size={10}
-              className="text-gray-400 mr-1 group-hover:text-green-500 transition-colors"
+              className="text-yellow-500 mr-1  transition-colors"
             />
-            <p className="font-semibold text-gray-900 text-sm group-hover:text-green-600 transition-colors">
+            <p className=" text-gray-900 text-sm group-hover:text-green-600 transition-colors">
               {formatDate(asset.createdAt)}
             </p>
           </div>
@@ -244,7 +244,7 @@ const CardItem = ({
 
   return (
     <motion.div
-      className={`relative group bg-white sm:rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-md md:p-2 sm:h-[380px] ${
+      className={`relative group bg-white sm:rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-md md:p-2 sm:h-[420px] ${
         checked ? "ring-2 ring-blue-500" : "border border-gray-200"
       }`}
       //style={{ height: "380px" }}

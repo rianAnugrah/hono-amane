@@ -45,11 +45,13 @@ const SmoothImageLoader: React.FC<SmoothImageLoaderProps> = ({
       {/* Skeleton Loading State */}
       {imageState === 'loading' && (
         <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" 
-               style={{
-                 background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
-                 animation: 'shimmer 2s infinite'
-               }} />
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+              animation: 'shimmer 2s infinite linear',
+            }}
+          />
         </div>
       )}
       
@@ -80,15 +82,15 @@ const SmoothImageLoader: React.FC<SmoothImageLoaderProps> = ({
         />
       )}
       
-      <style jsx>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-        .animate-shimmer {
-          animation: shimmer 2s infinite;
-        }
-      `}</style>
+      {/* Global CSS for shimmer animation */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+        `
+      }} />
     </div>
   );
 };

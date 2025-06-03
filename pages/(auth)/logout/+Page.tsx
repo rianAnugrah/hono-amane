@@ -1,39 +1,13 @@
 import React, { useEffect } from 'react';
-import { useUserStore } from '@/stores/store-user-login';
+import { useAuth } from '@/hooks/useAuth';
 
 export function Page() {
-  const { clearUser } = useUserStore();
+  const { logout } = useAuth();
 
   useEffect(() => {
-    const performLogout = async () => {
-      try {
-        // Call the logout API endpoint
-        const response = await fetch('/api/auth/logout');
-        
-        if (response.ok) {
-          // Clear user state from store and localStorage
-          clearUser();
-          
-          // Also clear any other application storage if needed
-          localStorage.removeItem('user-auth-storage');
-          sessionStorage.clear();
-        }
-        
-        // Redirect to login page after a short delay
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 1000);
-      } catch (error) {
-        console.error('Logout failed');
-        // Clear state anyway
-        clearUser();
-        // Redirect to login page
-        window.location.href = '/login';
-      }
-    };
-
-    performLogout();
-  }, [clearUser]);
+    // Use the centralized logout function
+    logout();
+  }, [logout]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
