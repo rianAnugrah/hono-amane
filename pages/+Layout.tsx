@@ -241,7 +241,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           ref={parent}
         >
           {/* Scrollable Content */}
-          <div className="overflow-y-auto bg-gray-100 rounded-b-lg pb-10 lg:pb-0">{children}</div>
+          <div className="overflow-y-auto bg-gray-100 rounded-b-lg pb-0 lg:pb-0 ">{children}</div>
         </div>
       </div>
     </div>

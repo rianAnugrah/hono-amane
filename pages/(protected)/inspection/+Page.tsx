@@ -289,7 +289,7 @@ export default function InspectionListPage() {
         transition={{ duration: 0.3 }}
       >
         {/* Summary Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-white border-b border-gray-200">
+        <div className="hidden md:grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-white border-b border-gray-200">
           <motion.div 
             className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 overflow-hidden relative hover:shadow-md transition-all"
             whileHover={{ y: -2 }}
@@ -330,8 +330,8 @@ export default function InspectionListPage() {
         
         {/* Inspections List */}
         <div 
-          className="overflow-y-auto flex-grow p-4 space-y-3"
-          style={{ maxHeight: isMobile ? "none" : "calc(100vh - 180px)" }}
+          className="overflow-y-scroll flex-grow p-4 space-y-3"
+          style={{ maxHeight: isMobile ? "none" : "calc(100vh - 280px)" }}
         >
           {filteredInspections.map((inspection) => {
             const inspectorName = inspection.inspector?.name || "Unknown";

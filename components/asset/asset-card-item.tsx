@@ -16,6 +16,7 @@ import {
   DollarSign,
   ImageIcon,
   Badge,
+  TriangleAlert,
 } from "lucide-react";
 import Checkbox from "@/components/ui/checkbox";
 import { formatIDR } from "@/components/utils/formatting";
@@ -26,6 +27,7 @@ import {
   hasValidImages,
 } from "@/components/utils/ImageUtils";
 import SmoothImageLoader from "../blocks/smooth-image-loader";
+import { formatDate } from "@/utils/helpers";
 
 const CardItem = ({
   asset,
@@ -97,7 +99,7 @@ const CardItem = ({
           <span className="text-2xl font-bold text-white/60 mt-14">
             {initials}
           </span>
-          <span className="text-xs text-white/60 mt-6">No image available</span>
+          <span className="text-xs text-white/60 my-6">No image available</span>
         </div>
       );
     }
@@ -118,7 +120,7 @@ const CardItem = ({
       <>
         {/* Content Container */}
         <div
-          className="p-4 gap-2 flex flex-col absolute bottom-0 left-0 right-0 bg-white/25 backdrop-blur rounded-2xl m-1"
+          className="p-4 gap-2 flex flex-col relative sm:absolute bottom-0 left-0 right-0 bg-white/25 backdrop-blur rounded-2xl m-1"
           // style={{ height: "210px" }}
         >
           {/* Asset ID & Category */}
@@ -189,7 +191,16 @@ const CardItem = ({
                 ` - ${truncate(asset.detailsLocation.description, 15)}`}
             </span>
           </div>
-
+          {/* Price and Actions */}
+          <div className="flex items-center group">
+            <TriangleAlert
+              size={10}
+              className="text-gray-400 mr-1 group-hover:text-green-500 transition-colors"
+            />
+            <p className="font-semibold text-gray-900 text-sm group-hover:text-green-600 transition-colors">
+              {formatDate(asset.createdAt)}
+            </p>
+          </div>
           {/* Price and Actions */}
           <div className="flex items-center group">
             <DollarSign
@@ -228,12 +239,15 @@ const CardItem = ({
     );
   };
 
+
+  
+
   return (
     <motion.div
-      className={`relative group bg-white rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-md p-2 ${
+      className={`relative group bg-white sm:rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-md md:p-2 sm:h-[380px] ${
         checked ? "ring-2 ring-blue-500" : "border border-gray-200"
       }`}
-      style={{ height: "380px" }}
+      //style={{ height: "380px" }}
       // whileHover={{ y: -4 }}
       layout
     >
@@ -281,12 +295,12 @@ const CardItem = ({
 
       {/* Image Container */}
       <div
-        className="relative bg-gray-50 group rounded-2xl overflow-hidden"
+        className="relative bg-gray-50 group sm:rounded-2xl overflow-hidden"
         style={{ height: "100%" }}
       >
         {renderAssetImage()}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-purple-500 opacity-50 rounded-2xl" />
-
+        <div className="absolute bg-none inset-0 md:bg-gradient-to-b from-transparent to-purple-500 opacity-50 rounded-2xl" />
+       
         <ContentContainer />
       </div>
     </motion.div>
