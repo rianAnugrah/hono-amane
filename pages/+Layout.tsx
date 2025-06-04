@@ -1,15 +1,18 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { usePageContext } from "vike-react/usePageContext";
 import "@/renderer/css/index.css";
 import "@/renderer/PageShell.css";
 import Navbar from "@/components/ui/navigation";
 import autoAnimate from "@formkit/auto-animate";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserStore } from "@/stores/store-user-login";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const parent = useRef(null);
   const pageContext = usePageContext();
-  const { initializeAuth, isAuthRoute } = useAuth();
+  const { initializeAuth, isAuthRoute, isAuthenticated } = useAuth();
+  const { role, isAuth } = useUserStore();
+  const [authInitialized, setAuthInitialized] = useState(false);
   
   // Check if current page is an auth page
   const isCurrentlyAuthPage = isAuthRoute(pageContext.urlPathname || '');
@@ -17,9 +20,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // Initialize authentication state on mount and route changes
   useEffect(() => {
     // Only initialize auth for non-auth pages
-    // Auth pages handle their own authentication logic
     if (!isCurrentlyAuthPage) {
-      initializeAuth();
+      initializeAuth().then(() => {
+        setAuthInitialized(true);
+      }).catch((error) => {
+        console.error('Layout - Auth initialization failed:', error);
+        setAuthInitialized(true); // Still set to true to prevent infinite loading
+      });
+    } else {
+      setAuthInitialized(true);
     }
   }, [pageContext.urlPathname, initializeAuth, isCurrentlyAuthPage]);
   
@@ -32,6 +41,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // For auth pages, render without navigation
   if (isCurrentlyAuthPage) {
     return <>{children}</>;
+  }
+
+  // Show loading state while auth is initializing
+  if (!authInitialized) {
+    return (
+      <div className="w-full h-[100svh] flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   // For protected pages, render with navigation

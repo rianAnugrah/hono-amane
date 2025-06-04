@@ -34,9 +34,12 @@ export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
       ...getInitialState(),
-      set_user: ({ email, name, isAuth, location, role, id }) =>
-        set(() => ({ email, isAuth, name, location, role, id })),
-      clearUser: () => set(() => getInitialState()),
+      set_user: ({ email, name, isAuth, location, role, id }) => {
+        set(() => ({ email, isAuth, name, location, role, id }));
+      },
+      clearUser: () => {
+        set(() => getInitialState());
+      },
     }),
     {
       name: "user-auth-storage", // unique name for localStorage key

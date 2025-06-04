@@ -20,6 +20,8 @@ export const guard: GuardAsync = async (pageContext): Promise<void> => {
       cookie.trim().startsWith("hcmlSession=")
     );
     
+    let sessionVerified = false;
+    
     if (hcmlSessionCookie) {
       // Cookie exists, verify with server
       try {
@@ -34,6 +36,7 @@ export const guard: GuardAsync = async (pageContext): Promise<void> => {
         if (response.ok) {
           const userData = await response.json();
           if (userData && !userData.error) {
+            sessionVerified = true;
             // Session is valid, ensure localStorage is in sync
             const authState = {
               state: {
@@ -52,30 +55,36 @@ export const guard: GuardAsync = async (pageContext): Promise<void> => {
           }
         }
       } catch (error) {
+        if (error instanceof Error && 'url' in error) {
+          // This is a redirect, let it propagate
+          throw error;
+        }
         console.warn('Session verification failed during auth guard:', error);
         // If verification fails, clear invalid data
         localStorage.removeItem('user-auth-storage');
       }
     }
     
-    // Check localStorage for existing auth state
-    const userStorage = localStorage.getItem('user-auth-storage');
-    if (userStorage) {
-      try {
-        const userData = JSON.parse(userStorage);
-        const state = userData.state || {};
-        
-        // If user is authenticated in localStorage but no cookie, clear it
-        if (state.isAuth && state.email && !hcmlSessionCookie) {
+    if (!sessionVerified) {
+      // Check localStorage for existing auth state
+      const userStorage = localStorage.getItem('user-auth-storage');
+      if (userStorage) {
+        try {
+          const userData = JSON.parse(userStorage);
+          const state = userData.state || {};
+          
+          // If user is authenticated in localStorage but no cookie, clear it
+          if (state.isAuth && state.email && !hcmlSessionCookie) {
+            localStorage.removeItem('user-auth-storage');
+          } else if (state.isAuth && state.email && hcmlSessionCookie) {
+            // Both exist, redirect to dashboard
+            throw redirect('/dashboard');
+          }
+        } catch (error) {
+          console.warn('Error parsing user storage in auth guard:', error);
+          // Clear invalid data
           localStorage.removeItem('user-auth-storage');
-        } else if (state.isAuth && state.email && hcmlSessionCookie) {
-          // Both exist, redirect to dashboard
-          throw redirect('/dashboard');
         }
-      } catch (error) {
-        console.warn('Error parsing user storage in auth guard:', error);
-        // Clear invalid data
-        localStorage.removeItem('user-auth-storage');
       }
     }
     

@@ -8,8 +8,10 @@ import {
   setSignedCookie,
   deleteCookie,
 } from "hono/cookie";
+import { PrismaClient } from "@prisma/client";
 
 const authRoutes = new Hono();
+const prisma = new PrismaClient();
 
 // Authentication route for login
 authRoutes.get("/login", async (c) => {
@@ -85,10 +87,10 @@ authRoutes.post("/verify", async (c) => {
     try {
       // Decrypt the token
       const decrypted = crypto.decrypt(sessionToken);
-      const userData = JSON.parse(decrypted);
+      const sessionData = JSON.parse(decrypted);
       
       // Check token expiration if timestamp exists
-      if (userData.exp && new Date(userData.exp) < new Date()) {
+      if (sessionData.exp && new Date(sessionData.exp) < new Date()) {
         // Clear invalid cookie
         deleteCookie(c, "hcmlSession", {
           path: "/",
@@ -99,10 +101,63 @@ authRoutes.post("/verify", async (c) => {
         return c.json({ error: "Session expired" }, 401);
       }
       
-      // Add timestamp for session verification
-      userData.lastVerified = new Date().toISOString();
-      
-      return c.json(userData, 200);
+      // Fetch complete user profile from database if we have an email
+      if (sessionData.email) {
+        try {
+          const userProfile = await prisma.users.findUnique({
+            where: { email: sessionData.email.toLowerCase() },
+            include: {
+              userLocations: {
+                include: { location: true }
+              }
+            }
+          });
+          
+          if (userProfile) {
+            // Merge session data with complete user profile
+            const completeUserData = {
+              ...sessionData,
+              id: userProfile.id,
+              email: userProfile.email,
+              name: userProfile.name || sessionData.name,
+              role: userProfile.role,
+              location: userProfile.userLocations?.map(ul => ul.location) || [],
+              lastVerified: new Date().toISOString(),
+            };
+            
+            return c.json(completeUserData, 200);
+          } else {
+            // User not found in database, return session data with default role
+            const userData = {
+              ...sessionData,
+              role: sessionData.role || 'read_only',
+              location: sessionData.location || [],
+              lastVerified: new Date().toISOString(),
+            };
+            
+            return c.json(userData, 200);
+          }
+        } catch (dbError) {
+          console.warn('Database lookup failed during session verification:', dbError);
+          // Fallback to session data with default role
+          const userData = {
+            ...sessionData,
+            role: sessionData.role || 'read_only',
+            location: sessionData.location || [],
+            lastVerified: new Date().toISOString(),
+          };
+          
+          return c.json(userData, 200);
+        }
+      } else {
+        // No email in session data, return what we have
+        const userData = {
+          ...sessionData,
+          lastVerified: new Date().toISOString(),
+        };
+        
+        return c.json(userData, 200);
+      }
     } catch (error) {
       // Clear invalid cookie
       deleteCookie(c, "hcmlSession", {

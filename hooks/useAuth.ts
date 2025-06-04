@@ -26,15 +26,17 @@ export const useAuth = () => {
 
       if (response.ok) {
         const userData = await response.json();
+        
         if (userData && !userData.error) {
-          set_user({
+          const newUserData = {
             email: userData.email || '',
             name: userData.name || '',
             isAuth: true,
             role: userData.role || '',
             location: userData.location || [],
             id: userData.id || '',
-          });
+          };
+          set_user(newUserData);
           sessionCheckedRef.current = true;
           return true;
         }
@@ -139,28 +141,28 @@ export const useAuth = () => {
     }
 
     return false;
-  }, [set_user, role, id]);
+  }, [set_user]);
 
   // Initialize authentication state
   const initializeAuth = useCallback(async () => {
-    if (sessionCheckedRef.current) {
+    // If already checking, don't start another check
+    if (isCheckingRef.current) {
       return;
     }
-
-    // If already authenticated, check user profile
-    if (isAuth && email) {
-      await checkUserProfile(email, name);
-      return;
-    }
-
-    // Verify session with server
+    
+    // Verify session with server - this will now return complete user data including role
     const sessionValid = await verifySession();
     
-    // If session is valid but we don't have user profile data, check it
-    if (sessionValid && email && !role) {
+    // If session verification succeeded, we're done - the verify endpoint now handles everything
+    if (sessionValid) {
+      return;
+    }
+    
+    // If session verification failed but we have local data, try to get fresh data from backend
+    if (!sessionValid && isAuth && email) {
       await checkUserProfile(email, name);
     }
-  }, [isAuth, email, name, role, verifySession, checkUserProfile]);
+  }, [isAuth, email, name, verifySession, checkUserProfile]);
 
   // Logout function
   const logout = useCallback(async () => {
