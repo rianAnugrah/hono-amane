@@ -37,22 +37,16 @@ async function main() {
         data: {
           version: 1,
           isLatest: true,
-          projectCode: asset.projectCode_id ? {
-            connect: { id: asset.projectCode_id }
-          } : undefined,
+          projectCode_id: asset.projectCode_id,
           assetNo: asset.assetNo,
           lineNo: asset.lineNo,
           assetName: asset.assetName,
           remark: asset.remark || null,
-          locationDesc: asset.locationDesc_id ? {
-            connect: { id: asset.locationDesc_id }
-          } : undefined,
-          detailsLocation: asset.detailsLocation_id ? {
-            connect: { id: asset.detailsLocation_id }
-          } : undefined,
+          locationDesc_id: asset.locationDesc_id,
+          detailsLocation_id: asset.detailsLocation_id,
           condition: asset.condition,
-          pisDate: asset.pisDate,
-          transDate: asset.transDate,
+          pisDate: asset.pisDate || new Date(),
+          transDate: asset.transDate || new Date(),
           categoryCode: asset.categoryCode,
           afeNo: asset.afeNo === "N/A" ? null : String(asset.afeNo),
           adjustedDepre: asset.adjustedDepre,
@@ -63,6 +57,7 @@ async function main() {
           ytdDepre: asset.ytdDepre,
           bookValue: asset.bookValue,
           taggingYear: asset.taggingYear || null,
+          type: asset.type,
         },
       });
 
