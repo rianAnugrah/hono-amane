@@ -26,11 +26,16 @@ export default function MultiSelect({
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const [searchTerm, setSearchTerm] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Handle click outside to close dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const isOutsideContainer = containerRef.current && !containerRef.current.contains(target);
+      const isOutsideDropdown = dropdownRef.current && !dropdownRef.current.contains(target);
+      
+      if (isOutsideContainer && isOutsideDropdown) {
         setIsOpen(false);
       }
     }
@@ -104,7 +109,6 @@ export default function MultiSelect({
         className="w-full px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        onClick={(e) => e.stopPropagation()} // Prevent dropdown from closing
       />
     </div>
   );
@@ -160,6 +164,7 @@ export default function MultiSelect({
         <AnimatePresence>
           {isOpen && (
             <motion.div 
+              ref={dropdownRef}
               initial={{ opacity: 0, y: -10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}

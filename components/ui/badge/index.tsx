@@ -76,7 +76,7 @@ export default function Badge({
       `}
     >
       {icon && <span className="mr-1.5">{icon}</span>}
-      {text}
+      <span className="truncate">{text}</span>
     </span>
   )
 }

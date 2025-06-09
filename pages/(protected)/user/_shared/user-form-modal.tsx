@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import {  motion } from "framer-motion";
+import React, { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import axios from "axios";
 import InputSelect from "@/components/ui/input-select";
 import MultiSelect from "@/components/ui/multi-select";
@@ -40,25 +40,14 @@ export default function UserFormModal({
 }: UserFormProps) {
   const [locations, setLocations] = useState<Location[]>([]);
 
-  const [search, setSearch] = useState("");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
-  const fetchLocations = async () => {
-    const res = await axios.get("/api/locations", {
-      params: { search, sort: sortOrder },
-    });
+  const fetchLocations = useCallback(async () => {
+    const res = await axios.get("/api/locations");
     setLocations(res.data);
-  };
+  }, []);
 
   useEffect(() => {
     fetchLocations();
-  }, [search, sortOrder]);
-
-  ////console.log("FORNM", locations);
-  // Function to display object as formatted JSON
-  // const formatObject = (obj) => {
-  //   return JSON.stringify(obj, null, 2);
-  // };
+  }, [fetchLocations]);
 
   return (
     <motion.div
@@ -115,11 +104,11 @@ export default function UserFormModal({
                       {
                         value: "pic",
                         label: "PIC",
-                      }
+                      },
                     ]}
                     value={form.role || "read_only"}
                     onChange={(e) => {
-                      const value = typeof e === 'string' ? e : e.target.value;
+                      const value = typeof e === "string" ? e : e.target.value;
                       setForm({ ...form, role: value });
                     }}
                   />

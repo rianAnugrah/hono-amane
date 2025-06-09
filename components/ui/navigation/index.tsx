@@ -219,7 +219,7 @@ function MobileNavbar() {
                   </div>
 
                   <div className="mt-4 px-3">
-                    <LocationDisplay size={3} orientation="vertical" />
+                    <LocationDisplay size={9} orientation="vertical" />
                   </div>
 
                   <div className="flex-grow"></div>
@@ -337,7 +337,7 @@ function DesktopNav() {
       </div>
 
       <div className="flex flex-grow flex-col"></div>
-      <LocationDisplay size={isCompact ? 0 : 3} orientation="vertical" />
+      <LocationDisplay size={99} orientation="vertical" />
     </nav>
   );
 }

@@ -17,7 +17,7 @@ export default function LocationDisplay({ size = 2 , orientation = "horizontal" 
       {location.slice(0, size).map((loc: any, index: number) => (
         <Badge
           key={index}
-          variant="outline"
+          variant="light"
           text={loc?.description}
           icon={<MapPin size={12} />}
           color="blue"
@@ -26,7 +26,7 @@ export default function LocationDisplay({ size = 2 , orientation = "horizontal" 
 
       {location.length > size && (
         <div className="">
-          <div className="dropdown w-full h-full cursor-pointer hover:font-bold">
+          <div className="dropdown dropdown-end w-full h-full cursor-pointer hover:font-bold">
             <div tabIndex={0} role="button" className="">
               <span className="bg-gray-50 rounded-full flex gap-2 items-center h-5 text-xs p-1">
               <MapPin size={12} /> +{location.length - size}
@@ -43,7 +43,7 @@ export default function LocationDisplay({ size = 2 , orientation = "horizontal" 
                   .map((loc: any, index: number) => (
                     <Badge
                       key={index}
-                      text={loc?.location?.description}
+                      text={loc?.description}
                       icon={<MapPin size={12} />}
                       color="gray"
                       variant="light"
