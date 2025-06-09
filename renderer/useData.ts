@@ -1,7 +1,8 @@
+import { usePageContext } from "vike-react/usePageContext"
+
 // https://vike.dev/useData
 export { useData }
 
-import { usePageContext } from './usePageContext'
 
 /** https://vike.dev/useData */
 function useData<Data>() {

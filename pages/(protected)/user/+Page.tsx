@@ -110,7 +110,7 @@ export default function Page() {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6  min-h-screen">
       <AnimatePresence>
         {isModalOpen && (
           <UserFormModal
@@ -186,7 +186,7 @@ export default function Page() {
         transition={{ duration: 0.3, delay: 0.2 }}
       >
         {/* Table Header */}
-        <div className="hidden md:grid md:grid-cols-5 bg-gray-50 border-b border-gray-200 px-6 py-3">
+        <div className="hidden md:grid md:grid-cols-5  border-b border-gray-200 px-6 py-3">
           <div className="text-sm font-medium text-gray-600">Email</div>
           <div className="text-sm font-medium text-gray-600">Name</div>
           <div className="text-sm font-medium text-gray-600">Role</div>
@@ -242,7 +242,7 @@ export default function Page() {
                     delay: index * 0.05,
                     ease: "easeOut"
                   }}
-                  className="grid grid-cols-1 md:grid-cols-5 px-6 py-4 hover:bg-gray-50 transition-all gap-y-2 md:gap-y-0"
+                  className="grid grid-cols-1 md:grid-cols-5 px-6 py-4 hover: transition-all gap-y-2 md:gap-y-0"
                   layout
                 >
                   {/* Email */}

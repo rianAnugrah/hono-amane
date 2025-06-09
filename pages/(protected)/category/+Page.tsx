@@ -40,7 +40,7 @@ export default function ProjectCodesPage() {
   // Mobile view toggle between list and form
   if (isMobile) {
     return (
-      <div className="p-4 bg-gray-50 min-h-screen">
+      <div className="p-4 min-h-screen">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Project Codes</h1>
           <p className="text-gray-500 mb-4">Manage your project codes</p>
@@ -98,7 +98,7 @@ export default function ProjectCodesPage() {
 
   // Desktop split view
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 min-h-screen">
       <div className="mb-8 mx-auto w-full">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Project Codes</h1>
         <p className="text-gray-500">Manage your project codes</p>

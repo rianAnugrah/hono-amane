@@ -267,7 +267,7 @@ export default function InspectionListPage() {
 
     if (inspections.length === 0) {
       return (
-        <div className="p-4 bg-gray-50 flex items-center justify-center text-gray-600 rounded-lg text-center w-full h-full">
+        <div className="p-4  flex items-center justify-center text-gray-600 rounded-lg text-center w-full h-full">
           <p>No inspection records found.</p>
         </div>
       );
@@ -275,7 +275,7 @@ export default function InspectionListPage() {
 
     if (filteredInspections.length === 0) {
       return (
-        <div className="p-4 bg-gray-50 text-gray-600 rounded-lg">
+        <div className="p-4  text-gray-600 rounded-lg">
           No inspections match the current filters.
         </div>
       );
@@ -383,7 +383,7 @@ export default function InspectionListPage() {
                 </div>
 
                 {inspection.notes && (
-                  <div className="mt-3 text-sm text-gray-700 bg-gray-50 p-2 rounded-md">
+                  <div className="mt-3 text-sm text-gray-700  p-2 rounded-md">
                     <p className="font-medium text-xs text-gray-500 mb-1">Notes:</p>
                     <p className="line-clamp-2">{inspection.notes}</p>
                   </div>
@@ -687,119 +687,9 @@ export default function InspectionListPage() {
   return (
     <div className="p-0 h-screen overflow-y-hidden ">
       {/* Desktop view: enhanced layout with full view option */}
-      {!isMobile ? (
-        isFullView ? (
-          <div className="grid grid-cols-5 gap-6 ">
-            {/* Left side: Inspections list - smaller when in full view */}
-            <div className="col-span-1 overflow-hidden bg-gray-50 h-screen">
-              {renderInspectionsList()}
-            </div>
-
-            {/* Right side: Full inspection details using component */}
-            <div className="col-span-4 bg-white rounded-xl shadow overflow-hidden max-h-[calc(100vh-2rem)] m-4">
-              {showNewInspectionForm ? (
-                renderNewInspectionForm()
-              ) : selectedInspectionId ? (
-                <div className="p-4 overflow-y-auto h-full">
-                  <div className="flex justify-end mb-4">
-                    <motion.button
-                      onClick={toggleFullView}
-                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-md hover:bg-blue-200 transition flex items-center gap-1.5"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
-                      </svg>
-                      <span>Split View</span>
-                    </motion.button>
-                  </div>
-                  <InspectionDetail
-                    inspectionId={selectedInspectionId}
-                    onBack={() => setSelectedInspectionId(null)}
-                    onInspectionChange={() => loadInspections()}
-                  />
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-60 text-gray-500">
-                  <p>
-                    Select an inspection to view details or create a new one
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-12 gap-0 h-screen">
-            {/* Left side: Inspections list */}
-            <div className="col-span-4 h-screen overflow-hidden bg-gray-50 border-r border-gray-200">
-              {renderInspectionsList()}
-            </div>
-
-            {/* Middle: Inspection details or New Form */}
-            <div className="col-span-8 bg-white overflow-hidden h-screen">
-              {showNewInspectionForm ? (
-                renderNewInspectionForm()
-              ) : selectedInspectionId ? (
-                <div className="overflow-y-auto h-full">
-                  <div className="flex justify-between items-center py-4 px-10 border-b border-gray-200">
-                    <h2 className="text-xl font-semibold">Inspection Details</h2>
-                    <div className="flex items-center space-x-2">
-                      <motion.button
-                        onClick={toggleFullView}
-                        className="bg-gray-100 text-gray-600 p-2 rounded-lg hover:bg-gray-200 transition"
-                        whileHover={{ scale: 1.05 }}
-                        title="Full View"
-                      >
-                        <Fullscreen className="h-4 w-4" />
-                      </motion.button>
-                      <Link
-                        href={`/inspection/${selectedInspectionId}`}
-                        className="bg-gray-100 text-gray-600 p-2 rounded-lg hover:bg-gray-200 transition"
-                      >
-                        <Expand className="h-4 w-4" />
-                      </Link>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <InspectionDetail
-                      inspectionId={selectedInspectionId}
-                      onBack={() => setSelectedInspectionId(null)}
-                      onInspectionChange={() => loadInspections()}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full bg-gray-50 text-gray-500 p-8">
-                  <svg className="h-12 w-12 text-gray-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  <p className="text-lg font-medium mb-2">No inspection selected</p>
-                  <p className="text-center max-w-md mb-6">
-                    Select an inspection from the list or create a new one to view details
-                  </p>
-                  <motion.button
-                    onClick={() => {
-                      setShowNewInspectionForm(true);
-                      setSelectedInspectionId(null);
-                    }}
-                    className="bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition shadow-sm flex items-center gap-2"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                    </svg>
-                    <span>New Inspection</span>
-                  </motion.button>
-                </div>
-              )}
-            </div>
-          </div>
-        )
-      ) : (
-        /* Mobile view: just the list */
+     
         <div className="pt-2 h-full overflow-y-auto">{renderInspectionsList()}</div>
-      )}
+
     </div>
   );
 }

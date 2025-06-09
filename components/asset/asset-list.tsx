@@ -87,7 +87,7 @@ export default function AssetList({
   // Enhanced empty state with better UI
   const EmptyState = () => (
     <motion.div 
-      className="flex flex-col items-center justify-center py-16 w-full bg-white rounded-xl border border-gray-200 shadow-sm"
+      className="flex flex-col items-center justify-center py-16 w-full "
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}

@@ -9,6 +9,8 @@ interface LocationDisplayProps {
 
 export default function LocationDisplay({ size = 2 , orientation = "horizontal" }: LocationDisplayProps) {
   const { location } = useUserStore();
+
+  console.log(location)
   
   return location?.length > 0 ? (
     <div className={`flex gap-1  ${orientation === "vertical" ? "flex-col items-start" : "flex-row items-center"}`}>
@@ -16,10 +18,9 @@ export default function LocationDisplay({ size = 2 , orientation = "horizontal" 
         <Badge
           key={index}
           variant="outline"
-          text={loc?.location?.description}
+          text={loc?.description}
           icon={<MapPin size={12} />}
           color="blue"
-          variant="light"
         />
       ))}
 
