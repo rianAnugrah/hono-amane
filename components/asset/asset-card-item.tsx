@@ -187,7 +187,7 @@ const CardItem = ({
               className="text-yellow-500 mr-1  transition-colors"
             />
             <p className=" text-gray-900 text-sm group-hover:text-green-600 transition-colors">
-              {formatDate(asset.createdAt)}
+              {formatDate(asset.pisDate)}
             </p>
           </div>
           {/* Price and Actions */}

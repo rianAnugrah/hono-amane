@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const assetsJsonData = JSON.parse(fs.readFileSync(path.join(__dirname, 'assets-hbi.json'), 'utf-8'));
+const assetsJsonData = JSON.parse(fs.readFileSync(path.join(__dirname, 'assets-hbm.json'), 'utf-8'));
 
 // Define interface for JSON data structure
 interface AssetJsonItem {
@@ -53,7 +53,7 @@ export const locationDescsData = [
   { description: "BD Development Wells" },
   { description: "Sampang Shorebase" },
   { description: "Storage (Sigma)" },
-
+  { description: "n/a" },
 ];
 
 // Details locations data
@@ -136,6 +136,7 @@ export const detailsLocationsData = [
   { description: "HEAD ROOM" },
   { description: "Raas 2" },
   { description: "Pantry Lt.24" },
+  { description: "n/a" },
 ];
 
 // Helper function to get project code ID
@@ -178,31 +179,45 @@ const parseDate = (dateStr: string): Date | null => {
     return null;
   }
   
-  // Parse MM/DD/YYYY format
-  const parts = dateStr.split('/');
-  if (parts.length !== 3) {
+  // Handle both YYYY-MM-DD and MM/DD/YYYY formats
+  let parts: string[];
+  let year: number, month: number, day: number;
+  
+  if (dateStr.includes('-')) {
+    // Parse YYYY-MM-DD format
+    parts = dateStr.split('-');
+    if (parts.length !== 3) {
+      return null;
+    }
+    [year, month, day] = parts.map(p => parseInt(p));
+  } else if (dateStr.includes('/')) {
+    // Parse MM/DD/YYYY format
+    parts = dateStr.split('/');
+    if (parts.length !== 3) {
+      return null;
+    }
+    const [monthStr, dayStr, yearStr] = parts;
+    month = parseInt(monthStr);
+    day = parseInt(dayStr);
+    year = parseInt(yearStr);
+  } else {
     return null;
   }
   
-  const [month, day, year] = parts;
-  const monthNum = parseInt(month);
-  const dayNum = parseInt(day);
-  const yearNum = parseInt(year);
-  
   // Validate parsed numbers
-  if (isNaN(monthNum) || isNaN(dayNum) || isNaN(yearNum)) {
+  if (isNaN(month) || isNaN(day) || isNaN(year)) {
     return null;
   }
   
   // Validate date ranges
-  if (monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31 || yearNum < 1900 || yearNum > 2100) {
+  if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1900 || year > 2100) {
     return null;
   }
   
-  const date = new Date(yearNum, monthNum - 1, dayNum);
+  const date = new Date(year, month - 1, day);
   
   // Check if the date is valid (handles cases like Feb 30th)
-  if (date.getFullYear() !== yearNum || date.getMonth() !== monthNum - 1 || date.getDate() !== dayNum) {
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
     return null;
   }
   
@@ -219,7 +234,7 @@ const parseStringValue = (value: string | null | undefined): string => {
 
 // Transform JSON data to the format expected by the application
 const transformAssetData = (jsonItem: AssetJsonItem) => ({
-  assetNo: parseStringValue(jsonItem.ASSET_NO) + '-I',
+  assetNo: parseStringValue(jsonItem.ASSET_NO) + '-M', //ini hardcode '-M' untuk HBM dan '-I' untuk HBI
   lineNo: parseStringValue(jsonItem.LINE_NO),
   assetName: parseStringValue(jsonItem.ASSET_NAME),
   remark: parseStringValue(jsonItem.REMARK),
@@ -239,7 +254,7 @@ const transformAssetData = (jsonItem: AssetJsonItem) => ({
   projectCode_id: getProjectCodeId(parseStringValue(jsonItem.PROJECT_CODE) || 'n/a'),
   locationDesc_id: getLocationDescId(parseStringValue(jsonItem.LOCATION_DESC) || 'n/a'),
   detailsLocation_id: getDetailsLocationId(parseStringValue(jsonItem.DETAILS_LOCATION) || 'n/a'),
-  type: 'HBI' // ini hardcode, pastikan tidak salah saat import
+  type: 'HBM' // HBI || HBM ini hardcode, pastikan tidak salah saat import
 });
 
 // Dynamically load and transform assets data from JSON file

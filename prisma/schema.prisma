@@ -53,22 +53,22 @@ model DetailsLocation {
 model Asset {
   id                 String           @id @default(uuid())
   assetNo            String
-  lineNo             String
-  assetName          String
+  lineNo             String?
+  assetName          String?
   remark             String?
   condition          String
-  pisDate            DateTime
-  transDate          DateTime
-  categoryCode       String
+  pisDate            DateTime?
+  transDate          DateTime?
+  categoryCode       String?
   afeNo              String?
   type               String?
-  adjustedDepre      Float
+  adjustedDepre      Float?
   poNo               String?
-  acqValueIdr        Float
-  acqValue           Float
-  accumDepre         Float
-  ytdDepre           Float
-  bookValue          Float
+  acqValueIdr        Float?
+  acqValue           Float?
+  accumDepre         Float?
+  ytdDepre           Float?
+  bookValue          Float?
   taggingYear        String?
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
