@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { ReactNode } from "react";
-import { LocationSelector } from "@/components/blocks/location-selector";
 import InputSelect from "@/components/ui/input-select";
 import InputText from "@/components/ui/input-text";
 import { Search } from "lucide-react";
@@ -21,7 +20,6 @@ type Props = {
 export function UserFilterToolbar({
   defaultValues = {},
   onChange,
-  children,
 }: Props) {
   const [q, setQ] = useState(defaultValues.q || "");
   const [role, setRole] = useState(defaultValues.role || "");

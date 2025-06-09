@@ -2,7 +2,7 @@ import { Link } from "@/renderer/Link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { UserFilterToolbar } from "@/pages/(protected)/user/_shared/user-filter-toolbar";
-import { PlusCircle, Menu, X, UserPlus, Search, Filter, RefreshCw } from "lucide-react";
+import { UserPlus, Filter, RefreshCw } from "lucide-react";
 import UserFormModal from "./_shared/user-form-modal";
 
 // Extended User type with all needed properties
@@ -68,14 +68,14 @@ export default function Page() {
       locationIds,
       ...(editingId ? {} : { password }), // don't send password when editing
     };
-    
+
     try {
       await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      
+
       setForm({ email: "", password: "" });
       setEditingId(null);
       setIsModalOpen(false);
@@ -124,7 +124,7 @@ export default function Page() {
       </AnimatePresence>
 
       {/* Page Header */}
-      <motion.div 
+      <motion.div
         className="mb-6"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -132,10 +132,14 @@ export default function Page() {
       >
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-            <p className="text-gray-500 mt-1">Manage system users and their access permissions</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              User Management
+            </h1>
+            <p className="text-gray-500 mt-1">
+              Manage system users and their access permissions
+            </p>
           </div>
-          
+
           {/* <motion.button
             onClick={() => {
               setForm({ email: "", password: "" });
@@ -163,7 +167,7 @@ export default function Page() {
             <Filter className="w-4 h-4" />
             <span>Filter Options</span>
           </div>
-          
+
           <motion.button
             onClick={handleRefresh}
             className="text-gray-500 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
@@ -171,15 +175,17 @@ export default function Page() {
             whileTap={{ scale: 0.95 }}
             disabled={refreshing}
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+            />
           </motion.button>
         </div>
-        
+
         <UserFilterToolbar onChange={setFilters} />
       </motion.div>
 
       {/* User List */}
-      <motion.div 
+      <motion.div
         className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -201,17 +207,32 @@ export default function Page() {
             <span className="ml-3 text-gray-500">Loading users...</span>
           </div>
         )}
-        
+
         {/* Empty State */}
         {!loading && users.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
             <div className="bg-gray-100 p-4 rounded-full mb-4">
-              <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              <svg
+                className="w-10 h-10 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                ></path>
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-1">No users found</h3>
-            <p className="text-gray-500 max-w-md mb-6">There are no users matching your current filters. Try adjusting your search or create a new user.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">
+              No users found
+            </h3>
+            <p className="text-gray-500 max-w-md mb-6">
+              There are no users matching your current filters. Try adjusting
+              your search or create a new user.
+            </p>
             <motion.button
               onClick={() => {
                 setForm({ email: "", password: "" });
@@ -226,7 +247,7 @@ export default function Page() {
             </motion.button>
           </div>
         )}
-        
+
         {/* User List */}
         {!loading && users.length > 0 && (
           <div className="divide-y divide-gray-100 overflow-y-auto max-h-[calc(100vh-320px)]">
@@ -237,10 +258,10 @@ export default function Page() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ 
-                    duration: 0.2, 
+                  transition={{
+                    duration: 0.2,
                     delay: index * 0.05,
-                    ease: "easeOut"
+                    ease: "easeOut",
                   }}
                   className="grid grid-cols-1 md:grid-cols-5 px-6 py-4 hover: transition-all gap-y-2 md:gap-y-0"
                   layout
@@ -275,12 +296,17 @@ export default function Page() {
                     </span>
                     <div className="text-gray-800">
                       {user.role ? (
-                        <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
-                          user.role === 'admin' ? 'bg-purple-100 text-purple-800' :
-                          user.role === 'manager' ? 'bg-blue-100 text-blue-800' :
-                          user.role === 'read_only' ? 'bg-gray-100 text-gray-800' :
-                          'bg-green-100 text-green-800'
-                        }`}>
+                        <span
+                          className={`px-2.5 py-1 text-xs font-medium rounded-full ${
+                            user.role === "admin"
+                              ? "bg-purple-100 text-purple-800"
+                              : user.role === "manager"
+                              ? "bg-blue-100 text-blue-800"
+                              : user.role === "read_only"
+                              ? "bg-gray-100 text-gray-800"
+                              : "bg-green-100 text-green-800"
+                          }`}
+                        >
                           {user.role}
                         </span>
                       ) : (
@@ -322,7 +348,7 @@ export default function Page() {
                         />
                       </svg>
                     </motion.button>
-                    
+
                     <motion.button
                       onClick={() => handleDelete(user.id)}
                       className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
