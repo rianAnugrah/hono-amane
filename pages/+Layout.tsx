@@ -5,13 +5,11 @@ import "@/renderer/PageShell.css";
 import Navbar from "@/components/ui/navigation";
 import autoAnimate from "@formkit/auto-animate";
 import { useAuth } from "@/hooks/useAuth";
-import { useUserStore } from "@/stores/store-user-login";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const parent = useRef(null);
   const pageContext = usePageContext();
-  const { initializeAuth, isAuthRoute, isAuthenticated } = useAuth();
-  const { role, isAuth } = useUserStore();
+  const { initializeAuth, isAuthRoute } = useAuth();
   const [authInitialized, setAuthInitialized] = useState(false);
   
   // Check if current page is an auth page

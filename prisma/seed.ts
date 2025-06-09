@@ -2,15 +2,15 @@ import { PrismaClient } from "@prisma/client";
 import { assetsData } from "./asset-data";
 const prisma = new PrismaClient();
 
-function parseFloatSafe(val: string): number {
-  const num = parseFloat(val.replace(/,/g, "").trim());
-  return isNaN(num) ? 0 : num;
-}
+// function parseFloatSafe(val: string): number {
+//   const num = parseFloat(val.replace(/,/g, "").trim());
+//   return isNaN(num) ? 0 : num;
+// }
 
-function parseDateSafe(dateStr: string): Date {
-  const [month, day, year] = dateStr.split("/");
-  return new Date(`${year}-${month}-${day}`);
-}
+// function parseDateSafe(dateStr: string): Date {
+//   const [month, day, year] = dateStr.split("/");
+//   return new Date(`${year}-${month}-${day}`);
+// }
 
 async function main() {
   const assets = assetsData

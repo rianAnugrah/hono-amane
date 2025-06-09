@@ -8,7 +8,7 @@ import authRoutes from "./routes/auth";
 import uploadRoutes from "./routes/upload";
 import { env } from "../config/env";
 import users from "./routes/users";
-import { authMiddleware, roleMiddleware } from "./middleware/auth";
+import { authMiddleware } from "./middleware/auth";
 
 import detailsLocationRoute from "./routes/location-details";
 import projectCodeRoute from "./routes/project-codes";

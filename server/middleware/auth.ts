@@ -37,12 +37,14 @@ export const authMiddleware: MiddlewareHandler = async (c, next) => {
       // Continue to next middleware or route handler
       await next();
     } catch (error) {
+      console.error("Error during token verification" , error);
       return c.json({ 
         error: "Invalid session", 
         status: "unauthorized" 
       }, 401);
     }
   } catch (error) {
+    console.error("Error during token verification" , error);
     return c.json({ 
       error: "Internal server error", 
       status: "error" 

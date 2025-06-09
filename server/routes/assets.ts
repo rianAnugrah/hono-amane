@@ -1,58 +1,65 @@
 import { Hono } from "hono";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const assetRoutes = new Hono();
 
-// Updated interface to match the schema
-interface Asset {
-  id: string;
-  assetNo: string;
-  lineNo: string;
-  assetName: string;
-  remark?: string | null;
-  condition: string;
-  pisDate: Date;
-  transDate: Date;
-  categoryCode: string;
-  afeNo?: string | null;
-  type?: string | null;
-  adjustedDepre: number;
-  poNo?: string | null;
-  acqValueIdr: number;
-  acqValue: number;
-  accumDepre: number;
-  ytdDepre: number;
-  bookValue: number;
-  taggingYear?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt?: Date | null;
-  isLatest: boolean;
-  parentId?: string | null;
-  version: number;
-  projectCode_id?: number | null;
-  locationDesc_id?: number | null;
-  detailsLocation_id?: number | null;
-  images?: string[];  // Making this optional to avoid TypeScript errors
+// Updated interface to match the actual Prisma schema results
+// interface Asset {
+//   id: string;
+//   assetNo: string;
+//   lineNo: string;
+//   assetName: string;
+//   remark?: string | null;
+//   condition: string;
+//   pisDate: Date;
+//   transDate: Date;
+//   categoryCode: string;
+//   afeNo?: string | null;
+//   type?: string | null;
+//   adjustedDepre: number;
+//   poNo?: string | null;
+//   acqValueIdr: number;
+//   acqValue: number;
+//   accumDepre: number;
+//   ytdDepre: number;
+//   bookValue: number;
+//   taggingYear?: string | null;
+//   createdAt: Date;
+//   updatedAt: Date;
+//   deletedAt?: Date | null;
+//   isLatest: boolean;
+//   parentId?: string | null;
+//   version: number;
+//   projectCode_id?: number | null;
+//   locationDesc_id?: number | null;
+//   detailsLocation_id?: number | null;
+//   images?: string[];
 
-  // Relations (optional for when they are included)
-  projectCode?: {
-    id: number;
-    name: string;
-    description?: string | null;
+//   // Relations (optional for when they are included) - updated to match actual schema
+//   projectCode?: {
+//     id: number;
+//     code: string;
+//     description?: string | null;
+//   } | null;
+//   locationDesc?: {
+//     id: number;
+//     description: string;
+//   } | null;
+//   detailsLocation?: {
+//     id: number;
+//     description: string;
+//   } | null;
+// }
+
+// Type for Prisma asset query results with relations
+type AssetWithRelations = Prisma.AssetGetPayload<{
+  include: {
+    projectCode: true;
+    locationDesc: true;
+    detailsLocation: true;
   };
-  locationDesc?: {
-    id: number;
-    name: string;
-    description?: string | null;
-  };
-  detailsLocation?: {
-    id: number;
-    name: string;
-    description?: string | null;
-  };
-}
+}>;
 
 // GET all assets with search, filter, sort, and pagination
 assetRoutes.get("/", async (c) => {
@@ -111,8 +118,8 @@ assetRoutes.get("/", async (c) => {
       ? parseFloat(c.req.query("bookValueMax")!)
       : undefined;
 
-    // Build where conditions object
-    const whereConditions: any = {
+    // Build where conditions object with proper typing
+    const whereConditions: Prisma.AssetWhereInput = {
       deletedAt: null,
       isLatest: true,
     };
@@ -189,7 +196,7 @@ assetRoutes.get("/", async (c) => {
     }
 
     // Execute the query with filters and pagination
-    const assets: Asset[] = await prisma.asset.findMany({
+    const assets: AssetWithRelations[] = await prisma.asset.findMany({
       where: whereConditions,
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -226,7 +233,7 @@ assetRoutes.get("/", async (c) => {
 // GET single asset (latest, not deleted)
 assetRoutes.get("/:id", async (c) => {
   try {
-    const asset: Asset | null = await prisma.asset.findFirst({
+    const asset: AssetWithRelations | null = await prisma.asset.findFirst({
       where: {
         id: c.req.param("id"),
         deletedAt: null,
@@ -249,7 +256,7 @@ assetRoutes.get("/:id", async (c) => {
 // GET single asset (latest, not deleted)
 assetRoutes.get("/by-asset-number/:id", async (c) => {
   try {
-    const asset: Asset | null = await prisma.asset.findFirst({
+    const asset: AssetWithRelations | null = await prisma.asset.findFirst({
       where: {
         assetNo: c.req.param("id"),
         deletedAt: null,
@@ -310,8 +317,8 @@ assetRoutes.post("/", async (c) => {
   try {
     const body = await c.req.json();
 
-    // Prepare the data for Prisma - using any to bypass TypeScript checks
-    const createData: any = {
+    // Prepare the data for Prisma with proper typing
+    const createData: Prisma.AssetCreateInput = {
       version: 1,
       isLatest: true,
       assetNo: body.assetNo,
@@ -364,25 +371,27 @@ assetRoutes.post("/", async (c) => {
     const isPrismaError = error && typeof error === 'object' && 'code' in error && 'meta' in error;
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
-    return c.json(
-      {
-        error: "Failed to create asset",
-        message: errorMessage,
-        ...(isPrismaError && {
-          prisma: {
-            code: (error as { code: string }).code,
-            target: (error as { meta?: { target?: unknown } }).meta?.target,
-            cause: (error as { meta?: { cause?: unknown } }).meta?.cause,
-            details: (error as { meta?: unknown }).meta,
-          },
-        }),
-        raw:
-          process.env.NODE_ENV === "development"
-            ? JSON.stringify(error, null, 2)
-            : undefined,
-      },
-      500
-    );
+    const errorResponse = {
+      error: "Failed to create asset",
+      message: errorMessage,
+      raw:
+        process.env.NODE_ENV === "development"
+          ? JSON.stringify(error, null, 2)
+          : undefined,
+    };
+
+    if (isPrismaError) {
+      Object.assign(errorResponse, {
+        prisma: {
+          code: (error as { code: string }).code,
+          target: (error as { meta?: { target?: unknown } }).meta?.target,
+          cause: (error as { meta?: { cause?: unknown } }).meta?.cause,
+          details: (error as { meta?: unknown }).meta,
+        },
+      });
+    }
+
+    return c.json(errorResponse, 500);
   }
 });
 
@@ -403,8 +412,8 @@ assetRoutes.put("/:id", async (c) => {
       data: { isLatest: false },
     });
     
-    // Prepare the data for Prisma - using any to bypass TypeScript checks
-    const createData: any = {
+    // Prepare the data for Prisma with proper typing
+    const createData: Prisma.AssetCreateInput = {
       version: old.version + 1,
       isLatest: true,
       parentId: old.parentId || old.id,
@@ -426,7 +435,7 @@ assetRoutes.put("/:id", async (c) => {
       ytdDepre: body.ytdDepre ?? old.ytdDepre,
       bookValue: body.bookValue ?? old.bookValue,
       taggingYear: body.taggingYear ?? old.taggingYear,
-      images: Array.isArray(body.images) ? body.images : (old as any).images || [], // Default to old images or empty array
+      images: Array.isArray(body.images) ? body.images : (old.images as string[]) || [], // Default to old images or empty array
     };
     
     // Add relation connections, keeping old connections if not changed
@@ -458,25 +467,27 @@ assetRoutes.put("/:id", async (c) => {
     const isPrismaError = error && typeof error === 'object' && 'code' in error && 'meta' in error;
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
-    return c.json(
-      {
-        error: "Failed to update asset",
-        message: errorMessage,
-        ...(isPrismaError && {
-          prisma: {
-            code: (error as { code: string }).code,
-            target: (error as { meta?: { target?: unknown } }).meta?.target,
-            cause: (error as { meta?: { cause?: unknown } }).meta?.cause,
-            details: (error as { meta?: unknown }).meta,
-          },
-        }),
-        raw:
-          process.env.NODE_ENV === "development"
-            ? JSON.stringify(error, null, 2)
-            : undefined,
-      },
-      500
-    );
+    const errorResponse = {
+      error: "Failed to update asset",
+      message: errorMessage,
+      raw:
+        process.env.NODE_ENV === "development"
+          ? JSON.stringify(error, null, 2)
+          : undefined,
+    };
+
+    if (isPrismaError) {
+      Object.assign(errorResponse, {
+        prisma: {
+          code: (error as { code: string }).code,
+          target: (error as { meta?: { target?: unknown } }).meta?.target,
+          cause: (error as { meta?: { cause?: unknown } }).meta?.cause,
+          details: (error as { meta?: unknown }).meta,
+        },
+      });
+    }
+
+    return c.json(errorResponse, 500);
   }
 });
 
