@@ -1,8 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Asset } from "../../pages/(protected)/asset/types";
 import { QRCodeCanvas } from "qrcode.react";
-import { Hash, FileText, Camera, CopyCheck, Download, X, ChevronLeft, ChevronRight, CheckCircle, AlertTriangle, Image, QrCode } from "lucide-react";
-import { ImageWithFallback, hasValidImages, getColorFromString, getInitials } from "@/components/utils/ImageUtils";
+import {
+  Camera,
+  CopyCheck,
+  Download,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle,
+  Image,
+  QrCode,
+} from "lucide-react";
+import {
+  ImageWithFallback,
+  hasValidImages,
+} from "@/components/utils/ImageUtils";
 import { motion, AnimatePresence } from "framer-motion";
 
 // QR Code and Images component
@@ -11,7 +24,9 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [qrCodeCopied, setQrCodeCopied] = useState(false);
-  const [imageLoadError, setImageLoadError] = useState<Record<number, boolean>>({});
+  const [imageLoadError, setImageLoadError] = useState<Record<number, boolean>>(
+    {}
+  );
 
   const handleCopyAssetNo = () => {
     navigator.clipboard.writeText(asset.assetNo);
@@ -28,56 +43,72 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
     setLightboxOpen(false);
   };
 
-  const navigateImage = (direction: 'next' | 'prev') => {
+  const navigateImage = (direction: "next" | "prev") => {
     if (!asset.images) return;
-    
-    if (direction === 'next') {
-      setCurrentImageIndex(prev => 
+
+    if (direction === "next") {
+      setCurrentImageIndex((prev) =>
         prev === asset.images.length - 1 ? 0 : prev + 1
       );
     } else {
-      setCurrentImageIndex(prev => 
+      setCurrentImageIndex((prev) =>
         prev === 0 ? asset.images.length - 1 : prev - 1
       );
     }
   };
-  
+
   const handleImageError = (index: number) => {
-    setImageLoadError(prev => ({
+    setImageLoadError((prev) => ({
       ...prev,
-      [index]: true
+      [index]: true,
     }));
   };
 
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.4, type: "spring", stiffness: 100 }
-    }
+      transition: { duration: 0.4, type: "spring", stiffness: 100 },
+    },
   };
-  
+
   // Function to create image placeholder with asset name
   const renderPlaceholder = (assetName: string, index: number) => {
-    const colors = ['bg-blue-100', 'bg-green-100', 'bg-purple-100', 'bg-yellow-100', 'bg-pink-100', 'bg-indigo-100'];
-    const textColors = ['text-blue-700', 'text-green-700', 'text-purple-700', 'text-yellow-700', 'text-pink-700', 'text-indigo-700'];
-    
-    const hashCode = assetName.split('').reduce(
-      (hash, char) => char.charCodeAt(0) + ((hash << 5) - hash), 0
-    );
+    const colors = [
+      "bg-blue-100",
+      "bg-green-100",
+      "bg-purple-100",
+      "bg-yellow-100",
+      "bg-pink-100",
+      "bg-indigo-100",
+    ];
+    const textColors = [
+      "text-blue-700",
+      "text-green-700",
+      "text-purple-700",
+      "text-yellow-700",
+      "text-pink-700",
+      "text-indigo-700",
+    ];
+
+    const hashCode = assetName
+      .split("")
+      .reduce((hash, char) => char.charCodeAt(0) + ((hash << 5) - hash), 0);
     const colorIndex = Math.abs(hashCode) % colors.length;
-    
+
     const initials = assetName
-      .split(' ')
-      .map(word => word[0])
-      .join('')
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
       .substring(0, 2)
       .toUpperCase();
-    
+
     return (
-      <div className={`w-full h-full ${colors[colorIndex]} flex flex-col items-center justify-center ${textColors[colorIndex]} relative`}>
+      <div
+        className={`w-full h-full ${colors[colorIndex]} flex flex-col items-center justify-center ${textColors[colorIndex]} relative`}
+      >
         <Image className="opacity-10 absolute" size={48} />
         <span className="text-lg font-bold z-10">{initials}</span>
         <span className="text-xs z-10 mt-1">No Image</span>
@@ -86,7 +117,7 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="space-y-6"
       variants={containerVariants}
       initial="hidden"
@@ -103,12 +134,12 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
             <p className="text-sm text-gray-600">Quick access QR code</p>
           </div>
         </div>
-        
+
         <div className="flex flex-col items-center space-y-4">
           {/* QR Code */}
           <div className="bg-white p-4 rounded-xl border-2 border-gray-100 shadow-sm">
-            <QRCodeCanvas 
-              value={asset.assetNo} 
+            <QRCodeCanvas
+              value={asset.assetNo}
               size={140}
               includeMargin
               fgColor="#1f2937"
@@ -116,23 +147,35 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
               level="H"
             />
           </div>
-          
+
           {/* Asset Number */}
           <div className="text-center space-y-2">
-            <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Asset Number</div>
+            <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+              Asset Number
+            </div>
             <div className="flex items-center justify-center gap-3 bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
-              <span className="font-mono text-lg font-bold text-gray-800">{asset.assetNo}</span>
-              <motion.button 
-                className={`p-2 rounded-lg transition-all ${qrCodeCopied ? 'bg-green-500 text-white' : 'bg-white text-gray-500 hover:bg-gray-100 hover:text-gray-700 border border-gray-200'}`}
+              <span className="font-mono text-lg font-bold text-gray-800">
+                {asset.assetNo}
+              </span>
+              <motion.button
+                className={`p-2 rounded-lg transition-all ${
+                  qrCodeCopied
+                    ? "bg-green-500 text-white"
+                    : "bg-white text-gray-500 hover:bg-gray-100 hover:text-gray-700 border border-gray-200"
+                }`}
                 onClick={handleCopyAssetNo}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {qrCodeCopied ? <CheckCircle size={16} /> : <CopyCheck size={16} />}
+                {qrCodeCopied ? (
+                  <CheckCircle size={16} />
+                ) : (
+                  <CopyCheck size={16} />
+                )}
               </motion.button>
             </div>
             {qrCodeCopied && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
@@ -144,10 +187,10 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
           </div>
         </div>
       </div>
-      
+
       {/* Asset Image Section */}
       {hasImages ? (
-        <motion.div 
+        <motion.div
           className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -160,14 +203,18 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
               </div>
               <div>
                 <h3 className="font-semibold text-gray-800">Asset Images</h3>
-                <p className="text-sm text-gray-600">{asset.images.length} photo{asset.images.length !== 1 ? 's' : ''} available</p>
+                <p className="text-sm text-gray-600">
+                  {asset.images.length} photo
+                  {asset.images.length !== 1 ? "s" : ""} available
+                </p>
               </div>
             </div>
             <div className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg text-sm font-medium border border-emerald-200">
-              {asset.images.length} {asset.images.length === 1 ? 'image' : 'images'}
+              {asset.images.length}{" "}
+              {asset.images.length === 1 ? "image" : "images"}
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             {asset.images.slice(0, 4).map((image, index) => (
               <motion.div
@@ -194,12 +241,15 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
               </motion.div>
             ))}
           </div>
-          
+
           {/* View all images button if more than 4 */}
           {asset.images.length > 4 && (
-            <motion.button 
+            <motion.button
               className="w-full text-sm text-emerald-700 hover:text-emerald-800 font-medium mt-6 bg-emerald-50 hover:bg-emerald-100 px-4 py-3 rounded-xl border border-emerald-200 transition-all flex items-center justify-center gap-2 shadow-sm"
-              whileHover={{ y: -1, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}
+              whileHover={{
+                y: -1,
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+              }}
               onClick={() => openLightbox(0)}
             >
               <Camera size={16} />
@@ -208,7 +258,7 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
           )}
         </motion.div>
       ) : (
-        <motion.div 
+        <motion.div
           className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -218,12 +268,17 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
             <div className="bg-gray-100 p-6 rounded-full mb-4">
               <Camera size={32} className="text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">No Images Available</h3>
-            <p className="text-gray-500 text-sm max-w-sm">This asset doesn't have any images yet. Images will appear here once uploaded.</p>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+              No Images Available
+            </h3>
+            <p className="text-gray-500 text-sm max-w-sm">
+              This asset doesn't have any images yet. Images will appear here
+              once uploaded.
+            </p>
           </div>
         </motion.div>
       )}
-      
+
       {/* Image Lightbox */}
       <AnimatePresence>
         {lightboxOpen && hasImages && (
@@ -235,7 +290,7 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
             onClick={closeLightbox}
           >
             {/* Close button */}
-            <motion.button 
+            <motion.button
               className="absolute top-6 right-6 z-10 p-3 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors"
               onClick={closeLightbox}
               initial={{ y: -10, opacity: 0 }}
@@ -244,7 +299,7 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
             >
               <X size={24} />
             </motion.button>
-            
+
             {/* Current image display */}
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -258,44 +313,48 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
                   {renderPlaceholder(asset.assetName, currentImageIndex)}
                 </div>
               ) : (
-                <ImageWithFallback 
-                  src={asset.images[currentImageIndex]} 
-                  alt={`${asset.assetName} - Full size ${currentImageIndex + 1}`} 
+                <ImageWithFallback
+                  src={asset.images[currentImageIndex]}
+                  alt={`${asset.assetName} - Full size ${
+                    currentImageIndex + 1
+                  }`}
                   className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
                   assetName={asset.assetName}
                   onError={() => handleImageError(currentImageIndex)}
                 />
               )}
-              
+
               {/* Download button */}
-              <a 
-                href={asset.images[currentImageIndex]} 
-                download={`asset-${asset.assetNo}-image-${currentImageIndex + 1}`}
+              <a
+                href={asset.images[currentImageIndex]}
+                download={`asset-${asset.assetNo}-image-${
+                  currentImageIndex + 1
+                }`}
                 className="absolute bottom-6 right-6 p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 text-white transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
                 <Download size={20} />
               </a>
-              
+
               {/* Navigation buttons for multiple images */}
               {asset.images.length > 1 && (
                 <>
-                  <motion.button 
+                  <motion.button
                     className="absolute left-4 p-4 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigateImage('prev');
+                      navigateImage("prev");
                     }}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
                     <ChevronLeft size={28} />
                   </motion.button>
-                  <motion.button 
+                  <motion.button
                     className="absolute right-4 p-4 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigateImage('next');
+                      navigateImage("next");
                     }}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
@@ -304,7 +363,7 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
                   </motion.button>
                 </>
               )}
-              
+
               {/* Image counter */}
               <div className="absolute bottom-6 left-6 bg-black/50 backdrop-blur-sm text-white text-sm px-4 py-2 rounded-full">
                 {currentImageIndex + 1} of {asset.images.length}
@@ -317,4 +376,4 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
   );
 };
 
-export default AssetMediaSection; 
+export default AssetMediaSection;

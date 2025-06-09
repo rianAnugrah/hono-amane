@@ -3,9 +3,6 @@ import { crypto, urlCrypto } from "../utils/crypto";
 import { env } from "@/config/env";
 import {
   getCookie,
-  getSignedCookie,
-  setCookie,
-  setSignedCookie,
   deleteCookie,
 } from "hono/cookie";
 import { PrismaClient } from "@prisma/client";
@@ -66,7 +63,7 @@ authRoutes.post("/decrypt", async (c) => {
 
     return c.json(userData, 200);
   } catch (error) {
-    console.error("Error during token verification");
+    console.error("Error during token verification" , error);
     return c.json({ 
       error: "Invalid token",
       status: "unauthorized" 
@@ -166,10 +163,10 @@ authRoutes.post("/verify", async (c) => {
         domain: env.APP_DOMAIN,
         httpOnly: true,
       });
-      return c.json({ error: "Invalid session" }, 401);
+      return c.json({ error: "Invalid session" , errorMessage: error }, 401);
     }
   } catch (error) {
-    return c.json({ error: "Session verification failed" }, 500);
+    return c.json({ error: "Session verification failed" , errorMessage: error }, 500);
   }
 });
 

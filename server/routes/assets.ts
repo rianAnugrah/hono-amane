@@ -54,43 +54,6 @@ interface Asset {
   };
 }
 
-interface WhereConditions {
-  deletedAt?: null;
-  isLatest?: boolean;
-  OR?: Array<{
-    assetName?: { contains: string; mode: string };
-    assetNo?: { contains: string; mode: string };
-    remark?: { contains: string; mode: string };
-  }>;
-  condition?: { equals: string };
-  assetNo?: { contains: string; mode: string };
-  lineNo?: { contains: string; mode: string };
-  categoryCode?: { equals: string };
-  afeNo?: { contains: string; mode: string };
-  poNo?: { contains: string; mode: string };
-  taggingYear?: { equals: string };
-  type?: { contains: string; mode: string };
-  projectCode_id?: number;
-  locationDesc_id?: { in: number[] };
-  detailsLocation_id?: number;
-  pisDate?: {
-    gte?: Date;
-    lte?: Date;
-  };
-  transDate?: {
-    gte?: Date;
-    lte?: Date;
-  };
-  acqValue?: {
-    gte?: number;
-    lte?: number;
-  };
-  bookValue?: {
-    gte?: number;
-    lte?: number;
-  };
-}
-
 // GET all assets with search, filter, sort, and pagination
 assetRoutes.get("/", async (c) => {
   try {
