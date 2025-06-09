@@ -36,7 +36,7 @@ interface AssetJsonItem {
 export const projectCodesData = [
   { code: "Common" },
   { code: "Gas1" },
-  { code: "No-Code" }
+  { code: "n/a" }
 ];
 
 // Location descriptions data
@@ -236,9 +236,9 @@ const transformAssetData = (jsonItem: AssetJsonItem) => ({
   ytdDepre: parseNumericValue(jsonItem.YTD_DEPRE),
   bookValue: parseNumericValue(jsonItem.BOOK_VALUE),
   taggingYear: parseStringValue(jsonItem.TAGGING_YEAR),
-  projectCode_id: getProjectCodeId(parseStringValue(jsonItem.PROJECT_CODE) || 'Common'),
-  locationDesc_id: getLocationDescId(parseStringValue(jsonItem.LOCATION_DESC) || 'GMS Pasuruan'),
-  detailsLocation_id: getDetailsLocationId(parseStringValue(jsonItem.DETAILS_LOCATION) || 'OUTSIDE AREA'),
+  projectCode_id: getProjectCodeId(parseStringValue(jsonItem.PROJECT_CODE) || 'n/a'),
+  locationDesc_id: getLocationDescId(parseStringValue(jsonItem.LOCATION_DESC) || 'n/a'),
+  detailsLocation_id: getDetailsLocationId(parseStringValue(jsonItem.DETAILS_LOCATION) || 'n/a'),
   type: 'HBI' // ini hardcode, pastikan tidak salah saat import
 });
 
