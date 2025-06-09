@@ -2,7 +2,6 @@ import React from "react";
 import { Document, Page, View, Text, Image } from "@react-pdf/renderer";
 import { formatDate } from "@/components/utils/formatting";
 import { pdfStyles } from "./pdf-styles";
-import { getWidthPercentage } from "./pdf-utils";
 import { AssetsPDFProps } from "./types";
 
 // PDF Document component with dynamic grid layout
@@ -10,13 +9,7 @@ export const AssetsPDF: React.FC<AssetsPDFProps> = ({
   assets,
   columnCount = 2,
 }) => {
-  // Apply dynamic styling based on column count
-  const dynamicAssetWrapper = {
-    ...pdfStyles.assetWrapper,
-    width: getWidthPercentage(columnCount),
-    marginRight: columnCount > 1 ? "1%" : "0%",
-    marginLeft: "0.5%",
-  };
+
 
   // Calculate items per page to prevent cutoff
   const cardHeight = 60; // mm
@@ -53,7 +46,7 @@ export const AssetsPDF: React.FC<AssetsPDFProps> = ({
             </View>
           </View>
           <View style={pdfStyles.assetsGrid} wrap>
-            {pageAssets.map((asset, index) => (
+            {pageAssets.map((asset) => (
            
               <View style={pdfStyles.container} wrap={false}>
                 {/* TOP SECTION */}

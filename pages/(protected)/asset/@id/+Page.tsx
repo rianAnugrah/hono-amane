@@ -3,7 +3,7 @@ import { usePageContext } from "vike-react/usePageContext";
 import { useEffect, useState } from "react";
 import { Asset } from "../types";
 import { Link } from "@/renderer/Link";
-import { ArrowLeft, Loader2, ClipboardCheck, PlusCircle, History, ListChecks, FileText, ChevronRight, Info } from "lucide-react";
+import { ArrowLeft, Loader2,  History,  FileText, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Import the extracted components
@@ -11,8 +11,6 @@ import AssetHeader from "@/components/asset/AssetHeader";
 import AssetMediaSection from "@/components/asset/AssetMediaSection";
 import AssetBasicInfo from "@/components/asset/AssetBasicInfo";
 import AssetFinancialInfo from "@/components/asset/AssetFinancialInfo";
-import NewInspectionForm from "@/components/asset/NewInspectionForm";
-import InspectionLogTable, { InspectionLog } from "@/components/asset/InspectionLogTable";
 import AssetVersionHistory from "@/components/asset/AssetVersionHistory";
 
 // Type for mobile view tabs
@@ -26,7 +24,6 @@ export default function AssetDetailPage() {
   const [loading, setLoading] = useState(true);
   const [inspectionLogs, setInspectionLogs] = useState<InspectionLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
-  const [showNewInspection, setShowNewInspection] = useState(false);
   
   // New state for mobile tab view
   const [activeTab, setActiveTab] = useState<MobileTab>('info');
@@ -89,6 +86,7 @@ export default function AssetDetailPage() {
           : [];
         
         setInspectionLogs(formattedLogs);
+        console.log("Inspection Logs", inspectionLogs);
         setLogsLoading(false);
       })
       .catch(error => {
@@ -270,7 +268,7 @@ export default function AssetDetailPage() {
 
           {/* Version History Section */}
           <section>
-            {renderVersionHistorySection()}
+            {logsLoading ? "Loading..." : renderVersionHistorySection()}
           </section>
         </div>
       </div>

@@ -75,7 +75,7 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
   };
 
   // Function to create image placeholder with asset name
-  const renderPlaceholder = (assetName: string, index: number) => {
+  const renderPlaceholder = (assetName: string) => {
     const colors = [
       "bg-blue-100",
       "bg-green-100",

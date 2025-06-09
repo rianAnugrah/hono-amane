@@ -4,23 +4,17 @@ import { Asset } from "../../pages/(protected)/asset/types";
 import { Link } from "@/renderer/Link";
 import {
   ChevronRight,
-  ExternalLink,
   Pencil,
-  Trash,
   MapPin,
   Package,
   Hash,
-  Tag,
-  Info,
-  Calendar,
+
   DollarSign,
   ImageIcon,
-  Badge,
   TriangleAlert,
 } from "lucide-react";
 import Checkbox from "@/components/ui/checkbox";
 import { formatIDR } from "@/components/utils/formatting";
-import AssetDetail from "./asset-detail";
 import {
   getColorFromString,
   getInitials,
@@ -35,12 +29,10 @@ const CardItem = ({
   onSelectAsset,
   role,
   handleEdit,
-  handleDelete,
 }: {
   asset: Asset;
   role: string;
   handleEdit: (asset: Asset) => void;
-  handleDelete: (id: string) => void;
   checked: boolean;
   onSelectAsset: (asset: Asset) => void;
 }) => {
@@ -61,10 +53,7 @@ const CardItem = ({
     return text.length > length ? text.substring(0, length) + "..." : text;
   };
 
-  // Get creation date (if available)
-  const creationDate = asset.createdAt
-    ? new Date(asset.createdAt).toLocaleDateString()
-    : null;
+
 
   // Get condition badge styles
   const getConditionStyle = (condition: string) => {

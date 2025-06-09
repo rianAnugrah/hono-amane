@@ -23,7 +23,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { initializeAuth, isAuthenticated } = useAuth();
+  const { initializeAuth } = useAuth();
 
   useEffect(() => {
     const initialize = async () => {

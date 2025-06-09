@@ -7,6 +7,10 @@ interface LocationDisplayProps {
   orientation?: "horizontal" | "vertical";
 }
 
+interface locInterface {
+  description: string;
+}
+
 export default function LocationDisplay({ size = 2 , orientation = "horizontal" }: LocationDisplayProps) {
   const { location } = useUserStore();
 
@@ -14,7 +18,7 @@ export default function LocationDisplay({ size = 2 , orientation = "horizontal" 
   
   return location?.length > 0 ? (
     <div className={`flex gap-1  ${orientation === "vertical" ? "flex-col items-start" : "flex-row items-center"}`}>
-      {location.slice(0, size).map((loc: any, index: number) => (
+      {location.slice(0, size).map((loc: locInterface, index: number) => (
         <Badge
           key={index}
           variant="light"
@@ -40,7 +44,7 @@ export default function LocationDisplay({ size = 2 , orientation = "horizontal" 
                 <h2 className="card-title">Your location access</h2>
                 {location
                   .slice(size, location.length)
-                  .map((loc: any, index: number) => (
+                  .map((loc: locInterface, index: number) => (
                     <Badge
                       key={index}
                       text={loc?.description}

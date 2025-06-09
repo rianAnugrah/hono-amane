@@ -7,29 +7,17 @@ import {
   Archive,
   BookCopy,
   ChevronLeft,
-  ChevronRight,
-  CircleCheckBig,
-  Cog,
-  CogIcon,
-  Database,
-  FileCheck2,
   HomeIcon,
-  LogOut,
   MapPin,
   MenuIcon,
-  Pin,
-  Scan,
   ScanQrCode,
   SearchCheck,
-  Settings,
   User2,
 } from "lucide-react";
 import { Link } from "@/renderer/Link";
-import { usePageContext } from "vike-react/usePageContext";
 import DesktopLink from "./desktop-link";
 import MobileLink from "./mobile-link";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAssetSelectionStore } from "@/stores/store-asset-selection";
 import { useUserStore } from "@/stores/store-user-login";
 import Logo from "@/components/svg/logo";
 import LocationDisplay from "../location-display";
@@ -244,13 +232,6 @@ function DesktopNav() {
       setIsCompact(savedCompactState === "true");
     }
   }, []);
-
-  const toggleSidebar = () => {
-    const newState = !isCompact;
-    setIsCompact(newState);
-    // Save preference to localStorage
-    localStorage.setItem("sidebarCompact", String(newState));
-  };
 
   return (
     <nav

@@ -7,8 +7,8 @@ interface DatePickerProps {
   label?: string;
   placeholder?: string;
   value: string;
-  onChange: (e: any) => void;
-  onBlur?: (e: any) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement> | { target: { value: string; name: string }; currentTarget: { value: string; name: string } }) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement> | { target: { name: string } }) => void;
   validation?: "valid" | "invalid" | "empty" | "untouched" | undefined;
   touched?: boolean;
   errorMessage?: string;
@@ -110,7 +110,6 @@ export const DatePickerFields = ({
   onChange,
   onBlur,
   validation,
-  touched,
   errorMessage,
   icon = <Calendar size={16} />,
   min,
@@ -140,6 +139,10 @@ export const DatePickerFields = ({
           target: {
             name,
             value: formattedDate
+          },
+          currentTarget: {
+            name,
+            value: formattedDate
           }
         };
         onChange(event);
@@ -164,7 +167,7 @@ export const DatePickerFields = ({
   
   const [isOpen, setIsOpen] = useState(false);
   const [displayValue, setDisplayValue] = useState('');
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const currentDate = new Date();
   const [viewYear, setViewYear] = useState(currentDate.getFullYear());
   const [viewMonth, setViewMonth] = useState(currentDate.getMonth());
   
@@ -230,6 +233,10 @@ export const DatePickerFields = ({
       target: {
         name,
         value: formattedDate
+      },
+      currentTarget: {
+        name,
+        value: formattedDate
       }
     };
     
@@ -266,15 +273,14 @@ export const DatePickerFields = ({
       target: {
         name,
         value: ''
+      },
+      currentTarget: {
+        name,
+        value: ''
       }
     };
     onChange(event);
   };
-  
-  // Month and day names
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                      'July', 'August', 'September', 'October', 'November', 'December'];
-  const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   
   // Check if a date is selected
   const isDateSelected = (date: Date): boolean => {
@@ -405,7 +411,7 @@ export const DatePickerFields = ({
             
             {/* Day names */}
             <div className="grid grid-cols-7 text-center border-b border-gray-100">
-              {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day, index) => (
+              {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
                 <div key={day} className="text-xs font-medium text-gray-500 py-2">
                   {day}
                 </div>

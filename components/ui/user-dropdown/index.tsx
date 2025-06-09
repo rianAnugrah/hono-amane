@@ -1,12 +1,8 @@
-import { User2, ShieldCheck, ShieldX, Circle } from "lucide-react";
+import { User2, ShieldCheck } from "lucide-react";
 import { useUserStore } from "@/stores/store-user-login";
 
-export default function UserDropDown({
-  isCompact = false,
-}: {
-  isCompact?: boolean;
-}) {
-  const { email, name, role } = useUserStore();
+export default function UserDropDown() {
+  const {  name, role } = useUserStore();
 
   return (
     <div className="dropdown dropdown-end dropdown-hover cursor-pointer h-full w-full">

@@ -39,7 +39,7 @@ function Page() {
             }
           }
         } else {
-          throw new Error(`Server returned ${response.status}`);
+          throw new Error(`Server returned ${response.status} ${error}`);
         }
       } catch (error) {
         console.error("Error fetching login URL:", error);

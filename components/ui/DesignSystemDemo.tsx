@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, User, Mail, Calendar, ArrowRight, Check, X } from 'lucide-react';
+import { User, Mail, Calendar, ArrowRight, Check, X } from 'lucide-react';
 import Button from './button';
 import Badge from './badge';
 import Checkbox from './checkbox';

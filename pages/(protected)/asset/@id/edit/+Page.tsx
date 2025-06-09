@@ -1,37 +1,15 @@
 // pages/users/[id]/+Page.tsx
 import { usePageContext } from "vike-react/usePageContext";
 import { useEffect, useState } from "react";
-import { Asset } from "../types";
+import { Asset } from "../../types";
 import { Link } from "@/renderer/Link";
-import {
-  ArrowLeft,
-  Loader2,
-  ClipboardCheck,
-  PlusCircle,
-  History,
-  ListChecks,
-  FileText,
-  ChevronRight,
-  Info,
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 // Import the extracted components
 import AssetHeader from "@/components/asset/AssetHeader";
-import AssetMediaSection from "@/components/asset/AssetMediaSection";
-import AssetBasicInfo from "@/components/asset/AssetBasicInfo";
-import AssetFinancialInfo from "@/components/asset/AssetFinancialInfo";
-import NewInspectionForm from "@/components/asset/NewInspectionForm";
-import InspectionLogTable, {
-  InspectionLog,
-} from "@/components/asset/InspectionLogTable";
-import AssetVersionHistory from "@/components/asset/AssetVersionHistory";
 import { useAssetForm } from "@/hooks/useAssetForm";
 import axios from "axios";
 import AssetForm from "@/components/forms/AssetForm";
-
-// Type for mobile view tabs
-type MobileTab = "info" | "history";
 
 // Main component
 export default function AssetDetailPage() {
@@ -39,12 +17,6 @@ export default function AssetDetailPage() {
   const { id } = pageContext.routeParams;
   const [asset, setAsset] = useState<Asset | null>(null);
   const [loading, setLoading] = useState(true);
-  const [inspectionLogs, setInspectionLogs] = useState<InspectionLog[]>([]);
-  const [logsLoading, setLogsLoading] = useState(false);
-  const [showNewInspection, setShowNewInspection] = useState(false);
-
-  // New state for mobile tab view
-  const [activeTab, setActiveTab] = useState<MobileTab>("info");
 
   // New state for mobile tab view
 
@@ -52,13 +24,10 @@ export default function AssetDetailPage() {
   const {
     form,
     editingId,
-    showForm,
     handleChange,
     handleSubmit,
     startEdit,
-    startCreate,
     handleCancel,
-    setShowForm,
   } = useAssetForm({ onSuccess: fetchAssets });
 
   // Fetch asset details
@@ -115,16 +84,15 @@ export default function AssetDetailPage() {
     <div className="w-full mx-auto">
       <AssetHeader />
       <div className="w-full p-4 overflow-y-auto h-[600px] flex mx-auto">
-
-      <AssetForm
-        form={form}
-        editingId={editingId}
-        handleChange={handleChange}
-        handleSubmit={handleSubmit}
-        handleCancel={handleCancel}
-        hasToolbar={false}
+        <AssetForm
+          form={form}
+          editingId={editingId}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          handleCancel={handleCancel}
+          hasToolbar={false}
         />
-        </div>
+      </div>
     </div>
   );
 }

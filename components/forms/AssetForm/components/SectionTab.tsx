@@ -3,7 +3,6 @@ import { SectionTabProps } from '../types';
 import { CheckCircle, AlertTriangle } from "lucide-react";
 
 export const SectionTab = ({
-  id,
   label,
   isActive,
   status,

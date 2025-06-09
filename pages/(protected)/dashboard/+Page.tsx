@@ -1,5 +1,5 @@
 import DashboardCharts from "@/components/blocks/dashboard-charts";
-import { formatIDR, formatIDRHuman, formatUSDHuman } from "@/components/utils/formatting";
+import { formatUSDHuman } from "@/components/utils/formatting";
 import { Link } from "@/renderer/Link";
 import { useUserStore } from "@/stores/store-user-login";
 import axios from "axios";
@@ -51,7 +51,7 @@ export function Page() {
         setStats(data);
       }
     } catch (error) {
-      //  console.error("Failed to fetch assets:", error);
+       console.error("Failed to fetch assets:", error);
     }
   };
 

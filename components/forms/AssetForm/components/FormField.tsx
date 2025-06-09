@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from "framer-motion";
 import { useState, memo } from "react";
 import { FormFieldProps } from '../types';
 import { Check, X } from "lucide-react";
@@ -40,7 +39,7 @@ const FormField = memo(({
             onChange={onChange}
             onBlur={(e) => {
               setIsFocused(false);
-              onBlur && onBlur(e);
+              if (onBlur) onBlur(e);
             }}
             onFocus={() => setIsFocused(true)}
           />

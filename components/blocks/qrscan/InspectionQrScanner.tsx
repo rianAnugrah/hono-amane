@@ -36,17 +36,17 @@ const InspectionQrScanner = ({ onScan }: InspectionQrScannerProps) => {
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
   const [permissionState, setPermissionState] = useState("prompt");
   const [switchingCamera, setSwitchingCamera] = useState(false);
-  const [autoStartCamera, setAutoStartCamera] = useState(true);
+  // const [autoStartCamera, setAutoStartCamera] = useState(true);
   const [scanSuccess, setScanSuccess] = useState(false);
 
-  useEffect(() => {
-    if (autoStartCamera) {
-      const timer = setTimeout(() => {
-        loadCameras();
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [autoStartCamera]);
+  // useEffect(() => {
+  //   if (autoStartCamera) {
+  //     const timer = setTimeout(() => {
+  //       loadCameras();
+  //     }, 1500);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [autoStartCamera]);
 
   // Handle result changes
   useEffect(() => {

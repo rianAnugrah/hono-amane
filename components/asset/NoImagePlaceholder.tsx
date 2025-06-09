@@ -23,7 +23,6 @@ const NoImagePlaceholder: React.FC<NoImagePlaceholderProps> = ({
   };
 
   const bgColor = getColorFromString(assetName);
-  const textColor = '#4b5563'; // Gray-600
   
   // Get the initials from the asset name (up to 2 characters)
   const getInitials = (name: string) => {

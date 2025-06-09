@@ -1,7 +1,7 @@
 import InputSelect from "@/components/ui/input-select";
 import InputText from "@/components/ui/input-text";
 import { AnimatePresence, motion } from "framer-motion";
-import { Filter, FilterX, PlusCircle, Search, SlidersHorizontal, X } from "lucide-react";
+import { PlusCircle, Search, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import Checkbox from "@/components/ui/checkbox";
 import SelectedAssetsPage from "@/pages/(protected)/asset/print/+Page";

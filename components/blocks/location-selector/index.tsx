@@ -3,7 +3,6 @@ import axios from "axios";
 import InputSelect from "@/components/ui/input-select";
 import InputText from "@/components/ui/input-text";
 import { Search } from "lucide-react";
-import { SelectField } from "@/components/forms/AssetForm/components/SelectField";
 
 // Define the Location type
 interface Location {
@@ -26,26 +25,19 @@ export function LocationSelector({
 }: LocationSelectorProps) {
   const [locations, setLocations] = useState<Location[]>([]);
   const [search, setSearch] = useState("");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [isLoading, setIsLoading] = useState(false);
 
   const fetchLocations = async () => {
-    setIsLoading(true);
     try {
-      const res = await axios.get("/api/locations", {
-        params: { search, sort: sortOrder },
-      });
+      const res = await axios.get("/api/locations");
       setLocations(res.data);
     } catch (error) {
       console.error("Failed to fetch locations:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchLocations();
-  }, [search, sortOrder]);
+  }, [search]);
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,11 +47,6 @@ export function LocationSelector({
   // Reset search input
   const resetSearch = () => {
     setSearch("");
-  };
-
-  // Toggle sort order
-  const toggleSortOrder = () => {
-    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
   // Create the search input component for the dropdown

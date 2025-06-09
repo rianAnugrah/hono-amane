@@ -1,7 +1,6 @@
 // Empty file to start with
 import { useState, useEffect } from 'react';
 import { navigate } from 'vike/client/router';
-import { Link } from '@/renderer/Link';
 import { motion } from 'framer-motion';
 import InspectionQrScanner from '@/components/blocks/qrscan/InspectionQrScanner';
 import { useAssetForm } from '@/hooks/useAssetForm';
@@ -9,8 +8,6 @@ import AssetFormModal from '@/components/asset/AssetFormModal';
 import axios from 'axios';
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 
-// Logo URL
-const LOGO_URL = "https://www.hcml.co.id/wp-content/uploads/2020/08/SKK-HCML-Warna.png";
 
 // PDF styles
 const styles = StyleSheet.create({
@@ -109,7 +106,6 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
     handleChange,
     handleSubmit: originalHandleSubmit,
     startEdit,
-    startCreate,
     handleCancel: originalHandleCancel,
     setShowForm,
   } = useAssetForm({ 
@@ -118,9 +114,6 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
       if (updatedAsset && assetToEdit) {
         //console.log("Adding updated asset to inspection from callback");
         handleAddAsset(updatedAsset);
-      } else {
-        // Regular asset management, just refresh the list
-        handleFetchAssets();
       }
     } 
   });
@@ -128,13 +121,9 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
   const [inspection, setInspection] = useState<Inspection | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [imageReady, setImageReady] = useState(true); // Start as true for simplicity
 
-  // Asset search state
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Asset[]>([]);
-  const [searching, setSearching] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  // Asset search state - removed unused variables
+  // const [searching, setSearching] = useState(false);
 
   // QR scanner state
   const [showQrScanner, setShowQrScanner] = useState(false);
@@ -255,62 +244,61 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
         setError("Failed to load inspection. Please try again later.");
       })
       .finally(() => setLoading(false));
-  }, [inspectionId]);
+  }, [inspectionId, onInspectionChange]);
 
   // Fetch asset by asset number (from QR scan)
   useEffect(() => {
     if (!scannedAssetNo) return;
 
-    setSearching(true);
+    const handleFetchAssets = async () => {
+      try {
+        // setSearching(true);
+        //console.log("Fetching asset by asset number:", scannedAssetNo);
+        const res = await fetch(`/api/assets/by-asset-number/${scannedAssetNo}`);
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error(`Error fetching asset (${res.status}): ${errorText}`);
+          throw new Error(`Failed to fetch asset: ${res.statusText}`);
+        }
+        
+        let data;
+        try {
+          data = await res.json();
+          //console.log("Fetched asset data:", data);
+        } catch (e) {
+          console.error("Error parsing asset data JSON:", e);
+          throw new Error("Invalid response format from asset API");
+        }
+
+        if (data && data.id) {
+          // Successfully found the asset
+          //console.log("Asset found, setting up edit form with:", data);
+          setAssetToEdit(data);
+          setShowAssetEditForm(true);
+          setShowQrScanner(false); // Hide scanner after successful scan
+          
+          // If we're scanning to edit an asset, also set the condition and remarks
+          setAssetCondition(data.condition || "Good");
+          setAssetRemarks(data.remark || "");
+        } else {
+          console.error("Asset API returned success but with invalid data:", data);
+          setError(`Asset with number ${scannedAssetNo} not found or has invalid format`);
+        }
+      } catch (err) {
+        console.error("Error fetching asset by asset number:", err);
+        setError(`Failed to fetch asset details: ${err instanceof Error ? err.message : "Unknown error"}`);
+      } finally {
+        // setSearching(false);
+        setScannedAssetNo("");
+      }
+    };
 
     handleFetchAssets();
   }, [scannedAssetNo]);
 
-  async function handleFetchAssets() {
-    try {
-      //console.log("Fetching asset by asset number:", scannedAssetNo);
-      const res = await fetch(`/api/assets/by-asset-number/${scannedAssetNo}`);
-      
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error(`Error fetching asset (${res.status}): ${errorText}`);
-        throw new Error(`Failed to fetch asset: ${res.statusText}`);
-      }
-      
-      let data;
-      try {
-        data = await res.json();
-        //console.log("Fetched asset data:", data);
-      } catch (e) {
-        console.error("Error parsing asset data JSON:", e);
-        throw new Error("Invalid response format from asset API");
-      }
-
-      if (data && data.id) {
-        // Successfully found the asset
-        //console.log("Asset found, setting up edit form with:", data);
-        setAssetToEdit(data);
-        setShowAssetEditForm(true);
-        setShowQrScanner(false); // Hide scanner after successful scan
-        
-        // If we're scanning to edit an asset, also set the condition and remarks
-        setAssetCondition(data.condition || "Good");
-        setAssetRemarks(data.remark || "");
-      } else {
-        console.error("Asset API returned success but with invalid data:", data);
-        setError(`Asset with number ${scannedAssetNo} not found or has invalid format`);
-      }
-    } catch (err) {
-      console.error("Error fetching asset by asset number:", err);
-      setError(`Failed to fetch asset details: ${err instanceof Error ? err.message : "Unknown error"}`);
-    } finally {
-      setSearching(false);
-      setScannedAssetNo("");
-    }
-  }
-
   // Add asset to inspection
-  const handleAddAsset = async (asset = selectedAsset) => {
+  const handleAddAsset = async (asset?: Asset) => {
     if (!asset || !inspectionId) {
       console.error("Cannot add asset to inspection: Missing asset or inspectionId", {
         assetProvided: !!asset,
@@ -397,9 +385,6 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
             setInspection(updatedInspection);
             
             // Clear selected asset and search results
-            setSelectedAsset(null);
-            setSearchResults([]);
-            setSearchQuery("");
             setAssetToEdit(null);
             setShowAssetEditForm(false);
             
@@ -478,32 +463,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
     }
   };
 
-  // Search for assets
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-
-    setSearching(true);
-    setSearchResults([]);
-
-    try {
-      const response = await fetch(
-        `/api/assets?search=${encodeURIComponent(searchQuery)}`
-      );
-      const data = await response.json();
-
-      if (data.success) {
-        setSearchResults(data.data || []);
-      } else {
-        throw new Error(data.error || "Failed to search assets");
-      }
-    } catch (error) {
-      console.error("Error searching assets:", error);
-      // Show error but don't set the main error state
-    } finally {
-      setSearching(false);
-    }
-  };
-
+  
   // Wrap original submit to handle the inspection-specific logic
   const handleSubmit = async () => {
     await originalHandleSubmit();
@@ -1036,7 +996,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
                 cursor: 'pointer',
               }}
             >
-              {({ blob, url, loading, error }) => (
+              {({loading}) => (
                 <motion.div
                   className="flex items-center"
                   whileHover={{ scale: 1.02 }}

@@ -5,21 +5,16 @@ import { formatIDR } from "@/components/utils/formatting";
 import { QRCodeCanvas } from "qrcode.react";
 import {
   Tag,
-  Map,
-  User,
-  Clock,
+  
   Info,
   DollarSign,
   Package,
   Calendar,
-  Hash,
   MapPin,
-  Link,
   Clipboard,
   QrCode,
   Share2,
   History,
-  Layers
 } from "lucide-react";
 
 // Type for mobile view tabs

@@ -1,4 +1,4 @@
-import { ValidationStatus, AssetFormValues } from './types';
+import { ValidationStatus } from './types';
 
 // Validation rules
 export const validateField = (name: string, value: string | number | null | string[]): ValidationStatus => {

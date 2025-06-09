@@ -19,7 +19,6 @@ interface InputTextProps {
 export default function InputText({
   value,
   onChange,
-  icon,
   placeholder = "Placeholder",
   type = "text",
   label,

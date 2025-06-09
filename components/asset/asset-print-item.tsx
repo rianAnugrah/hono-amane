@@ -1,40 +1,12 @@
-import React from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { Asset } from "../../pages/(protected)/asset/types";
-import { AnimatePresence, motion } from "framer-motion";
-import { Link } from "@/renderer/Link";
-import Switch from "@/components/ui/switch";
-import {
-    CheckCircle,
-  ChevronDown,
-  ChevronRight,
-  Circle,
-  ExternalLink,
-  Link2Icon,
-  LinkIcon,
-  Pencil,
-  Trash,
-} from "lucide-react";
-import Checkbox from "@/components/ui/checkbox";
-import { formatDate, formatIDR } from "@/components/utils/formatting";
-import AssetDetail from "./asset-detail";
+import { Circle } from "lucide-react";
+import { formatDate } from "@/components/utils/formatting";
 
 export default function AssetPrintItem({
   asset,
-  isExpanded,
-  onToggle,
-  handleEdit,
-  handleDelete,
-  checked,
-  onSelectAsset,
 }: {
   asset: Asset;
-  isExpanded: boolean;
-  onToggle: (id: string) => void;
-  handleEdit: (asset: Asset) => void;
-  handleDelete: (id: string) => void;
-  checked: boolean;
-  onSelectAsset: (asset: Asset) => void;
 }) {
   return (
     <div className="grid grid-cols-10  grid-rows-5  w-[800px]">

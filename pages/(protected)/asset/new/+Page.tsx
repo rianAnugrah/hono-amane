@@ -12,7 +12,6 @@ export default function Page() {
     handleChange,
     handleSubmit,
     startCreate,
-    handleCancel,
     isSubmitting
   } = useAssetForm({
     onSuccess: () => {

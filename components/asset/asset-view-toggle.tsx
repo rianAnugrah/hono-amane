@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutGrid, LayoutList, TableProperties, Grid3x3 } from "lucide-react";
+import { LayoutList, TableProperties, Grid3x3 } from "lucide-react";
 
 type ViewMode = "table" | "card" | "compact";
 

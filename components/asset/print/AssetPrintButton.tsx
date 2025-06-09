@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Download } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { AssetPreviewModal } from './AssetPreviewModal';
 import { printAssets } from './print-service';
 import { AssetPrintButtonProps } from './types';
@@ -8,11 +8,6 @@ import { AssetPrintButtonProps } from './types';
 export const AssetPrintButton: React.FC<AssetPrintButtonProps> = ({ assets }) => {
   const [showPreview, setShowPreview] = useState(false);
   
-  const handleOpenPreview = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setShowPreview(true);
-  };
   
   const handleClosePreview = () => setShowPreview(false);
   

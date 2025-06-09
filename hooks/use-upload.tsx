@@ -15,9 +15,7 @@ export const useUpload = () => {
     import.meta.env.PUBLIC_ENV__API_HOST || ''
   }api/sp/file?folder=${folder}&name=`
 
-  const apiPreview = `${
-    import.meta.env.PUBLIC_ENV__API_HOST || ''
-  }api/sp/preview?folder=${folder}&name=`
+
 
   const responseParser = useCallback((response: Record<string, unknown>) => {
     const name = response["Name"] as string

@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Asset } from "../../pages/(protected)/asset/types";
 import AssetItem from "./asset-item";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
-import Switch from "@/components/ui/switch";
-import { Package, Search, AlertCircle } from "lucide-react";
+import { Package, Search } from "lucide-react";
 
 export default function AssetList({
   assets,
@@ -12,7 +11,6 @@ export default function AssetList({
   handleDelete,
   handleCheckboxChange,
   currentView,
-  toggleSelectAll,
   isLoading
 }: {
   assets: Asset[];
@@ -25,11 +23,7 @@ export default function AssetList({
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const itemRefs = useRef<Map<string, HTMLElement>>(new Map());
-  const { selectedAssets, selectAsset, deselectAsset } = useAssetSelectionStore();
-  
-  const allSelected = assets.length > 0 && assets.every((asset) =>
-    selectedAssets.some((a) => a.id === asset.id)
-  );
+  const { selectedAssets } = useAssetSelectionStore();
   
   const handleToggle = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -106,21 +100,7 @@ export default function AssetList({
     </motion.div>
   );
 
-  // Error state component
-  const ErrorState = ({ message }: { message: string }) => (
-    <motion.div 
-      className="flex flex-col items-center justify-center py-16 w-full bg-white rounded-xl border border-gray-200 shadow-sm"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      <div className="rounded-full bg-red-100 p-5 mb-4">
-        <AlertCircle className="h-10 w-10 text-red-500" />
-      </div>
-      <h3 className="text-lg font-medium text-gray-900 mb-2">Couldn't load assets</h3>
-      <p className="text-gray-500 max-w-md text-center">{message || "An error occurred while loading assets. Please try again."}</p>
-    </motion.div>
-  );
+
 
   // Loading state with skeletons
   if (isLoading) {

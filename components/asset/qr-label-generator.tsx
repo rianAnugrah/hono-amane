@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { X, Printer, Download, Settings, Filter, Eye } from 'lucide-react';
 import QRCode from 'qrcode';
-import { saveAs } from 'file-saver';
 import { Asset } from '../../pages/(protected)/asset/types';
 
 // Label Settings Interface

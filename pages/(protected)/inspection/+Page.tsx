@@ -20,11 +20,6 @@ export default function InspectionListPage() {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedInspection, setSelectedInspection] =
-    useState<Inspection | null>(null);
-
-  const [isMobile, setIsMobile] = useState(false);
-  const [showNewInspectionForm, setShowNewInspectionForm] = useState(false);
 
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,23 +37,7 @@ export default function InspectionListPage() {
   >([]);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Check if screen is mobile size
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    // Initial check
-    checkIfMobile();
-
-    // Add event listener
-    window.addEventListener("resize", checkIfMobile);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener("resize", checkIfMobile);
-    };
-  }, []);
+;
 
   const loadInspections = () => {
     setLoading(true);

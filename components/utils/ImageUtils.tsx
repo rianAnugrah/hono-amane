@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import NoImagePlaceholder from '../asset/NoImagePlaceholder';
 import { Image } from 'lucide-react';
 
 // Function to determine if an image array has valid images
@@ -54,7 +53,6 @@ interface ImageWithFallbackProps {
 
 export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   src,
-  fallbackSrc,
   alt,
   className = "w-full h-full object-cover",
   assetName = "No Image",

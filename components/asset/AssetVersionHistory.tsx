@@ -5,7 +5,6 @@ import {
   Loader2, 
   ChevronDown, 
   Clock, 
-  Sparkles, 
   Calendar, 
   AlertCircle, 
   FileArchive, 

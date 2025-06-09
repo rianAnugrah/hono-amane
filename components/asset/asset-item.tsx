@@ -1,42 +1,22 @@
 import React, { useState } from "react";
-import { QRCodeCanvas } from "qrcode.react";
 import { Asset } from "../../pages/(protected)/asset/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@/renderer/Link";
-import Switch from "@/components/ui/switch";
 import {
   ChevronDown,
   ChevronRight,
-  ExternalLink,
-  Link2Icon,
-  LinkIcon,
   Pencil,
   Trash,
   Eye,
-  EyeOff,
-  Calendar,
   DollarSign,
-  ImageIcon
 } from "lucide-react";
 import Checkbox from "@/components/ui/checkbox";
 import { formatIDR } from "@/components/utils/formatting";
 import AssetDetail from "./asset-detail";
 import { useUserStore } from "@/stores/store-user-login";
 import CardItem from "./asset-card-item";
-import NoImagePlaceholder from "./NoImagePlaceholder";
-import { ImageWithFallback, hasValidImages, getColorFromString, getInitials } from "@/components/utils/ImageUtils";
+import { hasValidImages, getColorFromString, getInitials } from "@/components/utils/ImageUtils";
 
-/**
- * Interface for location object
- */
-interface LocationItem {
-  userId: string;
-  locationId: number;
-  location: {
-    id: number;
-    description: string;
-  };
-}
 
 // Extend the Asset interface in the file to ensure createdAt is available
 declare module "../../pages/(protected)/asset/types" {

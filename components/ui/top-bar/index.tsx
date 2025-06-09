@@ -1,4 +1,4 @@
-import { Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import UserDropDown from "@/components/ui/user-dropdown";
 import LocationDisplay from "@/components/ui/location-display";
 

@@ -32,15 +32,12 @@ const SelectField = memo(({
   validation,
   touched,
   errorMessage,
-  icon,
-  searchInput,
   searchable = false,
   searchPlaceholder = "Search...",
   disabled = false,
 }: SelectFieldProps) => {
   const isValid = validation === "valid";
   const isInvalid = validation === "invalid" || validation === "empty";
-  const isUntouched = validation === "untouched" || validation === undefined;
   
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

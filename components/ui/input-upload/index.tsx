@@ -1,6 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState, useRef } from "react"
-import { useDropzone } from "react-dropzone-esm"
-import  cn  from "@/components/utils/cn"
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
+import { useDropzone } from "react-dropzone-esm";
+import cn from "@/components/utils/cn";
 import {
   FileImageIcon,
   FileTextIcon,
@@ -10,35 +15,35 @@ import {
   SwitchCameraIcon,
   XIcon,
   MaximizeIcon,
-} from "lucide-react"
+} from "lucide-react";
 
 import {
   type DropzoneProps as _DropzoneProps,
   type DropzoneState as _DropzoneState,
-} from "react-dropzone-esm"
-import { uploadFile, useUpload } from "@/hooks/use-upload"
+} from "react-dropzone-esm";
+import { uploadFile, useUpload } from "@/hooks/use-upload";
 
 export type DropzoneState = _DropzoneState;
 
 export interface DropzoneProps
   extends Omit<_DropzoneProps, "children" | "onDrop"> {
-  containerClassName?: string
-  dropZoneClassName?: string
-  children?: (dropzone: DropzoneState) => React.ReactNode
-  value?: string[]
-  onChange?: (value: string[]) => void
-  readOnly?: boolean
-  preview?: boolean
-  useCamera?: boolean
-  cameraFacing?: "user" | "environment"
+  containerClassName?: string;
+  dropZoneClassName?: string;
+  children?: (dropzone: DropzoneState) => React.ReactNode;
+  value?: string[];
+  onChange?: (value: string[]) => void;
+  readOnly?: boolean;
+  preview?: boolean;
+  useCamera?: boolean;
+  cameraFacing?: "user" | "environment";
 }
 
 export type FileItemProps = {
-  href: string
-  onDelete: (file?: string) => void
-  disabled?: boolean
-  preview?: boolean
-}
+  href: string;
+  onDelete: (file?: string) => void;
+  disabled?: boolean;
+  preview?: boolean;
+};
 
 export const FileItem = ({
   href,
@@ -46,27 +51,27 @@ export const FileItem = ({
   disabled = false,
   preview = false,
 }: FileItemProps) => {
-  const url = new URL(href)
+  const url = new URL(href);
   const name =
-    url.searchParams.get("name") || (href || "").split("/").pop() || "Untitled"
-  const ext = name.split(".").pop() || ""
+    url.searchParams.get("name") || (href || "").split("/").pop() || "Untitled";
+  const ext = name.split(".").pop() || "";
   const type = ["jpg", "jpeg", "gif", "png", "webp"].includes(ext)
     ? "image"
-    : "file"
-  const Icon = type.includes("image") ? FileImageIcon : FileTextIcon
-  href = preview ? href.replace("/sp/file", "/sp/preview") : href
+    : "file";
+  const Icon = type.includes("image") ? FileImageIcon : FileTextIcon;
+  href = preview ? href.replace("/sp/file", "/sp/preview") : href;
 
   return (
     <div
       className={cn(
         "border-input relative flex h-32 w-32 flex-row rounded-lg border-2 border-solid shadow-xs",
-        disabled ? "bg-muted" : "bg-background",
+        disabled ? "bg-muted" : "bg-background"
       )}
     >
       <div
         className={cn(
           "flex flex-col items-start space-y-2",
-          disabled ? "bg-muted" : "",
+          disabled ? "bg-muted" : ""
         )}
       >
         <Icon className={"text-primary h-10 w-10 pt-2 pl-2"} />
@@ -90,13 +95,12 @@ export const FileItem = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 export const InputUpload = ({
   containerClassName,
   dropZoneClassName = "upload",
-  children,
   value,
   onChange,
   readOnly,
@@ -106,199 +110,206 @@ export const InputUpload = ({
   ...props
 }: DropzoneProps) => {
   // State:
-  const [progress, setProgress] = useState(0)
-  const [info, setInfo] = useState("")
+  const [progress, setProgress] = useState(0);
+  const [info, setInfo] = useState("");
   const [files, setFiles] = useState<string[]>(
-    value ? (Array.isArray(value) ? value : []) : [],
-  )
-  const [facing, setFacing] = useState<"user" | "environment">(cameraFacing)
-  const [isCameraActive, setIsCameraActive] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  
-  // Refs
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const fullscreenVideoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const streamRef = useRef<MediaStream | null>(null)
-  
-  const display = useMemo(
-    () => (value ? (Array.isArray(value) ? value : []) : []),
-    [value],
-  )
+    value ? (Array.isArray(value) ? value : []) : []
+  );
+  const [facing, setFacing] = useState<"user" | "environment">(cameraFacing);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const { url, onDelete, responseParser } = useUpload()
-  
+  // Refs
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const fullscreenVideoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const { url, onDelete, responseParser } = useUpload();
+
   const onDrop = useCallback(
     async (files: File[]) => {
       for (let i = 0; i < files.length; i++) {
-        const file = files[i]
-        setInfo(`${i + 1} of ${files.length}`)
+        const file = files[i];
+        setInfo(`${i + 1} of ${files.length}`);
         if (url) {
           //console.log("InputUpload: Uploading file:", file.name);
-          const resp = await uploadFile(url, file, setProgress)
-          const uploaded = responseParser(resp)
+          const resp = await uploadFile(url, file, setProgress);
+          const uploaded = responseParser(resp);
           //console.log("InputUpload: Upload response:", resp);
           //console.log("InputUpload: Parsed URL:", uploaded);
           setFiles((prevFiles) => {
             const newFiles = [...prevFiles, uploaded];
             //console.log("InputUpload: Updated files state:", newFiles);
             return newFiles;
-          })
-          setProgress(0)
+          });
+          setProgress(0);
         }
 
         if (i + 1 === files.length) {
-          setInfo("")
+          setInfo("");
         }
       }
     },
-    [setFiles, url, responseParser],
-  )
+    [setFiles, url, responseParser]
+  );
 
   const toggleFacing = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop())
-      streamRef.current = null
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
     }
-    
-    setFacing(prev => prev === "user" ? "environment" : "user")
-    
+
+    setFacing((prev) => (prev === "user" ? "environment" : "user"));
+
     // Restart camera with new facing mode
     if (isCameraActive) {
       setTimeout(() => {
-        startCamera()
-      }, 300)
+        startCamera();
+      }, 300);
     }
-  }, [isCameraActive])
+  }, [isCameraActive]);
 
   const onRemove = useCallback(
     async (file: string) => {
       if (onDelete) {
-        await onDelete(file)
+        await onDelete(file);
       }
-      const updated = files.filter((v) => !v.includes(file))
-      setFiles(updated)
+      const updated = files.filter((v) => !v.includes(file));
+      setFiles(updated);
     },
-    [files, setFiles, onDelete],
-  )
+    [files, setFiles, onDelete]
+  );
 
   useEffect(() => {
     if (onChange) {
       //console.log("InputUpload: Updating parent with files:", files);
       onChange(files);
     }
-  }, [files, onChange])
+  }, [files, onChange]);
 
   // Clean up camera stream when component unmounts
   useEffect(() => {
     return () => {
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop())
-        streamRef.current = null
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
       }
-    }
-  }, [])
+    };
+  }, []);
 
   // Start camera function
   const startCamera = useCallback(async () => {
     try {
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop())
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
-      
+
       const constraints = {
         video: { facingMode: facing },
-        audio: false
-      }
-      
-      const stream = await navigator.mediaDevices.getUserMedia(constraints)
-      streamRef.current = stream
-      
+        audio: false,
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      streamRef.current = stream;
+
       if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        videoRef.current.play()
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
       }
-      
+
       if (fullscreenVideoRef.current) {
-        fullscreenVideoRef.current.srcObject = stream
-        fullscreenVideoRef.current.play()
+        fullscreenVideoRef.current.srcObject = stream;
+        fullscreenVideoRef.current.play();
       }
-      
-      setIsCameraActive(true)
+
+      setIsCameraActive(true);
     } catch (err) {
-      console.error("Error accessing camera:", err)
-      alert("Could not access the camera. Please check permissions and try again.")
-      setIsCameraActive(false)
-      setIsFullscreen(false)
+      console.error("Error accessing camera:", err);
+      alert(
+        "Could not access the camera. Please check permissions and try again."
+      );
+      setIsCameraActive(false);
+      setIsFullscreen(false);
     }
-  }, [facing])
-  
+  }, [facing]);
+
   // Toggle camera
   const toggleCamera = useCallback(() => {
     if (isCameraActive) {
       // Stop camera
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop())
-        streamRef.current = null
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
       }
-      setIsCameraActive(false)
-      setIsFullscreen(false)
+      setIsCameraActive(false);
+      setIsFullscreen(false);
     } else {
       // Start camera
-      startCamera()
+      startCamera();
     }
-  }, [isCameraActive, startCamera])
-  
+  }, [isCameraActive, startCamera]);
+
   // Take photo
   const takePhoto = useCallback(async () => {
-    if (!videoRef.current || !canvasRef.current) return
-    
+    if (!videoRef.current || !canvasRef.current) return;
+
     // Use the active video element (either thumbnail or fullscreen)
-    const video = isFullscreen && fullscreenVideoRef.current ? 
-      fullscreenVideoRef.current : videoRef.current
-    
-    const canvas = canvasRef.current
-    
+    const video =
+      isFullscreen && fullscreenVideoRef.current
+        ? fullscreenVideoRef.current
+        : videoRef.current;
+
+    const canvas = canvasRef.current;
+
     // Set canvas dimensions to match video
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
-    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
     // Draw current video frame to canvas
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-    
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
     // Convert canvas to blob
-    canvas.toBlob(async (blob) => {
-      if (!blob) return
-      
-      // Create file from blob
-      const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' })
-      
-      // Upload using existing onDrop function
-      onDrop([file])
-      
-      // Close fullscreen mode after taking photo
-      if (isFullscreen) {
-        setIsFullscreen(false)
-      }
-    }, 'image/jpeg', 0.95)
-  }, [onDrop, isFullscreen])
+    canvas.toBlob(
+      async (blob) => {
+        if (!blob) return;
+
+        // Create file from blob
+        const file = new File([blob], `photo_${Date.now()}.jpg`, {
+          type: "image/jpeg",
+        });
+
+        // Upload using existing onDrop function
+        onDrop([file]);
+
+        // Close fullscreen mode after taking photo
+        if (isFullscreen) {
+          setIsFullscreen(false);
+        }
+      },
+      "image/jpeg",
+      0.95
+    );
+  }, [onDrop, isFullscreen]);
 
   const toggleFullscreen = useCallback(() => {
-    setIsFullscreen(prev => !prev)
-  }, [])
+    setIsFullscreen((prev) => !prev);
+  }, []);
 
   const dropzone = useDropzone({
     ...props,
     onDrop,
-    accept: { 'image/*': [] },
-  })
+    accept: { "image/*": [] },
+  });
 
   // Return:
   return (
-    <div className={cn("flex flex-row flex-wrap gap-2", containerClassName || "")}>
+    <div
+      className={cn("flex flex-row flex-wrap gap-2", containerClassName || "")}
+    >
       {!readOnly && (
         <>
           {useCamera && (
@@ -314,8 +325,8 @@ export const InputUpload = ({
                 {isCameraActive ? (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="relative w-full h-full">
-                      <video 
-                        ref={videoRef} 
+                      <video
+                        ref={videoRef}
                         className="absolute inset-0 w-full h-full object-cover rounded-lg"
                         playsInline
                         muted
@@ -325,8 +336,8 @@ export const InputUpload = ({
                           type="button"
                           className="bg-blue-500 hover:bg-blue-400 text-white rounded-full w-8 h-8 flex items-center justify-center"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            takePhoto()
+                            e.stopPropagation();
+                            takePhoto();
                           }}
                         >
                           <div className="w-5 h-5 bg-white rounded-full"></div>
@@ -336,8 +347,8 @@ export const InputUpload = ({
                         type="button"
                         className="absolute top-1 left-1 z-10 bg-blue-500 p-1 rounded-full hover:bg-blue-400 text-white"
                         onClick={(e) => {
-                          e.stopPropagation()
-                          toggleFullscreen()
+                          e.stopPropagation();
+                          toggleFullscreen();
                         }}
                       >
                         <MaximizeIcon className="h-4 w-4" />
@@ -350,7 +361,7 @@ export const InputUpload = ({
                       <CameraIcon
                         className={cn(
                           "mb-2 h-6 w-6",
-                          progress == 0 ? "" : "animate-bounce",
+                          progress == 0 ? "" : "animate-bounce"
                         )}
                       />
                       <span className="text-xs text-center">Open Camera</span>
@@ -363,18 +374,22 @@ export const InputUpload = ({
                     type="button"
                     className="absolute top-1 z-10 right-1 bg-red-500 p-1 rounded-full hover:bg-red-200 text-xs"
                     onClick={(e) => {
-                      e.stopPropagation()
-                      toggleFacing()
+                      e.stopPropagation();
+                      toggleFacing();
                     }}
-                    title={facing === "user" ? "Switch to back camera" : "Switch to front camera"}
+                    title={
+                      facing === "user"
+                        ? "Switch to back camera"
+                        : "Switch to front camera"
+                    }
                   >
                     <SwitchCameraIcon className="h-4 w-4 text-white" />
                   </button>
                 )}
                 <span className="absolute top-0 left-1 text-xs">{info}</span>
-                
+
                 {/* Hidden canvas for taking snapshots */}
-                <canvas ref={canvasRef} style={{ display: 'none' }} />
+                <canvas ref={canvasRef} style={{ display: "none" }} />
               </div>
 
               {/* Fullscreen camera modal */}
@@ -386,7 +401,11 @@ export const InputUpload = ({
                         type="button"
                         className="bg-red-500 p-2 rounded-full hover:bg-red-400 text-white"
                         onClick={toggleFacing}
-                        title={facing === "user" ? "Switch to back camera" : "Switch to front camera"}
+                        title={
+                          facing === "user"
+                            ? "Switch to back camera"
+                            : "Switch to front camera"
+                        }
                       >
                         <SwitchCameraIcon className="h-6 w-6" />
                       </button>
@@ -398,15 +417,15 @@ export const InputUpload = ({
                         <XIcon className="h-6 w-6" />
                       </button>
                     </div>
-                    
-                    <video 
+
+                    <video
                       ref={fullscreenVideoRef}
                       className="w-full h-full object-contain"
                       playsInline
                       muted
                       autoPlay
                     />
-                    
+
                     <div className="absolute bottom-4 left-0 right-0 flex justify-center">
                       <button
                         type="button"
@@ -425,18 +444,16 @@ export const InputUpload = ({
             {...dropzone.getRootProps()}
             className={cn(
               "border-input bg-background hover:bg-accent hover:text-accent-foreground relative flex h-32 w-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-all select-none",
-              dropZoneClassName,
+              dropZoneClassName
             )}
           >
-            <input 
-              {...dropzone.getInputProps()} 
-            />
+            <input {...dropzone.getInputProps()} />
             <div className="flex flex-col items-center gap-1.5">
               <div className="flex flex-col items-center gap-0.5 text-sm font-medium">
                 <UploadIcon
                   className={cn(
                     "mb-2 h-6 w-6",
-                    progress == 0 ? "" : "animate-bounce",
+                    progress == 0 ? "" : "animate-bounce"
                   )}
                 />
                 <span>{progress == 0 ? "Upload files" : `${progress} %`}</span>
@@ -462,5 +479,5 @@ export const InputUpload = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};

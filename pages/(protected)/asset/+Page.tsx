@@ -7,7 +7,6 @@ import AssetPagination from "../../../components/asset/asset-pagination";
 import AssetList from "../../../components/asset/asset-list";
 import AssetFormModal from "@/components/asset/AssetFormModal";
 import { useAssetSelectionStore } from "@/stores/store-asset-selection";
-import { useUserStore } from "@/stores/store-user-login";
 import { useAssetForm } from "@/hooks/useAssetForm";
 
 const AssetCrudPage = () => {
@@ -30,8 +29,6 @@ const AssetCrudPage = () => {
   const [condition, setCondition] = useState<string>("");
   const [type, setType] = useState<string>("");
   const [locationDesc_id, setLocationDesc_id] = useState<string>("");
-  const [projectCode_id, setprojectCode_id] = useState<number | null>(null);
-  const [categoryCode, setCategoryCode] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("createdAt");
   const [sortOrder, setSortOrder] = useState<string>("desc");
   const [page, setPage] = useState<number>(1);
@@ -41,7 +38,6 @@ const AssetCrudPage = () => {
     "card"
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { location } = useUserStore();
 
   //console.log("location", location);
 
@@ -109,8 +105,8 @@ const AssetCrudPage = () => {
     setCondition("");
     setType("");
     setLocationDesc_id("");
-    setprojectCode_id(null);
-    setCategoryCode("");
+    // setprojectCode_id(null);
+    // setCategoryCode("");
     setSortBy("createdAt");
     setSortOrder("desc");
     setPage(1);
@@ -143,7 +139,8 @@ const AssetCrudPage = () => {
   };
 
   const toggleSelectAll = (e?: React.ChangeEvent<HTMLInputElement>) => {
-    const allSelected = assets.every((asset) =>
+    
+    console.log("toggleSelectAll", e);    const allSelected = assets.every((asset) =>
       selectedAssets.some((a) => a.id === asset.id)
     );
 
