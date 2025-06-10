@@ -8,6 +8,8 @@ interface InspectionApprovalProps {
   inspection: {
     id: string;
     status: string;
+    lead_user_id?: string | null;
+    head_user_id?: string | null;
     lead_signature_data?: string | null;
     head_signature_data?: string | null;
     lead_signature_timestamp?: string | null;
@@ -15,6 +17,8 @@ interface InspectionApprovalProps {
   };
   onApprovalChange?: () => void;
   onInspectionUpdate?: (updatedFields: Partial<{
+    lead_user_id: string | null;
+    head_user_id: string | null;
     lead_signature_data: string | null;
     head_signature_data: string | null;
     lead_signature_timestamp: string | null;
@@ -28,11 +32,13 @@ type ApprovalRole = 'lead' | 'head';
 interface ApprovalStatus {
   lead: {
     signed: boolean;
+    userId?: string;
     timestamp?: string;
     signatureData?: string;
   };
   head: {
     signed: boolean;
+    userId?: string;
     timestamp?: string;
     signatureData?: string;
   };
@@ -44,26 +50,63 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
   onApprovalChange,
   onInspectionUpdate
 }) => {
-  const { role } = useUserStore();
+  const { role, id: currentUserId, name: currentUserName } = useUserStore();
   const [showSignatureModal, setShowSignatureModal] = useState(false);
   const [currentApprovalRole, setCurrentApprovalRole] = useState<ApprovalRole | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [leadUser, setLeadUser] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [headUser, setHeadUser] = useState<{ id: string; name: string; email: string } | null>(null);
   const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>({
     lead: { signed: false },
     head: { signed: false }
   });
+
+  // Fetch user information for lead and head approvers
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        // Fetch lead user if ID exists
+        if (inspection.lead_user_id) {
+          const leadResponse = await fetch(`/api/users/${inspection.lead_user_id}`);
+          if (leadResponse.ok) {
+            const leadData = await leadResponse.json();
+            setLeadUser(leadData);
+          }
+        } else {
+          setLeadUser(null);
+        }
+
+        // Fetch head user if ID exists
+        if (inspection.head_user_id) {
+          const headResponse = await fetch(`/api/users/${inspection.head_user_id}`);
+          if (headResponse.ok) {
+            const headData = await headResponse.json();
+            setHeadUser(headData);
+          }
+        } else {
+          setHeadUser(null);
+        }
+      } catch (error) {
+        console.error('Error fetching user information:', error);
+      }
+    };
+
+    fetchUsers();
+  }, [inspection.lead_user_id, inspection.head_user_id]);
 
   // Update approval status when inspection data changes
   useEffect(() => {
     setApprovalStatus({
       lead: {
         signed: !!inspection.lead_signature_data,
+        userId: inspection.lead_user_id || undefined,
         timestamp: inspection.lead_signature_timestamp || undefined,
         signatureData: inspection.lead_signature_data || undefined
       },
       head: {
         signed: !!inspection.head_signature_data,
+        userId: inspection.head_user_id || undefined,
         timestamp: inspection.head_signature_timestamp || undefined,
         signatureData: inspection.head_signature_data || undefined
       }
@@ -71,12 +114,14 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
   }, [inspection]);
 
   // Check if current user can perform approval actions
-  const canApproveAsLead = role && ['admin', 'lead', 'supervisor'].includes(role.toLowerCase());
-  const canApproveAsHead = role && ['admin', 'head', 'manager'].includes(role.toLowerCase());
+  const canApproveAsLead = (role && ['admin', 'lead'].includes(role.toLowerCase())) || 
+                          (inspection.lead_user_id === currentUserId);
+  const canApproveAsHead = (role && ['admin', 'head'].includes(role.toLowerCase())) || 
+                          (inspection.head_user_id === currentUserId);
 
   // Handle signature save
   const handleSignatureSave = async (signatureData: string) => {
-    if (!currentApprovalRole) return;
+    if (!currentApprovalRole || !currentUserId) return;
 
     setIsSubmitting(true);
     setError(null);
@@ -89,6 +134,7 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
         },
         body: JSON.stringify({
           role: currentApprovalRole,
+          userId: currentUserId,
           signatureData: signatureData,
           timestamp: new Date().toISOString()
         }),
@@ -107,6 +153,7 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
           ...approvalStatus,
           [currentApprovalRole]: {
             signed: true,
+            userId: currentUserId,
             timestamp: new Date().toISOString(),
             signatureData: signatureData
           }
@@ -116,12 +163,15 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
 
         // Prepare update data for parent component
         const updateData: {
+          lead_user_id?: string;
+          head_user_id?: string;
           lead_signature_data?: string;
           head_signature_data?: string;
           lead_signature_timestamp?: string;
           head_signature_timestamp?: string;
           status?: string;
         } = {
+          [`${currentApprovalRole}_user_id`]: currentUserId,
           [`${currentApprovalRole}_signature_data`]: signatureData,
           [`${currentApprovalRole}_signature_timestamp`]: new Date().toISOString()
         };
@@ -237,6 +287,7 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
           ...approvalStatus,
           [role]: {
             signed: false,
+            userId: undefined,
             timestamp: undefined,
             signatureData: undefined
           }
@@ -246,12 +297,15 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
 
         // Prepare update data for parent component
         const updateData: {
+          lead_user_id?: string | null;
+          head_user_id?: string | null;
           lead_signature_data?: string | null;
           head_signature_data?: string | null;
           lead_signature_timestamp?: string | null;
           head_signature_timestamp?: string | null;
           status?: string;
         } = {
+          [`${role}_user_id`]: null,
           [`${role}_signature_data`]: null,
           [`${role}_signature_timestamp`]: null
         };
@@ -373,13 +427,20 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
               
               <div>
                 <h3 className="font-medium text-gray-800">Lead Approval</h3>
+                {leadUser ? (
+                  <p className="text-sm text-blue-600 font-medium">
+                    Assigned to: {leadUser.name || leadUser.email}
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-500">No lead approver assigned</p>
+                )}
                 {approvalStatus.lead.signed ? (
                   <p className="text-sm text-green-600">
                     Signed on {new Date(approvalStatus.lead.timestamp!).toLocaleDateString()} at {new Date(approvalStatus.lead.timestamp!).toLocaleTimeString()}
                   </p>
-                ) : (
+                ) : leadUser ? (
                   <p className="text-sm text-gray-500">Signature required</p>
-                )}
+                ) : null}
               </div>
             </div>
 
@@ -435,13 +496,20 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
               
               <div>
                 <h3 className="font-medium text-gray-800">Head Approval</h3>
+                {headUser ? (
+                  <p className="text-sm text-purple-600 font-medium">
+                    Assigned to: {headUser.name || headUser.email}
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-500">No head approver assigned</p>
+                )}
                 {approvalStatus.head.signed ? (
                   <p className="text-sm text-green-600">
                     Signed on {new Date(approvalStatus.head.timestamp!).toLocaleDateString()} at {new Date(approvalStatus.head.timestamp!).toLocaleTimeString()}
                   </p>
-                ) : (
+                ) : headUser ? (
                   <p className="text-sm text-gray-500">Signature required</p>
-                )}
+                ) : null}
               </div>
             </div>
 
@@ -485,7 +553,7 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
               <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
             <p className="text-sm text-yellow-700">
-              You don't have permission to approve inspections. Only users with Lead or Head roles can sign approvals.
+              You don't have permission to approve this inspection. Only users with Lead/Head roles or specifically assigned as approvers can sign.
             </p>
           </div>
         </div>

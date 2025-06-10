@@ -8,18 +8,20 @@ datasource db {
 }
 
 model Users {
-  id            String          @id @default(uuid())
-  email         String          @unique
-  name          String?
-  role          String?
-  placement     String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  deletedAt     DateTime?
-  auditUsers    AuditUser[]
-  inspections   Inspection[]
-  userLocations UserLocation[]
-  UserSignature UserSignature[]
+  id                String          @id @default(uuid())
+  email             String          @unique
+  name              String?
+  role              String?
+  placement         String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  deletedAt         DateTime?
+  auditUsers        AuditUser[]
+  inspections       Inspection[]
+  leadInspections   Inspection[]    @relation("InspectionLead")
+  headInspections   Inspection[]    @relation("InspectionHead")
+  userLocations     UserLocation[]
+  UserSignature     UserSignature[]
 }
 
 model LocationDesc {
@@ -157,11 +159,15 @@ model Inspection {
   status                   String           @default("pending")
   createdAt                DateTime         @default(now())
   updatedAt                DateTime         @updatedAt
+  lead_user_id             String?
+  head_user_id             String?
   lead_signature_data      String?
   head_signature_data      String?
   lead_signature_timestamp DateTime?
   head_signature_timestamp DateTime?
   inspector                Users            @relation(fields: [inspector_id], references: [id])
+  leadUser                 Users?           @relation("InspectionLead", fields: [lead_user_id], references: [id])
+  headUser                 Users?           @relation("InspectionHead", fields: [head_user_id], references: [id])
   items                    InspectionItem[]
 }
 

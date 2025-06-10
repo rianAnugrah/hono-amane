@@ -9,9 +9,11 @@ import type {
 import InputText from "@/components/ui/input-text";
 import InputSelect from "@/components/ui/input-select";
 
-// Extend the Inspection type to include status
+// Extend the Inspection type to include status and user_id fields
 type Inspection = BaseInspection & {
   status?: "pending" | "in_progress" | "waiting_for_approval" | "completed" | "cancelled" | string;
+  lead_user_id?: string | null;
+  head_user_id?: string | null;
 };
 
 export default function InspectionListPage() {

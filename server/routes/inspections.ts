@@ -9,6 +9,8 @@ const inspections = new Hono()
 // Schema for creating an inspection
 const createInspectionSchema = z.object({
   inspector_id: z.string().uuid(),
+  lead_user_id: z.string().uuid().optional().nullable(),
+  head_user_id: z.string().uuid().optional().nullable(),
   date: z.string().optional(),
   notes: z.string().optional(),
   status: z.enum(['pending', 'in_progress', 'waiting_for_approval', 'completed', 'cancelled']).optional()
@@ -42,6 +44,20 @@ inspections.get('/', async (c) => {
     const inspections = await prisma.inspection.findMany({
       include: {
         inspector: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        leadUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        headUser: {
           select: {
             id: true,
             name: true,
@@ -89,6 +105,20 @@ inspections.get('/:id', async (c) => {
             email: true
           }
         },
+        leadUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        headUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
         items: {
           include: {
             asset: {
@@ -126,6 +156,8 @@ inspections.post('/', zValidator('json', createInspectionSchema), async (c) => {
     const inspection = await prisma.inspection.create({
       data: {
         inspector_id: body.inspector_id,
+        lead_user_id: body.lead_user_id,
+        head_user_id: body.head_user_id,
         date: body.date ? new Date(body.date) : new Date(),
         notes: body.notes,
         status: body.status
@@ -370,6 +402,7 @@ inspections.get('/items/status/:status', async (c) => {
 // Schema for inspection approval
 const approvalSchema = z.object({
   role: z.enum(['lead', 'head']),
+  userId: z.string().uuid(),
   signatureData: z.string(),
   timestamp: z.string().optional()
 })
@@ -396,17 +429,21 @@ inspections.put('/:id/approve', zValidator('json', approvalSchema), async (c) =>
     
     // Prepare update data based on role
     const updateData: {
+      lead_user_id?: string;
       lead_signature_data?: string;
       lead_signature_timestamp?: Date;
+      head_user_id?: string;
       head_signature_data?: string;
       head_signature_timestamp?: Date;
     } = {}
     const timestamp = body.timestamp ? new Date(body.timestamp) : new Date()
     
     if (body.role === 'lead') {
+      updateData.lead_user_id = body.userId
       updateData.lead_signature_data = body.signatureData
       updateData.lead_signature_timestamp = timestamp
     } else if (body.role === 'head') {
+      updateData.head_user_id = body.userId
       updateData.head_signature_data = body.signatureData
       updateData.head_signature_timestamp = timestamp
     }
@@ -441,16 +478,20 @@ inspections.delete('/:id/approve', zValidator('json', removeApprovalSchema), asy
     
     // Prepare update data based on role
     const updateData: {
+      lead_user_id?: string | null;
       lead_signature_data?: string | null;
       lead_signature_timestamp?: Date | null;
+      head_user_id?: string | null;
       head_signature_data?: string | null;
       head_signature_timestamp?: Date | null;
     } = {}
     
     if (body.role === 'lead') {
+      updateData.lead_user_id = null
       updateData.lead_signature_data = null
       updateData.lead_signature_timestamp = null
     } else if (body.role === 'head') {
+      updateData.head_user_id = null
       updateData.head_signature_data = null
       updateData.head_signature_timestamp = null
     }
