@@ -11,14 +11,14 @@ const createInspectionSchema = z.object({
   inspector_id: z.string().uuid(),
   date: z.string().optional(),
   notes: z.string().optional(),
-  status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']).optional()
+  status: z.enum(['pending', 'in_progress', 'waiting_for_approval', 'completed', 'cancelled']).optional()
 })
 
 // Schema for updating an inspection
 const updateInspectionSchema = z.object({
   notes: z.string().optional(),
   date: z.string().optional(),
-  status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']).optional()
+  status: z.enum(['pending', 'in_progress', 'waiting_for_approval', 'completed', 'cancelled']).optional()
 })
 
 // Schema for adding an item to inspection

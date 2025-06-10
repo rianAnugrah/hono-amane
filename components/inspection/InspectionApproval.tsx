@@ -14,6 +14,13 @@ interface InspectionApprovalProps {
     head_signature_timestamp?: string | null;
   };
   onApprovalChange?: () => void;
+  onInspectionUpdate?: (updatedFields: Partial<{
+    lead_signature_data: string | null;
+    head_signature_data: string | null;
+    lead_signature_timestamp: string | null;
+    head_signature_timestamp: string | null;
+    status: string;
+  }>) => void;
 }
 
 type ApprovalRole = 'lead' | 'head';
@@ -34,7 +41,8 @@ interface ApprovalStatus {
 const InspectionApproval: React.FC<InspectionApprovalProps> = ({
   inspectionId,
   inspection,
-  onApprovalChange
+  onApprovalChange,
+  onInspectionUpdate
 }) => {
   const { role } = useUserStore();
   const [showSignatureModal, setShowSignatureModal] = useState(false);
@@ -95,14 +103,73 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
 
       if (data.success) {
         // Update local state
-        setApprovalStatus(prev => ({
-          ...prev,
+        const newApprovalStatus = {
+          ...approvalStatus,
           [currentApprovalRole]: {
             signed: true,
             timestamp: new Date().toISOString(),
             signatureData: signatureData
           }
-        }));
+        };
+        
+        setApprovalStatus(newApprovalStatus);
+
+        // Prepare update data for parent component
+        const updateData: {
+          lead_signature_data?: string;
+          head_signature_data?: string;
+          lead_signature_timestamp?: string;
+          head_signature_timestamp?: string;
+          status?: string;
+        } = {
+          [`${currentApprovalRole}_signature_data`]: signatureData,
+          [`${currentApprovalRole}_signature_timestamp`]: new Date().toISOString()
+        };
+
+        // Check if both signatures are now present and update status to completed
+        const otherRole = currentApprovalRole === 'lead' ? 'head' : 'lead';
+        if (newApprovalStatus[otherRole].signed) {
+          // Both signatures are now present, update inspection status to completed
+          updateData.status = 'completed';
+          try {
+            await fetch(`/api/inspections/${inspectionId}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                status: 'completed'
+              }),
+            });
+          } catch (statusError) {
+            console.warn('Failed to update inspection status to completed:', statusError);
+            // Don't throw error here as signature was saved successfully
+          }
+        } else {
+          // First signature added, set status to waiting_for_approval if not already completed
+          if (inspection.status !== 'completed' && inspection.status !== 'waiting_for_approval') {
+            updateData.status = 'waiting_for_approval';
+            try {
+              await fetch(`/api/inspections/${inspectionId}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  status: 'waiting_for_approval'
+                }),
+              });
+            } catch (statusError) {
+              console.warn('Failed to update inspection status to waiting_for_approval:', statusError);
+              // Don't throw error here as signature was saved successfully
+            }
+          }
+        }
+
+        // Update parent component immediately
+        if (onInspectionUpdate) {
+          onInspectionUpdate(updateData);
+        }
 
         // Close modal
         setShowSignatureModal(false);
@@ -166,14 +233,52 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
 
       if (data.success) {
         // Update local state
-        setApprovalStatus(prev => ({
-          ...prev,
+        const newApprovalStatus = {
+          ...approvalStatus,
           [role]: {
             signed: false,
             timestamp: undefined,
             signatureData: undefined
           }
-        }));
+        };
+        
+        setApprovalStatus(newApprovalStatus);
+
+        // Prepare update data for parent component
+        const updateData: {
+          lead_signature_data?: string | null;
+          head_signature_data?: string | null;
+          lead_signature_timestamp?: string | null;
+          head_signature_timestamp?: string | null;
+          status?: string;
+        } = {
+          [`${role}_signature_data`]: null,
+          [`${role}_signature_timestamp`]: null
+        };
+
+        // If inspection was completed but now missing a signature, change status back to waiting_for_approval
+        if (inspection.status === 'completed') {
+          updateData.status = 'waiting_for_approval';
+          try {
+            await fetch(`/api/inspections/${inspectionId}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                status: 'waiting_for_approval'
+              }),
+            });
+          } catch (statusError) {
+            console.warn('Failed to update inspection status:', statusError);
+            // Don't throw error here as signature removal was successful
+          }
+        }
+
+        // Update parent component immediately
+        if (onInspectionUpdate) {
+          onInspectionUpdate(updateData);
+        }
 
         // Notify parent component
         if (onApprovalChange) {
@@ -216,12 +321,17 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
         
         <div className="flex items-center space-x-2">
           {approvalStatus.lead.signed && approvalStatus.head.signed && (
-            <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full flex items-center">
+            <motion.span 
+              className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full flex items-center"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
               <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
               </svg>
-              Fully Approved
-            </span>
+              Fully Approved - PDF Available
+            </motion.span>
           )}
         </div>
       </div>

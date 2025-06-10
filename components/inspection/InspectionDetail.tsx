@@ -88,7 +88,7 @@ type Inspection = {
   notes: string | null;
   inspector: Inspector;
   items: InspectionItem[];
-  status?: 'pending' | 'in_progress' | 'completed' | 'cancelled' | string;
+  status?: 'pending' | 'in_progress' | 'waiting_for_approval' | 'completed' | 'cancelled' | string;
   lead_signature_data?: string | null;
   head_signature_data?: string | null;
   lead_signature_timestamp?: string | null;
@@ -178,6 +178,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
               <Text style={styles.label}>Status:</Text>
               <Text style={styles.value}>
                 {inspection.status === 'in_progress' ? 'In Progress' : 
+                 inspection.status === 'waiting_for_approval' ? 'Waiting for Approval' :
                  inspection.status ? inspection.status.charAt(0).toUpperCase() + inspection.status.slice(1) : 'Pending'}
               </Text>
             </View>
@@ -646,6 +647,20 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
     }
   };
 
+  // Handle immediate inspection updates from approval component
+  const handleInspectionUpdate = (updatedFields: Partial<{
+    lead_signature_data: string | null;
+    head_signature_data: string | null;
+    lead_signature_timestamp: string | null;
+    head_signature_timestamp: string | null;
+    status: string;
+  }>) => {
+    if (inspection) {
+      const updatedInspection = { ...inspection, ...updatedFields };
+      setInspection(updatedInspection);
+    }
+  };
+
   // Handle QR scan result
   const handleQrScanResult = (assetNo: string) => {
     if (assetNo.trim()) {
@@ -791,7 +806,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
         </div>
 
         <motion.div 
-          className="bg-white shadow-lg rounded-xl p-4 border border-gray-100"
+          className="bg-white shadow-sm rounded-xl p-4 border border-gray-100"
           initial={{ y: 20 }}
           animate={{ y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
@@ -896,7 +911,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
         </div>
 
         <motion.div 
-          className="bg-white shadow-lg rounded-xl p-6 border border-gray-100"
+          className="bg-white shadow-sm rounded-xl p-6 border border-gray-100"
           initial={{ y: 20 }}
           animate={{ y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
@@ -1016,8 +1031,10 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
               <select
                 value={inspection.status || 'pending'}
                 onChange={(e) => handleUpdateInspectionStatus(e.target.value)}
-                className={`text-sm px-3 py-1.5 rounded-full border-0 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer ${
+                disabled={inspection.status === 'completed' && !!inspection.lead_signature_data && !!inspection.head_signature_data}
+                className={`text-sm px-3 py-1.5 rounded-full border-0 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed ${
                   inspection.status === 'completed' ? 'bg-green-100 text-green-800' :
+                  inspection.status === 'waiting_for_approval' ? 'bg-purple-100 text-purple-800' :
                   inspection.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
                   inspection.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                   'bg-yellow-100 text-yellow-800'
@@ -1025,10 +1042,38 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
               >
                 <option value="pending">Pending</option>
                 <option value="in_progress">In Progress</option>
+                <option value="waiting_for_approval">Waiting for Approval</option>
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
               </select>
             </div>
+            
+            {/* Submit for Approval Button */}
+            {inspection.status !== 'waiting_for_approval' && 
+             inspection.status !== 'completed' && 
+             inspection.status !== 'cancelled' && 
+             inspection.items.length > 0 && (
+              <motion.button
+                onClick={() => handleUpdateInspectionStatus('waiting_for_approval')}
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center shadow-sm text-sm"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Submit for Approval
+              </motion.button>
+            )}
+            
+            {inspection.status === 'completed' && inspection.lead_signature_data && inspection.head_signature_data && (
+              <div className="flex items-center text-green-600 text-sm">
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span className="font-medium">Fully Approved</span>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex gap-2">
@@ -1044,7 +1089,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
             Back
           </motion.button>
           
-          {inspection && (
+          {inspection && inspection.lead_signature_data && inspection.head_signature_data && (
             <PDFDownloadLink 
               document={<InspectionPDFDocument />} 
               fileName={`inspection-${inspectionId}-${new Date().toISOString().split('T')[0]}.pdf`}
@@ -1069,6 +1114,15 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
             </PDFDownloadLink>
           )}
           
+          {inspection && (!inspection.lead_signature_data || !inspection.head_signature_data) && (
+            <div className="bg-yellow-100 text-yellow-800 px-4 py-2.5 rounded-lg flex items-center shadow-sm">
+              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+              <span className="text-sm">PDF available after full approval</span>
+            </div>
+          )}
+          
           <motion.button
             onClick={handleDeleteInspection}
             className="bg-red-600 text-white px-4 py-2.5 rounded-lg hover:bg-red-700 transition flex items-center shadow-sm"
@@ -1085,7 +1139,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
 
       {/* Notes Section */}
       <motion.div 
-        className="bg-white shadow-lg rounded-xl p-5 mb-6 border border-gray-100"
+        className="bg-white shadow-sm rounded-xl p-5 mb-6 border border-gray-100"
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.3 }}
@@ -1104,19 +1158,27 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
             )
           }
           onBlur={(e) => handleUpdateNotes(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg p-3 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-          placeholder="Add inspection notes..."
+          disabled={inspection.status === 'waiting_for_approval' || inspection.status === 'completed'}
+          className={`w-full border border-gray-300 rounded-lg p-3 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+            (inspection.status === 'waiting_for_approval' || inspection.status === 'completed') ? 'bg-gray-100 cursor-not-allowed' : ''
+          }`}
+          placeholder={
+            inspection.status === 'waiting_for_approval' ? "Notes editing disabled while waiting for approval" :
+            inspection.status === 'completed' ? "Notes editing disabled - inspection completed" :
+            "Add inspection notes..."
+          }
           rows={3}
         />
       </motion.div>
 
       {/* QR Scanner Button */}
-      <motion.div 
-        className="bg-white shadow-lg rounded-xl p-5 mb-6 border border-gray-100"
-        initial={{ y: 10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.1 }}
-      >
+      {inspection.status !== 'waiting_for_approval' && inspection.status !== 'completed' && (
+        <motion.div 
+          className="bg-white shadow-sm rounded-xl p-5 mb-6 border border-gray-100"
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-lg font-medium flex items-center">
             <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1160,10 +1222,11 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
 
         </div>
       </motion.div>
+      )}
 
       {/* Inspected Assets Section */}
       <motion.div 
-        className="bg-white shadow-lg rounded-xl p-5 border border-gray-100"
+        className="bg-white shadow-sm rounded-xl p-5 border border-gray-100"
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.2 }}
@@ -1186,17 +1249,19 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
             <p className="text-gray-500 mb-3">
               No assets have been added to this inspection yet.
             </p>
-            <motion.button
-              onClick={() => setShowQrScanner(true)}
-              className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg hover:bg-blue-200 transition inline-flex items-center"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
-              </svg>
-              Scan QR Code to Add Asset
-            </motion.button>
+            {inspection.status !== 'waiting_for_approval' && inspection.status !== 'completed' && (
+              <motion.button
+                onClick={() => setShowQrScanner(true)}
+                className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg hover:bg-blue-200 transition inline-flex items-center"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                </svg>
+                Scan QR Code to Add Asset
+              </motion.button>
+            )}
           </div>
         ) : (
           <div className="border border-gray-200 rounded-lg overflow-hidden">
@@ -1247,17 +1312,21 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
                     </td>
                     <td className="px-4 py-2.5 text-sm">{item.assetVersion}</td>
                     <td className="px-4 py-2.5 text-sm">
-                      <motion.button
-                        onClick={() => handleRemoveAsset(item.id)}
-                        className="text-red-600 hover:text-red-800 transition-colors inline-flex items-center"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Remove
-                      </motion.button>
+                      {inspection.status !== 'waiting_for_approval' && inspection.status !== 'completed' ? (
+                        <motion.button
+                          onClick={() => handleRemoveAsset(item.id)}
+                          className="text-red-600 hover:text-red-800 transition-colors inline-flex items-center"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          Remove
+                        </motion.button>
+                      ) : (
+                        <span className="text-gray-400 text-sm">Action disabled</span>
+                      )}
                     </td>
                   </motion.tr>
                 ))}
@@ -1268,24 +1337,28 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
       </motion.div>
 
       {/* Inspection Approval Section */}
-      <motion.div
-        initial={{ y: 10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.3 }}
-      >
-        <InspectionApproval
-          inspectionId={inspectionId}
-          inspection={{
-            id: inspection.id,
-            status: inspection.status || 'pending',
-            lead_signature_data: inspection.lead_signature_data,
-            head_signature_data: inspection.head_signature_data,
-            lead_signature_timestamp: inspection.lead_signature_timestamp,
-            head_signature_timestamp: inspection.head_signature_timestamp
-          }}
-          onApprovalChange={onInspectionChange}
-        />
-      </motion.div>
+      {inspection.status === 'waiting_for_approval' || inspection.status === 'completed' && (
+        <motion.div
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+          className="mt-6"
+        >
+          <InspectionApproval
+            inspectionId={inspectionId}
+            inspection={{
+              id: inspection.id,
+              status: inspection.status || 'pending',
+              lead_signature_data: inspection.lead_signature_data,
+              head_signature_data: inspection.head_signature_data,
+              lead_signature_timestamp: inspection.lead_signature_timestamp,
+              head_signature_timestamp: inspection.head_signature_timestamp
+            }}
+            onApprovalChange={onInspectionChange}
+            onInspectionUpdate={handleInspectionUpdate}
+          />
+        </motion.div>
+      )}
     </motion.div>
   );
 };

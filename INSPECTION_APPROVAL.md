@@ -15,11 +15,16 @@ This document describes the inspection approval system that allows lead and head
 - **Role-Based Access**: Users can only sign approvals based on their role permissions
 - **Timestamp Tracking**: Records exact date and time of each signature
 - **Signature Management**: Ability to remove signatures for corrections (with proper permissions)
+- **Automatic Status Updates**: Inspection status automatically changes to "completed" when both signatures are present
+- **Status Protection**: When fully approved, status dropdown is disabled to prevent accidental changes
+- **Conditional PDF Access**: PDF download only appears when inspection is fully approved
 
 ### PDF Integration
+- **Conditional Access**: PDF download only available when both signatures are present
 - **Report Generation**: Signatures are included in generated inspection PDF reports
 - **Professional Layout**: Signatures are displayed alongside approval timestamps
 - **Visual Verification**: Clear indication of signed vs unsigned approvals
+- **Status Management**: Inspection status automatically changes to "completed" when fully approved
 
 ## User Roles and Permissions
 
@@ -145,9 +150,12 @@ Visit `/test-signature` to test the signature canvas component:
 1. Create a new inspection
 2. Add assets to the inspection
 3. Sign as Lead (if you have lead permissions)
-4. Sign as Head (if you have head permissions)
-5. Generate PDF to verify signature inclusion
-6. Test signature removal functionality
+4. Note that status remains "in_progress" and PDF is not yet available
+5. Sign as Head (if you have head permissions)
+6. Verify that status automatically changes to "completed"
+7. Confirm PDF download button appears
+8. Generate PDF to verify signature inclusion
+9. Test signature removal functionality (status should revert to "in_progress")
 
 ## Security Considerations
 
