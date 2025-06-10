@@ -142,6 +142,85 @@ users.get("/", async (c) => {
   }
 });
 
+// GET deleted users
+users.get("/deleted", async (c) => {
+  try {
+    const {
+      q,
+      role,
+      placement,
+      locationId,
+      sort = "deletedAt",
+      order = "desc",
+      page = "1",
+      limit = "10",
+    } = c.req.query();
+
+    const pageNumber = parseInt(page);
+    const pageSize = parseInt(limit);
+    const skip = (pageNumber - 1) * pageSize;
+
+    const parsedLocationId = locationId ? Number(locationId) : undefined;
+
+    const where = {
+      deletedAt: { not: null },
+      AND: [
+        q
+          ? {
+              OR: [
+                { name: { contains: q, mode: "insensitive" as const } },
+                { email: { contains: q, mode: "insensitive" as const } },
+              ],
+            }
+          : {},
+        role ? { role } : {},
+        placement ? { placement } : {},
+        parsedLocationId
+          ? {
+              userLocations: {
+                some: { locationId: parsedLocationId },
+              },
+            }
+          : {},
+      ].filter(condition => Object.keys(condition).length > 0),
+    };
+
+    const [rawUsers, total] = await Promise.all([
+      prisma.users.findMany({
+        where,
+        orderBy: { [sort as string]: order === "asc" ? "asc" : "desc" },
+        skip,
+        take: pageSize,
+        include: {
+          userLocations: {
+            include: { location: true },
+          },
+        },
+      }),
+      prisma.users.count({ where }),
+    ]);
+
+    // Add `locations` array manually
+    const usersWithLocations = rawUsers.map((user) => ({
+      ...user,
+      locations: user.userLocations.map((ul) => ul.location),
+    }));
+
+    return c.json({
+      data: usersWithLocations,
+      pagination: {
+        total,
+        page: pageNumber,
+        limit: pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching deleted users:", error);
+    return c.json({ error: "Failed to fetch deleted users." }, 500);
+  }
+});
+
 users.get("/:id", async (c) => {
   try {
     const id = c.req.param("id");
