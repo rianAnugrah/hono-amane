@@ -8,25 +8,26 @@ datasource db {
 }
 
 model Users {
-  id            String         @id @default(uuid())
-  email         String         @unique
+  id            String          @id @default(uuid())
+  email         String          @unique
   name          String?
   role          String?
   placement     String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   deletedAt     DateTime?
-  userLocations UserLocation[]
   auditUsers    AuditUser[]
   inspections   Inspection[]
+  userLocations UserLocation[]
+  UserSignature UserSignature[]
 }
 
 model LocationDesc {
   id            Int            @id @default(autoincrement())
   description   String         @unique @db.VarChar(255)
   assets        Asset[]
-  userLocations UserLocation[]
   assetAudits   AssetAudit[]
+  userLocations UserLocation[]
 }
 
 model UserLocation {
@@ -53,22 +54,21 @@ model DetailsLocation {
 model Asset {
   id                 String           @id @default(uuid())
   assetNo            String
-  lineNo             String?
-  assetName          String?
+  lineNo             String
+  assetName          String
   remark             String?
   condition          String
-  pisDate            DateTime?
-  transDate          DateTime?
-  categoryCode       String?
+  pisDate            DateTime
+  transDate          DateTime
+  categoryCode       String
   afeNo              String?
-  type               String?
-  adjustedDepre      Float?
+  adjustedDepre      Float
   poNo               String?
-  acqValueIdr        Float?
-  acqValue           Float?
-  accumDepre         Float?
-  ytdDepre           Float?
-  bookValue          Float?
+  acqValueIdr        Float
+  acqValue           Float
+  accumDepre         Float
+  ytdDepre           Float
+  bookValue          Float
   taggingYear        String?
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
@@ -76,10 +76,11 @@ model Asset {
   isLatest           Boolean          @default(true)
   parentId           String?
   version            Int              @default(1)
-  projectCode_id     Int?
-  locationDesc_id    Int?
   detailsLocation_id Int?
-  images             String[]       @default([])
+  images             String[]         @default([])
+  locationDesc_id    Int?
+  projectCode_id     Int?
+  type               String?
   detailsLocation    DetailsLocation? @relation(fields: [detailsLocation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_details_location")
   locationDesc       LocationDesc?    @relation(fields: [locationDesc_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location_desc")
   projectCode        ProjectCode?     @relation(fields: [projectCode_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_project_code")
@@ -121,21 +122,19 @@ model Asset_Copy {
   @@index([assetNo, isLatest])
 }
 
-
 model AssetAudit {
-  id            String         @id @default(uuid())
-  assetId       String
-  checkDate     DateTime       @default(now())
-  locationId    Int?
-  status        String
-  remarks       String?
-  images        String[]       @default([])
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-
-  asset         Asset          @relation(fields: [assetId], references: [id])
-  location      LocationDesc?  @relation(fields: [locationId], references: [id])
-  auditUsers    AuditUser[]    // Link to users who participated
+  id         String        @id @default(uuid())
+  assetId    String
+  checkDate  DateTime      @default(now())
+  locationId Int?
+  status     String
+  remarks    String?
+  images     String[]      @default([])
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  asset      Asset         @relation(fields: [assetId], references: [id])
+  location   LocationDesc? @relation(fields: [locationId], references: [id])
+  auditUsers AuditUser[]
 
   @@index([assetId])
   @@index([checkDate])
@@ -144,7 +143,6 @@ model AssetAudit {
 model AuditUser {
   auditId String
   userId  String
-
   audit   AssetAudit @relation(fields: [auditId], references: [id])
   user    Users      @relation(fields: [userId], references: [id])
 
@@ -152,29 +150,46 @@ model AuditUser {
 }
 
 model Inspection {
-  id           String            @id @default(uuid())
-  inspector_id String
-  date         DateTime          @default(now())
-  notes        String?
-  status       String            @default("pending") // pending, in_progress, completed, cancelled
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  items        InspectionItem[]
-  inspector    Users             @relation(fields: [inspector_id], references: [id])
+  id                       String           @id @default(uuid())
+  inspector_id             String
+  date                     DateTime         @default(now())
+  notes                    String?
+  status                   String           @default("pending")
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+  lead_signature_data      String?
+  head_signature_data      String?
+  lead_signature_timestamp DateTime?
+  head_signature_timestamp DateTime?
+  inspector                Users            @relation(fields: [inspector_id], references: [id])
+  items                    InspectionItem[]
 }
 
 model InspectionItem {
-  id            String     @id @default(uuid())
-  inspectionId  String
-  assetId       String
-  assetVersion  Int
-  status        String     @default("pending") // pending, inspected, failed, passed, not_applicable
-  notes         String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  inspection    Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
-  asset         Asset      @relation(fields: [assetId], references: [id])
+  id           String     @id @default(uuid())
+  inspectionId String
+  assetId      String
+  assetVersion Int
+  status       String     @default("pending")
+  notes        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  asset        Asset      @relation(fields: [assetId], references: [id])
+  inspection   Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
 
   @@index([inspectionId])
   @@index([assetId])
+}
+
+model UserSignature {
+  id             String   @id
+  user_id        String
+  signature_data String
+  is_active      Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime
+  Users          Users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([is_active])
+  @@index([user_id])
 }
