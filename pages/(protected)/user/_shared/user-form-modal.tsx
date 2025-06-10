@@ -31,6 +31,14 @@ type UserFormProps = {
   onCancel: () => void;
 };
 
+// Utility function to get cookie value by name
+const getCookie = (name: string): string | null => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+};
+
 export default function UserFormModal({
   form,
   setForm,
@@ -39,15 +47,100 @@ export default function UserFormModal({
   onCancel,
 }: UserFormProps) {
   const [locations, setLocations] = useState<Location[]>([]);
+  const [pmdUsers, setPmdUsers] = useState<User[]>([]);
+  const [search, setSearch] = useState("");
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const fetchLocations = useCallback(async () => {
     const res = await axios.get("/api/locations");
     setLocations(res.data);
   }, []);
 
+  const fetchPmdUsers = useCallback(async () => {
+    if (!search.trim() || editingId) return;
+    
+    setIsSearching(true);
+    try {
+      const hcmlSessionCookie = getCookie('hcmlSession');
+      const res = await axios.post("https://pmd.hcml.co.id/api/person/read_all", {
+        select: {
+          name: true,
+          email: true,
+        },
+        where: {
+          name: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(hcmlSessionCookie && { "Cookie": `hcmlSession=${hcmlSessionCookie}` })
+        },
+        withCredentials: true
+      });
+      setPmdUsers(res.data.items || []);
+      setShowUserDropdown(res.data.items?.length > 0);
+    } catch (error) {
+      console.error('Error fetching PMD users:', error);
+      setPmdUsers([]);
+      setShowUserDropdown(false);
+    } finally {
+      setIsSearching(false);
+    }
+  }, [search, editingId]);
+
+  const handleUserSelect = (selectedUser: User) => {
+    // Update form with selected user data
+    setForm({
+      ...form,
+      name: selectedUser.name || "",
+      email: selectedUser.email || "",
+    });
+    
+    // Update search to show selected user name
+    setSearch(selectedUser.name || "");
+    
+    // Hide dropdown and clear users list
+    setShowUserDropdown(false);
+    setPmdUsers([]);
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setForm({ ...form, name: value });
+    setSearch(value);
+    
+    if (!editingId) {
+      setShowUserDropdown(false);
+      // Clear email when name changes (unless editing)
+      if (!value.trim()) {
+        setForm({ ...form, name: value, email: "" });
+      }
+    }
+  };
+
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (search.trim() && !editingId) {
+        fetchPmdUsers();
+      } else {
+        setPmdUsers([]);
+        setShowUserDropdown(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [search, editingId, fetchPmdUsers]);
+
   useEffect(() => {
     fetchLocations();
   }, [fetchLocations]);
+
+  console.log(pmdUsers);
 
   return (
     <motion.div
@@ -69,22 +162,64 @@ export default function UserFormModal({
 
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-4">
-              <div>
+              <div className="relative">
                 <input
                   className="w-full px-4 py-3 bg-gray-100 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
+                  placeholder={editingId ? "Name" : "Search name or type to add new user"}
+                  value={form.name || ""}
+                  disabled={!!editingId}
+                  onChange={handleNameChange}
+                  onFocus={() => {
+                    if (!editingId && search.trim() && pmdUsers.length > 0) {
+                      setShowUserDropdown(true);
+                    }
+                  }}
+                  onBlur={() => {
+                    // Delay hiding dropdown to allow clicking on items
+                    setTimeout(() => setShowUserDropdown(false), 200);
+                  }}
                 />
+                
+                {/* Loading indicator */}
+                {isSearching && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+
+                {/* User selection dropdown */}
+                {showUserDropdown && pmdUsers.length > 0 && !editingId && (
+                  <div className="absolute top-full  mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-60 overflow-y-auto">
+                    {pmdUsers.map((user, index) => (
+                      <button
+                        key={`${user.email}-${index}`}
+                        type="button"
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 focus:outline-none focus:bg-gray-50"
+                        onClick={() => handleUserSelect(user)}
+                      >
+                        <div className="font-medium text-gray-900">{user.name}</div>
+                        <div className="text-sm text-gray-500">{user.email}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* No results message */}
+                {search.trim() && !isSearching && pmdUsers.length === 0 && !editingId && !form.email && (
+                  <div className="absolute top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10 px-4 py-3 text-gray-500 text-sm">
+                    No users found. You can create a new user with this name.
+                  </div>
+                )}
               </div>
 
               <div>
                 <input
                   className="w-full px-4 py-3 bg-gray-100 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Name"
-                  value={form.name || ""}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="Email"
+                  value={form.email || ""}
+                  disabled={!!editingId}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
                 />
               </div>
 
@@ -100,6 +235,14 @@ export default function UserFormModal({
                       {
                         value: "admin",
                         label: "Admin",
+                      },
+                      {
+                        value: "head",
+                        label: "Head",
+                      },
+                      {
+                        value: "lead",
+                        label: "Leader",
                       },
                       {
                         value: "pic",

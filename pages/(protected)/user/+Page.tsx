@@ -142,7 +142,7 @@ export default function Page() {
             </p>
           </div>
 
-          {/* <motion.button
+          <motion.button
             onClick={() => {
               setForm({ email: "", password: "" });
               setIsModalOpen(true);
@@ -153,7 +153,7 @@ export default function Page() {
           >
             <UserPlus className="w-4 h-4" />
             <span>Add New User</span>
-          </motion.button> */}
+          </motion.button>
         </div>
       </motion.div>
 

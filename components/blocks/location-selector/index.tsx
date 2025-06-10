@@ -26,9 +26,10 @@ export function LocationSelector({
   const [locations, setLocations] = useState<Location[]>([]);
   const [search, setSearch] = useState("");
 
-  const fetchLocations = async () => {
+  const fetchLocations = async (searchTerm = "") => {
     try {
-      const res = await axios.get("/api/locations");
+      const params = searchTerm ? { search: searchTerm } : {};
+      const res = await axios.get("/api/locations", { params });
       setLocations(res.data);
     } catch (error) {
       console.error("Failed to fetch locations:", error);
@@ -36,7 +37,7 @@ export function LocationSelector({
   };
 
   useEffect(() => {
-    fetchLocations();
+    fetchLocations(search);
   }, [search]);
 
   // Handle search input change
@@ -51,7 +52,11 @@ export function LocationSelector({
 
   // Create the search input component for the dropdown
   const searchInput = (
-    <div className="flex items-center gap-2">
+    <div 
+      className="flex items-center gap-2"
+      onClick={(e: React.MouseEvent) => e.stopPropagation()}
+      onMouseDown={(e: React.MouseEvent) => e.stopPropagation()}
+    >
       <InputText
         value={search}
         icon={<Search />}
@@ -60,7 +65,11 @@ export function LocationSelector({
       />
       <button
         type="button"
-        onClick={resetSearch}
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          resetSearch();
+        }}
+        onMouseDown={(e: React.MouseEvent) => e.stopPropagation()}
         className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
       >
         Reset
