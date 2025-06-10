@@ -330,12 +330,12 @@ body {
           <AssetPrintItem 
             key={asset.id} 
             asset={asset} 
-            isExpanded={false}
-            onToggle={() => {}}
-            handleEdit={() => {}}
-            handleDelete={() => {}}
-            checked={false}
-            onSelectAsset={() => {}}
+            // isExpanded={false}
+            // onToggle={() => {}}
+            // handleEdit={() => {}}
+            // handleDelete={() => {}}
+            // checked={false}
+            // onSelectAsset={() => {}}
           />
         ))}
       </div>

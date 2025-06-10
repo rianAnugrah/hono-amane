@@ -11,7 +11,7 @@ interface locInterface {
   description: string;
 }
 
-export default function LocationDisplay({ size = 2 , orientation = "horizontal" }: LocationDisplayProps) {
+export default function LocationDisplay({ size = 2 , orientation = "horizontal" , }: LocationDisplayProps) {
   const { location } = useUserStore();
 
   console.log(location)

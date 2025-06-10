@@ -4,9 +4,10 @@ import AuditForm from "@/components/audit/AuditForm";
 
 interface AuditFormData {
   assetId: string;
-  condition: string;
-  notes?: string;
-  images?: string[];
+  checkedById: string;
+  status: string;
+  remarks: string;
+  images: string[];
 }
 
 export default function NewAssetAuditPage() {

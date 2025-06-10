@@ -129,7 +129,7 @@ function MobileNavbar() {
                   </div>
 
                   <div className="py-2">
-                    <UserDropDown isCompact={false} />
+                    <UserDropDown  />
                   </div>
 
                   <div className="flex flex-col p-2 gap-1 overflow-y-auto">
@@ -242,7 +242,7 @@ function DesktopNav() {
       } pb-4 relative`}
     >
       <div className="h-[12.75rem] flex items-center justify-center">
-        <UserDropDown isCompact={isCompact} />
+        <UserDropDown />
       </div>
 
       {/* <button 

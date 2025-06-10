@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { UserFilterToolbar } from "@/pages/(protected)/user/_shared/user-filter-toolbar";
 import { UserPlus, Filter, RefreshCw } from "lucide-react";
 import UserFormModal from "./_shared/user-form-modal";
+import Badge from "@/components/ui/badge";
 
 // Extended User type with all needed properties
 type User = {
@@ -15,6 +16,7 @@ type User = {
   createdAt: string;
   updatedAt: string;
   password: string;
+  userLocations?: Array<{ id: number; description?: string }>;
   locations?: Array<{ id: number; description?: string }>;
   location?: { id: number; description?: string };
   locationIds?: number[];
@@ -320,8 +322,8 @@ export default function Page() {
                     <span className="md:hidden text-xs font-medium text-gray-500 w-20">
                       Placement:
                     </span>
-                    <span className="text-gray-700 text-sm">
-                      {user.location?.description || "—"}
+                    <span className="text-gray-700 text-sm flex flex-wrap gap-1">
+                      {user?.locations?.map((loc) => <Badge key={loc.id} text={loc.description || ""} color="blue" variant="light" />)}
                     </span>
                   </div>
 

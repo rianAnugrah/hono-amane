@@ -48,7 +48,7 @@ const NewInspectionForm = ({
             throw new Error(errorData.error || "Unknown error");
           }
           
-          await onSubmit(formData as InspectionFormData);
+          await onSubmit(formData as unknown as InspectionFormData);
         } catch (error) {
           console.error("Error submitting audit:", error);
           throw error;

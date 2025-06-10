@@ -12,6 +12,7 @@ import AssetMediaSection from "@/components/asset/AssetMediaSection";
 import AssetBasicInfo from "@/components/asset/AssetBasicInfo";
 import AssetFinancialInfo from "@/components/asset/AssetFinancialInfo";
 import AssetVersionHistory from "@/components/asset/AssetVersionHistory";
+import { InspectionLog } from "@/components/asset/InspectionLogTable";
 
 // Type for mobile view tabs
 type MobileTab = 'info' | 'history';

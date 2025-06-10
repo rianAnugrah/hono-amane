@@ -240,7 +240,7 @@ export default function AssetItem({
           onSelectAsset={onSelectAsset}
           role={role}
           handleEdit={handleEdit}
-          handleDelete={handleDelete}
+          // handleDelete={handleDelete}
         />
       )}
     </motion.div>

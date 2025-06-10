@@ -1,5 +1,5 @@
 // Load assets data from JSON file
-import assetsJsonData from './assets.json';
+import assetsJsonData from './assets-hbi.json';
 
 // Define interface for JSON data structure
 interface AssetJsonItem {

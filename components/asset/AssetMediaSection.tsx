@@ -224,7 +224,7 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
                 onClick={() => openLightbox(index)}
               >
                 {imageLoadError[index] ? (
-                  renderPlaceholder(asset.assetName, index)
+                  renderPlaceholder(asset.assetName)
                 ) : (
                   <ImageWithFallback
                     src={image}
@@ -310,7 +310,7 @@ const AssetMediaSection = ({ asset }: { asset: Asset }) => {
             >
               {imageLoadError[currentImageIndex] ? (
                 <div className="h-[60vh] w-[60vh] max-w-full max-h-full rounded-xl flex items-center justify-center bg-gray-800">
-                  {renderPlaceholder(asset.assetName, currentImageIndex)}
+                  {renderPlaceholder(asset.assetName)}
                 </div>
               ) : (
                 <ImageWithFallback
