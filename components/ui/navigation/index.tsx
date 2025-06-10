@@ -115,18 +115,7 @@ function MobileNavbar() {
                   transition={{ type: "tween", duration: 0.3 }}
                   style={{ maxHeight: "100vh" }}
                 >
-                  <div className="p-4 border-b border-blue-800 flex items-center justify-between">
-                    <div className="w-10 h-10">
-                      <Logo />
-                    </div>
-                    <button
-                      onClick={() => setMenuOpen(false)}
-                      className="text-white hover:text-red-400"
-                      aria-label="Close menu"
-                    >
-                      <ChevronLeft size={24} />
-                    </button>
-                  </div>
+
 
                   <div className="py-2">
                     <UserDropDown  />

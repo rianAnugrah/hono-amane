@@ -205,7 +205,7 @@ const AssetCrudPage = () => {
       </div>
 
       {!isLoading && assets.length > 0 && (
-        <div className="relative md:sticky bottom-16 md:-bottom-0 z-10 ">
+        <div className="relative md:sticky -bottom-3 md:-bottom-0 z-10 ">
           <AssetPagination
             page={page}
             pageSize={pageSize}

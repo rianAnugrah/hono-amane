@@ -55,7 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   // For protected pages, render with navigation
   return (
-    <div className="w-full h-[100svh] relative flex bg-gray-100">
+    <div className="w-full h-[100svh] relative flex bg-gray-100 ">
       <Navbar />
       <div className="w-full md:w-full flex flex-col h-[100vh]">
         <div
@@ -63,7 +63,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           ref={parent}
         >
           {/* Scrollable Content */}
-          <div className="overflow-y-auto bg-gray-100 rounded-b-lg pb-0 lg:pb-0 ">{children}</div>
+          <div className="overflow-y-auto bg-gray-100 rounded-b-lg pb-20 lg:pb-0 ">{children}</div>
         </div>
       </div>
     </div>
