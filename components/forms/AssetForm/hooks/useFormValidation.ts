@@ -50,17 +50,22 @@ export const useFormValidation = (form: AssetFormValues) => {
     }, {} as SectionStatusState);
   }, [validation, touchedFields, sections]);
 
-  // Handle field blur with useCallback to prevent recreation
-  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
-    const { name } = e.target;
-    setTouchedFields(prev => new Set(prev).add(name));
+  // Simplified blur handler that works with field names
+  const markFieldTouched = useCallback((fieldName: string) => {
+    setTouchedFields(prev => new Set(prev).add(fieldName));
     
-    // Validate the field
+    // Validate the field immediately
     setValidation(prev => ({
       ...prev,
-      [name]: validateField(name, form[name])
+      [fieldName]: validateField(fieldName, form[fieldName as keyof AssetFormValues])
     }));
   }, [form]);
+
+  // Legacy blur handler for backward compatibility
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    const { name } = e.target;
+    markFieldTouched(name);
+  }, [markFieldTouched]);
 
   // Update validation when form changes (debounced effect)
   useEffect(() => {
@@ -110,6 +115,7 @@ export const useFormValidation = (form: AssetFormValues) => {
     validation,
     sectionStatus,
     handleBlur,
+    markFieldTouched, // New simplified method
     isFormValid,
     validateAllFields,
   };

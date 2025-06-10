@@ -1,18 +1,12 @@
 import { useEffect, useState, useMemo, useCallback, memo } from "react";
-import { AnimatePresence } from "framer-motion";
 import { AssetFormValues } from "./types";
-import { getErrorMessage } from "./validation";
-import { useFormValidation } from "./hooks/useFormValidation";
+import { useZodValidation } from "./hooks/useZodValidation";
 import { FormField } from "./components/FormField";
-import { SectionTab } from "./components/SectionTab";
-import { ProgressIndicator } from "./components/ProgressIndicator";
-import { NavigationButtons } from "./components/NavigationButtons";
-import { FormSection } from "./components/FormSection";
 import { SelectField } from "./components/SelectField";
 import { DatePickerFields } from "./components/DatepickerFields";
 import { InputUpload } from "@/components/ui/input-upload";
 import axios from "axios";
-import { X, Layers, ScrollText } from "lucide-react";
+import { X } from "lucide-react";
 
 // Define interfaces for location and project code data
 interface LocationOption {
@@ -29,13 +23,12 @@ interface AssetFormProps {
   editingId: string | null;
   form: AssetFormValues;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { target: { value: string | number | string[]; name: string }; currentTarget?: { value: string | number | string[]; name: string } }) => void;
-  handleBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement> | { target: { name: string } }) => void;
   handleSubmit: () => void;
   handleCancel: () => void;
   hasToolbar?: boolean;
 }
 
-// Memoize static options to prevent recreation
+// Static options
 const categoryCodeOptions = [
   { label: "Select", value: "" },
   { label: "A", value: "A" },
@@ -61,71 +54,46 @@ const conditionOptions = [
   { value: "poor", label: "Poor" },
 ];
 
-const sections = ["basic", "location", "financial", "depreciation", "dates", "images"];
-
 function AssetForm({
   editingId,
   form,
   handleChange,
-  handleBlur: externalHandleBlur,
   handleSubmit,
   handleCancel,
   hasToolbar = true,
 }: AssetFormProps) {
-  const [activeSection, setActiveSection] = useState("basic");
-  const [direction, setDirection] = useState(0);
   const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
   const [projectCodes, setProjectCodes] = useState<ProjectCode[]>([]);
-  const [isVerticalMode, setIsVerticalMode] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { touchedFields, validation, sectionStatus, handleBlur: internalHandleBlur, isFormValid, validateAllFields } =
-    useFormValidation(form);
+  const { 
+    validateOnSubmit, 
+    getFieldError, 
+    hasFieldError, 
+    isFormValid,
+    clearErrors 
+  } = useZodValidation(form);
 
-  // Create a flexible blur handler that works with different event types
-  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement | HTMLSelectElement> | { target: { name: string } }) => {
-    // Call external handler if provided
-    if (externalHandleBlur) {
-      externalHandleBlur(e);
+  // Simple change handler without validation
+  const handleChangeWithClearErrors = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { target: { value: string | number | string[]; name: string }; currentTarget?: { value: string | number | string[]; name: string } }) => {
+    handleChange(e);
+    // Optional: Clear errors when user starts typing after a failed submit
+    // clearErrors();
+  }, [handleChange]);
+
+
+
+  // Enhanced submit handler with validation
+  const handleSubmitWithValidation = useCallback(() => {
+    if (validateOnSubmit()) {
+      handleSubmit();
     }
-    
-    // Call internal handler for validation - but only if it's a proper FocusEvent
-    if ('currentTarget' in e && 'relatedTarget' in e) {
-      // This is a proper FocusEvent, safe to pass to internal handler
-      internalHandleBlur(e as React.FocusEvent<HTMLInputElement>);
-    } else {
-      // This is a synthetic event, create a proper FocusEvent-like object for validation
-      const syntheticBlurEvent = {
-        target: { name: e.target.name },
-        currentTarget: { name: e.target.name }
-      } as React.FocusEvent<HTMLInputElement>;
-      
-      // For synthetic events, call the internal handler with a mock event
-      internalHandleBlur(syntheticBlurEvent);
-    }
-  }, [externalHandleBlur, internalHandleBlur]);
+    // If validation fails, errors will be shown automatically
+  }, [validateOnSubmit, handleSubmit]);
 
-  // Memoize navigation functions
-  const navigateSection = useCallback((next: boolean) => {
-    const currentIndex = sections.indexOf(activeSection);
-    const newIndex = next ? currentIndex + 1 : currentIndex - 1;
-
-    if (newIndex >= 0 && newIndex < sections.length) {
-      setDirection(next ? 1 : -1);
-      setActiveSection(sections[newIndex]);
-    }
-  }, [activeSection]);
-
-  const handleSectionClick = useCallback((section: string) => {
-    const currentIndex = sections.indexOf(activeSection);
-    const newIndex = sections.indexOf(section);
-    setDirection(newIndex > currentIndex ? 1 : -1);
-    setActiveSection(section);
-  }, [activeSection]);
-
-  // Optimize data fetching with useCallback
+  // Fetch data functions
   const fetchLocations = useCallback(async () => {
-    if (isLoading) return; // Prevent multiple simultaneous requests
+    if (isLoading) return;
     
     setIsLoading(true);
     try {
@@ -139,7 +107,7 @@ function AssetForm({
   }, [isLoading]);
 
   const fetchProjectCode = useCallback(async () => {
-    if (isLoading) return; // Prevent multiple simultaneous requests
+    if (isLoading) return;
     
     setIsLoading(true);
     try {
@@ -152,24 +120,13 @@ function AssetForm({
     }
   }, [isLoading]);
 
-  // Fetch data only once
+  // Fetch data on mount
   useEffect(() => {
     fetchLocations();
     fetchProjectCode();
-  }, []); // Remove dependencies to fetch only once
+  }, []);
 
-  // Validate all fields when in edit mode
-  useEffect(() => {
-    if (editingId) {
-      validateAllFields();
-    }
-  }, [editingId, validateAllFields]);
-
-  const toggleViewMode = useCallback(() => {
-    setIsVerticalMode(!isVerticalMode);
-  }, [isVerticalMode]);
-
-  // Memoize location and project code options
+  // Memoize select options
   const locationSelectOptions = useMemo(() => [
     { label: "Select", value: "" },
     ...locationOptions.map((loc) => ({
@@ -187,655 +144,300 @@ function AssetForm({
   ], [projectCodes]);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm mb-6 h-full overflow-y-auto relative">
-      <h2 className="text-xl font-semibold mb-6 text-gray-800">
-        {editingId ? "Edit" : "Create"} Asset
-      </h2>
-
-      {hasToolbar && (
-        <div className="absolute right-8 top-6 flex items-center gap-2">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <h2 className="text-2xl font-semibold text-gray-900">
+          {editingId ? "Edit Asset" : "Create New Asset"}
+        </h2>
+        {hasToolbar && (
           <button 
-          className={`btn btn-sm ${isVerticalMode ? 'btn-ghost' : 'btn-primary'}`} 
-          onClick={toggleViewMode} 
-          title="Slide View"
-        >
-          <Layers size={18} />
-        </button>
-        <button 
-          className={`btn btn-sm ${isVerticalMode ? 'btn-primary' : 'btn-ghost'}`} 
-          onClick={toggleViewMode} 
-          title="Vertical View"
-        >
-          <ScrollText size={18} />
-        </button>
-          <button className="btn btn-ghost" onClick={handleCancel}><X /></button>
-        </div>
-      )}
-      
-      {/* Navigation Tabs - only show in slide mode */}
-      {!isVerticalMode && (
-        <div className="flex space-x-1 mb-4 overflow-x-auto relative">
-          {sections.map((section) => (
-            <SectionTab
-              key={section}
-              id={section}
-              label={section.charAt(0).toUpperCase() + section.slice(1)}
-              isActive={activeSection === section}
-              status={sectionStatus[section as keyof typeof sectionStatus]}
-              onClick={() => handleSectionClick(section)}
+            onClick={handleCancel}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X size={20} />
+          </button>
+        )}
+      </div>
+
+      {/* Form Content */}
+      <div className="p-6 space-y-8 h-[calc(100vh-14rem)] flex flex-col overflow-y-auto">
+        {/* Basic Information */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+            Basic Information
+          </h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <SelectField
+              name="projectCode_id"
+              label="Project Code"
+              placeholder="Select project code"
+              value={form.projectCode_id}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              options={projectCodeSelectOptions}
+              validation={hasFieldError("projectCode_id") ? "invalid" : "valid"}
+              touched={hasFieldError("projectCode_id")}
+              errorMessage={getFieldError("projectCode_id")}
             />
-          ))}
-        </div>
-      )}
-
-      {/* Form Sections */}
-      <div
-        className="relative overflow-hidden mb-6 flex"
-        style={{ minHeight: isVerticalMode ? "auto" : "calc(100% - 220px)" }}
-      >
-        <div className="w-full relative">
-          {isVerticalMode ? (
-            // Vertical scroll mode - show all sections
-            <div className="space-y-8">
-              <div id="basic-section">
-                <h3 className="text-lg font-medium mb-4 text-gray-700">Basic Information</h3>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <SelectField
-                    name="projectCode_id"
-                    label="Project Code"
-                    placeholder="Enter project code"
-                    value={form.projectCode_id}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    options={projectCodeSelectOptions}
-                    validation={validation.projectCode_id}
-                    touched={touchedFields.has("projectCode_id")}
-                    errorMessage={getErrorMessage(
-                      "projectCode_id",
-                      validation.projectCode_id
-                    )}
-                  />
-                    <SelectField
-                    name="type"
-                    label="Asset Type"
-                    placeholder="Select asset type"
-                    value={form.type}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    options={typeOptions}
-                    validation={validation.type}
-                    touched={touchedFields.has("type")}
-                    errorMessage={getErrorMessage("type", validation.type)}
-                  />
-                  <FormField
-                    name="assetNo"
-                    label="Asset No"
-                    placeholder="Enter asset number"
-                    value={form.assetNo}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.assetNo}
-                    touched={touchedFields.has("assetNo")}
-                    errorMessage={getErrorMessage("assetNo", validation.assetNo)}
-                  />
-                  <FormField
-                    name="lineNo"
-                    label="Line No"
-                    placeholder="Enter line number"
-                    value={form.lineNo}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.lineNo}
-                    touched={touchedFields.has("lineNo")}
-                    errorMessage={getErrorMessage("lineNo", validation.lineNo)}
-                  />
-                  <FormField
-                    name="assetName"
-                    label="Asset Name"
-                    placeholder="Enter asset name"
-                    value={form.assetName}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.assetName}
-                    touched={touchedFields.has("assetName")}
-                    errorMessage={getErrorMessage(
-                      "assetName",
-                      validation.assetName
-                    )}
-                  />
-                
-                </div>
-              </div>
-
-              <div id="location-section">
-                <h3 className="text-lg font-medium mb-4 text-gray-700">Location</h3>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <SelectField
-                    name="categoryCode"
-                    label="Category Code"
-                    placeholder="Enter category code"
-                    value={form.categoryCode}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.categoryCode}
-                    options={categoryCodeOptions}
-                    touched={touchedFields.has("categoryCode")}
-                    errorMessage={getErrorMessage(
-                      "categoryCode",
-                      validation.categoryCode
-                    )}
-                  />
-                  <SelectField
-                    name="locationDesc_id"
-                    label="Location"
-                    placeholder="Enter location description"
-                    value={form.locationDesc_id}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    options={locationSelectOptions}
-                    searchable={true}
-                    searchPlaceholder="Search locations..."
-                    validation={validation.locationDesc_id}
-                    touched={touchedFields.has("locationDesc_id")}
-                    errorMessage={getErrorMessage(
-                      "locationDesc_id",
-                      validation.locationDesc_id
-                    )}
-                  />
-                  <SelectField
-                    name="condition"
-                    label="Condition"
-                    placeholder="Enter asset condition"
-                    value={form.condition}
-                    onChange={handleChange}
-                    options={conditionOptions}
-                    onBlur={handleBlur}
-                    validation={validation.condition}
-                    touched={touchedFields.has("condition")}
-                    errorMessage={getErrorMessage(
-                      "condition",
-                      validation.condition
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div id="financial-section">
-                <h3 className="text-lg font-medium mb-4 text-gray-700">Financial Information</h3>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <FormField
-                    name="acqValue"
-                    label="Acquisition Value"
-                    placeholder="Enter acquisition value"
-                    type="number"
-                    value={form.acqValue}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.acqValue}
-                    touched={touchedFields.has("acqValue")}
-                    errorMessage={getErrorMessage("acqValue", validation.acqValue)}
-                  />
-                  <FormField
-                    name="acqValueIdr"
-                    label="Acquisition Value (IDR)"
-                    placeholder="Enter IDR value"
-                    type="number"
-                    value={form.acqValueIdr}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.acqValueIdr}
-                    touched={touchedFields.has("acqValueIdr")}
-                    errorMessage={getErrorMessage(
-                      "acqValueIdr",
-                      validation.acqValueIdr
-                    )}
-                  />
-                  <FormField
-                    name="bookValue"
-                    label="Book Value"
-                    placeholder="Enter book value"
-                    type="number"
-                    value={form.bookValue}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.bookValue}
-                    touched={touchedFields.has("bookValue")}
-                    errorMessage={getErrorMessage(
-                      "bookValue",
-                      validation.bookValue
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div id="depreciation-section">
-                <h3 className="text-lg font-medium mb-4 text-gray-700">Depreciation</h3>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <FormField
-                    name="accumDepre"
-                    label="Accumulated Depreciation"
-                    placeholder="Enter accumulated depreciation"
-                    type="number"
-                    value={form.accumDepre}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.accumDepre}
-                    touched={touchedFields.has("accumDepre")}
-                    errorMessage={getErrorMessage(
-                      "accumDepre",
-                      validation.accumDepre
-                    )}
-                  />
-                  <FormField
-                    name="adjustedDepre"
-                    label="Adjusted Depreciation"
-                    placeholder="Enter adjusted depreciation"
-                    type="number"
-                    value={form.adjustedDepre}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.adjustedDepre}
-                    touched={touchedFields.has("adjustedDepre")}
-                    errorMessage={getErrorMessage(
-                      "adjustedDepre",
-                      validation.adjustedDepre
-                    )}
-                  />
-                  <FormField
-                    name="ytdDepre"
-                    label="YTD Depreciation"
-                    placeholder="Enter YTD depreciation"
-                    type="number"
-                    value={form.ytdDepre}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.ytdDepre}
-                    touched={touchedFields.has("ytdDepre")}
-                    errorMessage={getErrorMessage("ytdDepre", validation.ytdDepre)}
-                  />
-                </div>
-              </div>
-
-              <div id="dates-section">
-                <h3 className="text-lg font-medium mb-4 text-gray-700">Important Dates</h3>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <DatePickerFields
-                    name="pisDate"
-                    label="PIS Date"
-                    placeholder="YYYY-MM-DD"
-                    value={form.pisDate}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.pisDate}
-                    touched={touchedFields.has("pisDate")}
-                    errorMessage={getErrorMessage("pisDate", validation.pisDate)}
-                  />
-                  <DatePickerFields
-                    name="transDate"
-                    label="Transaction Date"
-                    placeholder="YYYY-MM-DD"
-                    value={form.transDate}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.transDate}
-                    touched={touchedFields.has("transDate")}
-                    errorMessage={getErrorMessage(
-                      "transDate",
-                      validation.transDate
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div id="images-section">
-                <h3 className="text-lg font-medium mb-4 text-gray-700">Asset Images</h3>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="mt-1">
-                    <InputUpload
-                      useCamera={true} 
-                      value={form.images || []}
-                      onChange={(newImages) => {
-                        if (handleChange && typeof handleChange === 'function') {
-                          // Create a synthetic event to match the handler's expected signature
-                          const syntheticEvent = {
-                            target: {
-                              name: 'images',
-                              value: newImages
-                            }
-                          } as unknown as React.ChangeEvent<HTMLInputElement>;
-                          handleChange(syntheticEvent);
-                        }
-                      }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Upload images of the asset for documentation purposes. You can use your camera or upload existing files.
-                  </p>
-                </div>
-              </div>
+            <SelectField
+              name="type"
+              label="Asset Type"
+              placeholder="Select asset type"
+              value={form.type}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              options={typeOptions}
+              validation={hasFieldError("type") ? "invalid" : "valid"}
+              touched={hasFieldError("type")}
+              errorMessage={getFieldError("type")}
+            />
+            <FormField
+              name="assetNo"
+              label="Asset Number"
+              placeholder="Enter asset number"
+              value={form.assetNo}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              validation={hasFieldError("assetNo") ? "invalid" : "valid"}
+              touched={hasFieldError("assetNo")}
+              errorMessage={getFieldError("assetNo")}
+            />
+            <FormField
+              name="lineNo"
+              label="Line Number"
+              placeholder="Enter line number"
+              value={form.lineNo}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              validation={hasFieldError("lineNo") ? "invalid" : "valid"}
+              touched={hasFieldError("lineNo")}
+              errorMessage={getFieldError("lineNo")}
+            />
+            <div className="lg:col-span-2">
+              <FormField
+                name="assetName"
+                label="Asset Name"
+                placeholder="Enter asset name"
+                value={form.assetName}
+                onChange={handleChangeWithClearErrors}
+                onBlur={validateOnSubmit}
+                validation={hasFieldError("assetName") ? "invalid" : "valid"}
+                touched={hasFieldError("assetName")}
+                errorMessage={getFieldError("assetName")}
+              />
             </div>
-          ) : (
-            // Slide mode - show only active section with animations
-            <AnimatePresence initial={false} custom={direction} mode="wait">
-              {activeSection === "basic" && (
-                <FormSection direction={direction}>
-                  <SelectField
-                    name="projectCode_id"
-                    label="Project Code"
-                    placeholder="Enter project code"
-                    value={form.projectCode_id}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    options={projectCodeSelectOptions}
-                    validation={validation.projectCode_id}
-                    touched={touchedFields.has("projectCode_id")}
-                    errorMessage={getErrorMessage(
-                      "projectCode_id",
-                      validation.projectCode_id
-                    )}
-                  />
-                   <SelectField
-                    name="type"
-                    label="Asset Type"
-                    placeholder="Select asset type"
-                    value={form.type}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    options={typeOptions}
-                    validation={validation.type}
-                    touched={touchedFields.has("type")}
-                    errorMessage={getErrorMessage("type", validation.type)}
-                  />
-                  <FormField
-                    name="assetNo"
-                    label="Asset No"
-                    placeholder="Enter asset number"
-                    value={form.assetNo}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.assetNo}
-                    touched={touchedFields.has("assetNo")}
-                    errorMessage={getErrorMessage("assetNo", validation.assetNo)}
-                  />
-                  <FormField
-                    name="lineNo"
-                    label="Line No"
-                    placeholder="Enter line number"
-                    value={form.lineNo}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.lineNo}
-                    touched={touchedFields.has("lineNo")}
-                    errorMessage={getErrorMessage("lineNo", validation.lineNo)}
-                  />
-                  <FormField
-                    name="assetName"
-                    label="Asset Name"
-                    placeholder="Enter asset name"
-                    value={form.assetName}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.assetName}
-                    touched={touchedFields.has("assetName")}
-                    errorMessage={getErrorMessage(
-                      "assetName",
-                      validation.assetName
-                    )}
-                  />
-                 
-                </FormSection>
-              )}
+          </div>
+        </div>
 
-              {activeSection === "location" && (
-                <FormSection direction={direction}>
-                  <SelectField
-                    name="categoryCode"
-                    label="Category Code"
-                    placeholder="Enter category code"
-                    value={form.categoryCode}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.categoryCode}
-                    options={categoryCodeOptions}
-                    touched={touchedFields.has("categoryCode")}
-                    errorMessage={getErrorMessage(
-                      "categoryCode",
-                      validation.categoryCode
-                    )}
-                  />
-                  <SelectField
-                    name="locationDesc_id"
-                    label="Location"
-                    placeholder="Enter location description"
-                    value={form.locationDesc_id}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    options={locationSelectOptions}
-                    searchable={true}
-                    searchPlaceholder="Search locations..."
-                    validation={validation.locationDesc_id}
-                    touched={touchedFields.has("locationDesc_id")}
-                    errorMessage={getErrorMessage(
-                      "locationDesc_id",
-                      validation.locationDesc_id
-                    )}
-                  />
-                  <SelectField
-                    name="condition"
-                    label="Condition"
-                    placeholder="Enter asset condition"
-                    value={form.condition}
-                    onChange={handleChange}
-                    options={conditionOptions}
-                    onBlur={handleBlur}
-                    validation={validation.condition}
-                    touched={touchedFields.has("condition")}
-                    errorMessage={getErrorMessage(
-                      "condition",
-                      validation.condition
-                    )}
-                  />
-                </FormSection>
-              )}
+        {/* Location Information */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+            Location Information
+          </h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <SelectField
+              name="categoryCode"
+              label="Category Code"
+              placeholder="Select category code"
+              value={form.categoryCode}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              validation={hasFieldError("categoryCode") ? "invalid" : "valid"}
+              options={categoryCodeOptions}
+              touched={hasFieldError("categoryCode")}
+              errorMessage={getFieldError("categoryCode")}
+            />
+            <SelectField
+              name="locationDesc_id"
+              label="Location"
+              placeholder="Select location"
+              value={form.locationDesc_id}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              options={locationSelectOptions}
+              searchable={true}
+              searchPlaceholder="Search locations..."
+              validation={hasFieldError("locationDesc_id") ? "invalid" : "valid"}
+              touched={hasFieldError("locationDesc_id")}
+              errorMessage={getFieldError("locationDesc_id")}
+            />
+            <SelectField
+              name="condition"
+              label="Asset Condition"
+              placeholder="Select condition"
+              value={form.condition}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              options={conditionOptions}
+              validation={hasFieldError("condition") ? "invalid" : "valid"}
+              touched={hasFieldError("condition")}
+              errorMessage={getFieldError("condition")}
+            />
+          </div>
+        </div>
 
-              {activeSection === "financial" && (
-                <FormSection direction={direction}>
-                  <FormField
-                    name="acqValue"
-                    label="Acquisition Value"
-                    placeholder="Enter acquisition value"
-                    type="number"
-                    value={form.acqValue}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.acqValue}
-                    touched={touchedFields.has("acqValue")}
-                    errorMessage={getErrorMessage("acqValue", validation.acqValue)}
-                  />
-                  <FormField
-                    name="acqValueIdr"
-                    label="Acquisition Value (IDR)"
-                    placeholder="Enter IDR value"
-                    type="number"
-                    value={form.acqValueIdr}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.acqValueIdr}
-                    touched={touchedFields.has("acqValueIdr")}
-                    errorMessage={getErrorMessage(
-                      "acqValueIdr",
-                      validation.acqValueIdr
-                    )}
-                  />
-                  <FormField
-                    name="bookValue"
-                    label="Book Value"
-                    placeholder="Enter book value"
-                    type="number"
-                    value={form.bookValue}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.bookValue}
-                    touched={touchedFields.has("bookValue")}
-                    errorMessage={getErrorMessage(
-                      "bookValue",
-                      validation.bookValue
-                    )}
-                  />
-                </FormSection>
-              )}
+        {/* Financial Information */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+            Financial Information
+          </h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <FormField
+              name="acqValue"
+              label="Acquisition Value"
+              placeholder="Enter acquisition value"
+              type="number"
+              value={form.acqValue}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              validation={hasFieldError("acqValue") ? "invalid" : "valid"}
+              touched={hasFieldError("acqValue")}
+              errorMessage={getFieldError("acqValue")}
+            />
+            <FormField
+              name="acqValueIdr"
+              label="Acquisition Value (IDR)"
+              placeholder="Enter IDR value"
+              type="number"
+              value={form.acqValueIdr}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              validation={hasFieldError("acqValueIdr") ? "invalid" : "valid"}
+              touched={hasFieldError("acqValueIdr")}
+              errorMessage={getFieldError("acqValueIdr")}
+            />
+            <FormField
+              name="bookValue"
+              label="Book Value"
+              placeholder="Enter book value"
+              type="number"
+              value={form.bookValue}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              validation={hasFieldError("bookValue") ? "invalid" : "valid"}
+              touched={hasFieldError("bookValue")}
+              errorMessage={getFieldError("bookValue")}
+            />
+          </div>
+        </div>
 
-              {activeSection === "depreciation" && (
-                <FormSection direction={direction}>
-                  <FormField
-                    name="accumDepre"
-                    label="Accumulated Depreciation"
-                    placeholder="Enter accumulated depreciation"
-                    type="number"
-                    value={form.accumDepre}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.accumDepre}
-                    touched={touchedFields.has("accumDepre")}
-                    errorMessage={getErrorMessage(
-                      "accumDepre",
-                      validation.accumDepre
-                    )}
-                  />
-                  <FormField
-                    name="adjustedDepre"
-                    label="Adjusted Depreciation"
-                    placeholder="Enter adjusted depreciation"
-                    type="number"
-                    value={form.adjustedDepre}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.adjustedDepre}
-                    touched={touchedFields.has("adjustedDepre")}
-                    errorMessage={getErrorMessage(
-                      "adjustedDepre",
-                      validation.adjustedDepre
-                    )}
-                  />
-                  <FormField
-                    name="ytdDepre"
-                    label="YTD Depreciation"
-                    placeholder="Enter YTD depreciation"
-                    type="number"
-                    value={form.ytdDepre}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.ytdDepre}
-                    touched={touchedFields.has("ytdDepre")}
-                    errorMessage={getErrorMessage("ytdDepre", validation.ytdDepre)}
-                  />
-                </FormSection>
-              )}
+        {/* Depreciation Information */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+            Depreciation Information
+          </h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <FormField
+              name="accumDepre"
+              label="Accumulated Depreciation"
+              placeholder="Enter accumulated depreciation"
+              type="number"
+              value={form.accumDepre}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              validation={hasFieldError("accumDepre") ? "invalid" : "valid"}
+              touched={hasFieldError("accumDepre")}
+              errorMessage={getFieldError("accumDepre")}
+            />
+            <FormField
+              name="adjustedDepre"
+              label="Adjusted Depreciation"
+              placeholder="Enter adjusted depreciation"
+              type="number"
+              value={form.adjustedDepre}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              validation={hasFieldError("adjustedDepre") ? "invalid" : "valid"}
+              touched={hasFieldError("adjustedDepre")}
+              errorMessage={getFieldError("adjustedDepre")}
+            />
+            <FormField
+              name="ytdDepre"
+              label="YTD Depreciation"
+              placeholder="Enter YTD depreciation"
+              type="number"
+              value={form.ytdDepre}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              validation={hasFieldError("ytdDepre") ? "invalid" : "valid"}
+              touched={hasFieldError("ytdDepre")}
+              errorMessage={getFieldError("ytdDepre")}
+            />
+          </div>
+        </div>
 
-              {activeSection === "dates" && (
-                <FormSection direction={direction}>
-                  <DatePickerFields
-                    name="pisDate"
-                    label="PIS Date"
-                    placeholder="YYYY-MM-DD"
-                    value={form.pisDate}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.pisDate}
-                    touched={touchedFields.has("pisDate")}
-                    errorMessage={getErrorMessage("pisDate", validation.pisDate)}
-                  />
-                  <DatePickerFields
-                    name="transDate"
-                    label="Transaction Date"
-                    placeholder="YYYY-MM-DD"
-                    value={form.transDate}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    validation={validation.transDate}
-                    touched={touchedFields.has("transDate")}
-                    errorMessage={getErrorMessage(
-                      "transDate",
-                      validation.transDate
-                    )}
-                  />
-                </FormSection>
-              )}
+        {/* Date Information */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+            Important Dates
+          </h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <DatePickerFields
+              name="pisDate"
+              label="PIS Date"
+              placeholder="YYYY-MM-DD"
+              value={form.pisDate}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              validation={hasFieldError("pisDate") ? "invalid" : "valid"}
+              touched={hasFieldError("pisDate")}
+              errorMessage={getFieldError("pisDate")}
+            />
+            <DatePickerFields
+              name="transDate"
+              label="Transaction Date"
+              placeholder="YYYY-MM-DD"
+              value={form.transDate}
+              onChange={handleChangeWithClearErrors}
+              onBlur={validateOnSubmit}
+              validation={hasFieldError("transDate") ? "invalid" : "valid"}
+              touched={hasFieldError("transDate")}
+              errorMessage={getFieldError("transDate")}
+            />
+          </div>
+        </div>
 
-              {activeSection === "images" && (
-                <FormSection direction={direction}>
-                  <div className="bg-gray-50 rounded-xl p-3 relative">
-                    <label className="block text-sm text-gray-500 mb-2">Asset Images</label>
-                    <div className="mt-1">
-                      <InputUpload
-                        useCamera={true} 
-                        value={form.images || []}
-                        onChange={(newImages) => {
-                          if (handleChange && typeof handleChange === 'function') {
-                            // Create a synthetic event to match the handler's expected signature
-                            const syntheticEvent = {
-                              target: {
-                                name: 'images',
-                                value: newImages
-                              }
-                            } as unknown as React.ChangeEvent<HTMLInputElement>;
-                            handleChange(syntheticEvent);
-                          }
-                        }}
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Upload images of the asset for documentation purposes. You can use your camera or upload existing files.
-                    </p>
-                  </div>
-                </FormSection>
-              )}
-            </AnimatePresence>
-          )}
+        {/* Asset Images */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+            Asset Images
+          </h3>
+          <div className="bg-gray-50 rounded-lg p-4">
+            <InputUpload
+              useCamera={true} 
+              value={form.images || []}
+              onChange={(newImages) => {
+                const syntheticEvent = {
+                  target: {
+                    name: 'images',
+                    value: newImages
+                  }
+                } as unknown as React.ChangeEvent<HTMLInputElement>;
+                handleChange(syntheticEvent);
+              }}
+            />
+            <p className="text-sm text-gray-600 mt-2">
+              Upload images of the asset for documentation purposes. You can use your camera or upload existing files.
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Progress Indicator - only show in slide mode */}
-      {!isVerticalMode && (
-        <div className="flex justify-center mb-6">
-          <ProgressIndicator
-            sections={sections}
-            activeSection={activeSection}
-            sectionStatus={sectionStatus}
-            onSectionClick={handleSectionClick}
-          />
-        </div>
-      )}
-
-      {/* Navigation and Submit Buttons */}
-      <div className="flex justify-between mt-6">
-        {!isVerticalMode ? (
-          <NavigationButtons
-            activeSection={activeSection}
-            isFormValid={isFormValid()}
-            onPrevious={() => navigateSection(false)}
-            onNext={() => navigateSection(true)}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            editingId={editingId}
-          />
-        ) : (
-          <div className="flex justify-end w-full">
-            <button
-              className="btn btn-ghost mr-2"
-              onClick={handleCancel}
-            >
-              Cancel
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={handleSubmit}
-              disabled={!isFormValid()}
-            >
-              {editingId ? "Update" : "Create"} Asset
-            </button>
-          </div>
-        )}
+      {/* Footer */}
+      <div className="flex justify-end items-center gap-3 p-6 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+        <button
+          onClick={handleCancel}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmitWithValidation}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+        >
+          {editingId ? "Update Asset" : "Create Asset"}
+        </button>
       </div>
     </div>
   );
