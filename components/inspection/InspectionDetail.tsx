@@ -274,6 +274,11 @@ const InspectionDetail = ({
                 >
                   Lead Approval:
                 </Text>
+                {inspection.leadUser && (
+                  <Text style={{ fontSize: 9, color: "#666", marginBottom: 3 }}>
+                    Approver: {inspection.leadUser.name || inspection.leadUser.email}
+                  </Text>
+                )}
                 {inspection.lead_signature_data ? (
                   <View>
                     <Image
@@ -285,7 +290,10 @@ const InspectionDetail = ({
                       }}
                     />
                     <Text style={{ fontSize: 8, marginTop: 5 }}>
-                      Signed:{" "}
+                      Signed by: {inspection.leadUser?.name || inspection.leadUser?.email || "Unknown"}
+                    </Text>
+                    <Text style={{ fontSize: 8, marginTop: 2 }}>
+                      Date:{" "}
                       {inspection.lead_signature_timestamp
                         ? new Date(
                             inspection.lead_signature_timestamp
@@ -309,7 +317,7 @@ const InspectionDetail = ({
                     }}
                   >
                     <Text style={{ fontSize: 10, color: "#666" }}>
-                      Not signed
+                      {inspection.leadUser ? "Awaiting signature" : "No approver assigned"}
                     </Text>
                   </View>
                 )}
@@ -322,6 +330,11 @@ const InspectionDetail = ({
                 >
                   Head Approval:
                 </Text>
+                {inspection.headUser && (
+                  <Text style={{ fontSize: 9, color: "#666", marginBottom: 3 }}>
+                    Approver: {inspection.headUser.name || inspection.headUser.email}
+                  </Text>
+                )}
                 {inspection.head_signature_data ? (
                   <View>
                     <Image
@@ -333,7 +346,10 @@ const InspectionDetail = ({
                       }}
                     />
                     <Text style={{ fontSize: 8, marginTop: 5 }}>
-                      Signed:{" "}
+                      Signed by: {inspection.headUser?.name || inspection.headUser?.email || "Unknown"}
+                    </Text>
+                    <Text style={{ fontSize: 8, marginTop: 2 }}>
+                      Date:{" "}
                       {inspection.head_signature_timestamp
                         ? new Date(
                             inspection.head_signature_timestamp
@@ -357,7 +373,7 @@ const InspectionDetail = ({
                     }}
                   >
                     <Text style={{ fontSize: 10, color: "#666" }}>
-                      Not signed
+                      {inspection.headUser ? "Awaiting signature" : "No approver assigned"}
                     </Text>
                   </View>
                 )}
