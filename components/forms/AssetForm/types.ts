@@ -57,6 +57,7 @@ export interface FormFieldProps {
   touched: boolean;
   errorMessage: string;
   icon?: ReactNode;
+  onClear?: () => void;
 }
 
 // Props for the section tab component

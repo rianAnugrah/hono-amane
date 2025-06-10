@@ -13,21 +13,37 @@ const FormField = memo(({
   validation,
   touched,
   errorMessage,
-  icon
+  icon,
+  onClear
 }: FormFieldProps) => {
   const isValid = validation === "valid";
   const isInvalid = validation === "invalid" || validation === "empty";
   const [isFocused, setIsFocused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  
+  const hasValue = value !== null && value !== undefined && value !== "";
+  const showClearButton = hasValue && onClear && (isFocused || isHovered);
+  
+  const handleClear = () => {
+    if (onClear) {
+      onClear();
+    }
+  };
   
   return (
     <div className="relative mb-4">
       <div className="flex flex-col w-full">
-        <div className="relative">
+        <div 
+          className="relative"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
           <input
             type={type}
             name={name}
             className={`
               w-full px-4 py-2.5 
+              ${showClearButton ? "pr-10" : "pr-4"}
               bg-gray-50 
               border 
               ${isInvalid ? "border-red-500" : isValid ? "border-green-500" : isFocused ? "border-blue-500" : "border-gray-200"} 
@@ -67,7 +83,20 @@ const FormField = memo(({
             {placeholder || label}
           </label>
           
-          {touched && (
+          {/* Clear button */}
+          {showClearButton && (
+            <button
+              type="button"
+              onClick={handleClear}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors duration-150 z-10"
+              tabIndex={-1}
+            >
+              <X size={16} />
+            </button>
+          )}
+          
+          {/* Validation icons */}
+          {touched && !showClearButton && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
               {isValid && (
                 <span className="text-green-500 flex items-center opacity-100 transition-opacity duration-150">

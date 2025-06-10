@@ -81,7 +81,85 @@ function AssetForm({
     // clearErrors();
   }, [handleChange]);
 
+  // Generic clear handler for form fields
+  const handleClearField = useCallback((fieldName: string) => {
+    handleChange({
+      target: {
+        name: fieldName,
+        value: ""
+      }
+    });
+  }, [handleChange]);
 
+  // Helper function to remove existing suffixes
+  const removeAssetNoSuffix = useCallback((assetNo: string): string => {
+    if (assetNo.endsWith('-M') || assetNo.endsWith('-I')) {
+      return assetNo.slice(0, -2);
+    }
+    return assetNo;
+  }, []);
+
+  // Helper function to add appropriate suffix based on type
+  const addAssetNoSuffix = useCallback((assetNo: string, type: string): string => {
+    const baseAssetNo = removeAssetNoSuffix(assetNo);
+    if (type === 'HBM') {
+      return `${baseAssetNo}-M`;
+    } else if (type === 'HBI') {
+      return `${baseAssetNo}-I`;
+    }
+    return baseAssetNo;
+  }, [removeAssetNoSuffix]);
+
+  // Specialized handler for type field changes
+  const handleTypeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement> | { target: { value: string | number | string[]; name: string }; currentTarget?: { value: string | number | string[]; name: string } }) => {
+    const newType = e.target.value as string;
+    
+    // Update the type field
+    handleChange(e);
+    
+    // Update assetNo with appropriate suffix if it has a value
+    if (form.assetNo) {
+      const updatedAssetNo = addAssetNoSuffix(form.assetNo, newType);
+      handleChange({
+        target: {
+          name: 'assetNo',
+          value: updatedAssetNo
+        }
+      });
+    }
+  }, [handleChange, form.assetNo, addAssetNoSuffix]);
+
+  // Specialized handler for assetNo field changes
+  const handleAssetNoChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newAssetNo = e.target.value;
+    
+    // If user is typing and we have a type selected, just store the raw value
+    // The suffix will be applied on blur or when type changes
+    handleChange({
+      target: {
+        name: 'assetNo',
+        value: newAssetNo
+      }
+    });
+  }, [handleChange]);
+
+  // Handler for when user finishes typing in assetNo field
+  const handleAssetNoBlur = useCallback(() => {
+    // Apply suffix when user finishes typing
+    if (form.assetNo && form.type && (form.type === 'HBM' || form.type === 'HBI')) {
+      const updatedAssetNo = addAssetNoSuffix(form.assetNo, form.type);
+      if (updatedAssetNo !== form.assetNo) {
+        handleChange({
+          target: {
+            name: 'assetNo',
+            value: updatedAssetNo
+          }
+        });
+      }
+    }
+    // Also trigger validation
+    validateOnSubmit();
+  }, [form.assetNo, form.type, addAssetNoSuffix, handleChange, validateOnSubmit]);
 
   // Enhanced submit handler with validation
   const handleSubmitWithValidation = useCallback(() => {
@@ -185,7 +263,7 @@ function AssetForm({
               label="Asset Type"
               placeholder="Select asset type"
               value={form.type}
-              onChange={handleChangeWithClearErrors}
+              onChange={handleTypeChange}
               onBlur={validateOnSubmit}
               options={typeOptions}
               validation={hasFieldError("type") ? "invalid" : "valid"}
@@ -197,11 +275,12 @@ function AssetForm({
               label="Asset Number"
               placeholder="Enter asset number"
               value={form.assetNo}
-              onChange={handleChangeWithClearErrors}
-              onBlur={validateOnSubmit}
+              onChange={handleAssetNoChange}
+              onBlur={handleAssetNoBlur}
               validation={hasFieldError("assetNo") ? "invalid" : "valid"}
               touched={hasFieldError("assetNo")}
               errorMessage={getFieldError("assetNo")}
+              onClear={() => handleClearField("assetNo")}
             />
             <FormField
               name="lineNo"
@@ -213,6 +292,7 @@ function AssetForm({
               validation={hasFieldError("lineNo") ? "invalid" : "valid"}
               touched={hasFieldError("lineNo")}
               errorMessage={getFieldError("lineNo")}
+              onClear={() => handleClearField("lineNo")}
             />
             <div className="lg:col-span-2">
               <FormField
@@ -225,6 +305,7 @@ function AssetForm({
                 validation={hasFieldError("assetName") ? "invalid" : "valid"}
                 touched={hasFieldError("assetName")}
                 errorMessage={getFieldError("assetName")}
+                onClear={() => handleClearField("assetName")}
               />
             </div>
           </div>
@@ -294,6 +375,7 @@ function AssetForm({
               validation={hasFieldError("acqValue") ? "invalid" : "valid"}
               touched={hasFieldError("acqValue")}
               errorMessage={getFieldError("acqValue")}
+              onClear={() => handleClearField("acqValue")}
             />
             <FormField
               name="acqValueIdr"
@@ -306,6 +388,7 @@ function AssetForm({
               validation={hasFieldError("acqValueIdr") ? "invalid" : "valid"}
               touched={hasFieldError("acqValueIdr")}
               errorMessage={getFieldError("acqValueIdr")}
+              onClear={() => handleClearField("acqValueIdr")}
             />
             <FormField
               name="bookValue"
@@ -318,6 +401,7 @@ function AssetForm({
               validation={hasFieldError("bookValue") ? "invalid" : "valid"}
               touched={hasFieldError("bookValue")}
               errorMessage={getFieldError("bookValue")}
+              onClear={() => handleClearField("bookValue")}
             />
           </div>
         </div>
@@ -339,6 +423,7 @@ function AssetForm({
               validation={hasFieldError("accumDepre") ? "invalid" : "valid"}
               touched={hasFieldError("accumDepre")}
               errorMessage={getFieldError("accumDepre")}
+              onClear={() => handleClearField("accumDepre")}
             />
             <FormField
               name="adjustedDepre"
@@ -351,6 +436,7 @@ function AssetForm({
               validation={hasFieldError("adjustedDepre") ? "invalid" : "valid"}
               touched={hasFieldError("adjustedDepre")}
               errorMessage={getFieldError("adjustedDepre")}
+              onClear={() => handleClearField("adjustedDepre")}
             />
             <FormField
               name="ytdDepre"
@@ -363,6 +449,7 @@ function AssetForm({
               validation={hasFieldError("ytdDepre") ? "invalid" : "valid"}
               touched={hasFieldError("ytdDepre")}
               errorMessage={getFieldError("ytdDepre")}
+              onClear={() => handleClearField("ytdDepre")}
             />
           </div>
         </div>
