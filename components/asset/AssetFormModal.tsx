@@ -7,7 +7,7 @@ interface AssetFormModalProps {
   showForm: boolean;
   editingId: string | null;
   form: AssetFormValues;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { target: { value: string | number | string[]; name: string }; currentTarget?: { value: string | number | string[]; name: string } }) => void;
   handleSubmit: () => void;
   handleCancel: () => void;
 }

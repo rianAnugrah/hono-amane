@@ -28,7 +28,8 @@ interface ProjectCode {
 interface AssetFormProps {
   editingId: string | null;
   form: AssetFormValues;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { target: { value: string | number | string[]; name: string }; currentTarget?: { value: string | number | string[]; name: string } }) => void;
+  handleBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement> | { target: { name: string } }) => void;
   handleSubmit: () => void;
   handleCancel: () => void;
   hasToolbar?: boolean;
@@ -66,6 +67,7 @@ function AssetForm({
   editingId,
   form,
   handleChange,
+  handleBlur: externalHandleBlur,
   handleSubmit,
   handleCancel,
   hasToolbar = true,
@@ -77,8 +79,31 @@ function AssetForm({
   const [isVerticalMode, setIsVerticalMode] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { touchedFields, validation, sectionStatus, handleBlur, isFormValid, validateAllFields } =
+  const { touchedFields, validation, sectionStatus, handleBlur: internalHandleBlur, isFormValid, validateAllFields } =
     useFormValidation(form);
+
+  // Create a flexible blur handler that works with different event types
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement | HTMLSelectElement> | { target: { name: string } }) => {
+    // Call external handler if provided
+    if (externalHandleBlur) {
+      externalHandleBlur(e);
+    }
+    
+    // Call internal handler for validation - but only if it's a proper FocusEvent
+    if ('currentTarget' in e && 'relatedTarget' in e) {
+      // This is a proper FocusEvent, safe to pass to internal handler
+      internalHandleBlur(e as React.FocusEvent<HTMLInputElement>);
+    } else {
+      // This is a synthetic event, create a proper FocusEvent-like object for validation
+      const syntheticBlurEvent = {
+        target: { name: e.target.name },
+        currentTarget: { name: e.target.name }
+      } as React.FocusEvent<HTMLInputElement>;
+      
+      // For synthetic events, call the internal handler with a mock event
+      internalHandleBlur(syntheticBlurEvent);
+    }
+  }, [externalHandleBlur, internalHandleBlur]);
 
   // Memoize navigation functions
   const navigateSection = useCallback((next: boolean) => {

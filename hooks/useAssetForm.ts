@@ -41,8 +41,9 @@ export function useAssetForm({ onSuccess }: UseAssetFormProps = {}) {
   }, []);
 
   // Handle form field changes
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { target: { value: string | number | string[]; name: string }; currentTarget?: { value: string | number | string[]; name: string } }) => {
+    const { name, value } = e.target;
+    const type = 'type' in e.target ? e.target.type : undefined;
     
     // Handle array values (like images)
     if (name === 'images') {
@@ -50,7 +51,7 @@ export function useAssetForm({ onSuccess }: UseAssetFormProps = {}) {
     } else if (type === 'number') {
       // Convert string values to numbers for number inputs
       // If value is empty string, set to null to avoid NaN
-      const numValue = value === '' ? null : parseFloat(value);
+      const numValue = value === '' ? null : parseFloat(value as string);
       setForm(prev => ({ ...prev, [name]: numValue }));
     } else {
       setForm(prev => ({ ...prev, [name]: value }));
