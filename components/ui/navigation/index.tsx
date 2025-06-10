@@ -319,6 +319,7 @@ function DesktopNav() {
 
       <div className="flex flex-grow flex-col"></div>
       <LocationDisplay size={99} orientation="vertical" />
+      <div className="flex w-full items-center justify-center py-2"></div>
     </nav>
   );
 }
