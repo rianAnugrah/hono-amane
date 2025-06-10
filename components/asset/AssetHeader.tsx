@@ -78,52 +78,7 @@ const AssetHeader = () => {
             </motion.button>
           </div>
           
-          {/* Full actions - hidden on mobile */}
-          <div className="hidden md:flex items-center gap-2">
-            {/* QR Code button */}
-            <motion.button
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
-              whileHover="hover"
-              whileTap="tap"
-              variants={buttonVariants}
-            >
-              <QrCode size={14} />
-              <span className="hidden lg:inline">QR Code</span>
-            </motion.button>
-            
-            {/* Print button */}
-            <motion.button
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
-              whileHover="hover"
-              whileTap="tap"
-              variants={buttonVariants}
-            >
-              <Printer size={14} />
-              <span className="hidden lg:inline">Print</span>
-            </motion.button>
-            
-            {/* Share button */}
-            <motion.button
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-full transition-colors"
-              whileHover="hover"
-              whileTap="tap"
-              variants={buttonVariants}
-            >
-              <Share2 size={14} />
-              <span className="hidden lg:inline">Share</span>
-            </motion.button>
-            
-            {/* Export button - primary action */}
-            <motion.button
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-full transition-colors shadow-sm"
-              whileHover="hover"
-              whileTap="tap"
-              variants={buttonVariants}
-            >
-              <Download size={14} />
-              Export PDF
-            </motion.button>
-          </div>
+
         </div>
       </div>
       

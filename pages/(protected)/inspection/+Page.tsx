@@ -7,6 +7,7 @@ import type {
   Inspection as BaseInspection,
 } from "@/components/inspection/InspectionDetail";
 import InputText from "@/components/ui/input-text";
+import InputSelect from "@/components/ui/input-select";
 
 // Extend the Inspection type to include status
 type Inspection = BaseInspection & {
@@ -512,21 +513,22 @@ export default function InspectionListPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Inspector filter */}
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">
-                  Inspector
-                </label>
-                <select
+                <InputSelect
+                  label="Inspector"
+                  placeholder="All Inspectors"
                   value={filterByInspector}
-                  onChange={(e) => setFilterByInspector(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border-gray-300 bg-white shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">All Inspectors</option>
-                  {inspectors.map((inspector) => (
-                    <option key={inspector.id} value={inspector.id}>
-                      {inspector.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement> | string) => {
+                    const value = typeof e === 'string' ? e : e.target.value;
+                    setFilterByInspector(value);
+                  }}
+                  options={[
+                    { label: "All Inspectors", value: "" },
+                    ...inspectors.map((inspector) => ({
+                      label: inspector.name,
+                      value: inspector.id,
+                    })),
+                  ]}
+                />
               </div>
 
               {/* Date range filter */}
