@@ -20,7 +20,7 @@ export default function MobileLink({
       <a
         href={href}
         className={`text-xl flex flex-col items-center gap-1  active:scale-95 transition-all group w-[3rem] h-[3rem] justify-center rounded ${
-          isActive ? "bg-gray-200 text-orange-500" : "bg-transparent  text-white"
+          isActive ? " text-orange-500" : "bg-transparent  text-white"
         }  `}
       >
         {icon &&

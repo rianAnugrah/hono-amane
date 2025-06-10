@@ -114,7 +114,7 @@ const CardItem = ({
         >
           {/* Asset ID & Category */}
           <div className="flex items-center justify-between text-xs mb-1.5">
-            <div className="flex items-center text-gray-500">
+            <div className="flex items-center text-gray-900">
               <Hash size={11} className="mr-1 flex-shrink-0" />
               <span className="truncate font-mono">{asset.assetNo}</span>
             </div>
