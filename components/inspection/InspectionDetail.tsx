@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import InspectionQrScanner from '@/components/blocks/qrscan/InspectionQrScanner';
 import { useAssetForm } from '@/hooks/useAssetForm';
 import AssetFormModal from '@/components/asset/AssetFormModal';
+import InspectionApproval from '@/components/inspection/InspectionApproval';
 import axios from 'axios';
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 
@@ -88,6 +89,10 @@ type Inspection = {
   inspector: Inspector;
   items: InspectionItem[];
   status?: 'pending' | 'in_progress' | 'completed' | 'cancelled' | string;
+  lead_signature_data?: string | null;
+  head_signature_data?: string | null;
+  lead_signature_timestamp?: string | null;
+  head_signature_timestamp?: string | null;
 };
 
 interface InspectionDetailProps {
@@ -206,6 +211,59 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
                   <Text style={styles.col4}>{item.assetVersion}</Text>
                 </View>
               ))}
+            </View>
+          </View>
+
+          {/* Approval Signatures Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Approvals</Text>
+            
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+              {/* Lead Signature */}
+              <View style={{ width: '45%' }}>
+                <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 5 }}>Lead Approval:</Text>
+                {inspection.lead_signature_data ? (
+                  <View>
+                    <Image 
+                      src={inspection.lead_signature_data} 
+                      style={{ width: 150, height: 75, border: '1px solid #ccc' }}
+                    />
+                    <Text style={{ fontSize: 8, marginTop: 5 }}>
+                      Signed: {inspection.lead_signature_timestamp ? 
+                        new Date(inspection.lead_signature_timestamp).toLocaleDateString() + ' ' +
+                        new Date(inspection.lead_signature_timestamp).toLocaleTimeString() : 
+                        'N/A'}
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={{ width: 150, height: 75, border: '1px solid #ccc', backgroundColor: '#f9f9f9', alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 10, color: '#666' }}>Not signed</Text>
+                  </View>
+                )}
+              </View>
+
+              {/* Head Signature */}
+              <View style={{ width: '45%' }}>
+                <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 5 }}>Head Approval:</Text>
+                {inspection.head_signature_data ? (
+                  <View>
+                    <Image 
+                      src={inspection.head_signature_data} 
+                      style={{ width: 150, height: 75, border: '1px solid #ccc' }}
+                    />
+                    <Text style={{ fontSize: 8, marginTop: 5 }}>
+                      Signed: {inspection.head_signature_timestamp ? 
+                        new Date(inspection.head_signature_timestamp).toLocaleDateString() + ' ' +
+                        new Date(inspection.head_signature_timestamp).toLocaleTimeString() : 
+                        'N/A'}
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={{ width: 150, height: 75, border: '1px solid #ccc', backgroundColor: '#f9f9f9', alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 10, color: '#666' }}>Not signed</Text>
+                  </View>
+                )}
+              </View>
             </View>
           </View>
         </Page>
@@ -1207,6 +1265,26 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
             </table>
           </div>
         )}
+      </motion.div>
+
+      {/* Inspection Approval Section */}
+      <motion.div
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.3 }}
+      >
+        <InspectionApproval
+          inspectionId={inspectionId}
+          inspection={{
+            id: inspection.id,
+            status: inspection.status || 'pending',
+            lead_signature_data: inspection.lead_signature_data,
+            head_signature_data: inspection.head_signature_data,
+            lead_signature_timestamp: inspection.lead_signature_timestamp,
+            head_signature_timestamp: inspection.head_signature_timestamp
+          }}
+          onApprovalChange={onInspectionChange}
+        />
       </motion.div>
     </motion.div>
   );

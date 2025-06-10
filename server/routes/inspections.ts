@@ -367,4 +367,129 @@ inspections.get('/items/status/:status', async (c) => {
   }
 })
 
+// Schema for inspection approval
+const approvalSchema = z.object({
+  role: z.enum(['lead', 'head']),
+  signatureData: z.string(),
+  timestamp: z.string().optional()
+})
+
+// Schema for removing approval
+const removeApprovalSchema = z.object({
+  role: z.enum(['lead', 'head'])
+})
+
+// Add or update inspection approval signature
+inspections.put('/:id/approve', zValidator('json', approvalSchema), async (c) => {
+  try {
+    const id = c.req.param('id')
+    const body = await c.req.valid('json')
+    
+    // Check if inspection exists
+    const inspection = await prisma.inspection.findUnique({
+      where: { id }
+    })
+    
+    if (!inspection) {
+      return c.json({ success: false, error: 'Inspection not found' }, 404)
+    }
+    
+    // Prepare update data based on role
+    const updateData: {
+      lead_signature_data?: string;
+      lead_signature_timestamp?: Date;
+      head_signature_data?: string;
+      head_signature_timestamp?: Date;
+    } = {}
+    const timestamp = body.timestamp ? new Date(body.timestamp) : new Date()
+    
+    if (body.role === 'lead') {
+      updateData.lead_signature_data = body.signatureData
+      updateData.lead_signature_timestamp = timestamp
+    } else if (body.role === 'head') {
+      updateData.head_signature_data = body.signatureData
+      updateData.head_signature_timestamp = timestamp
+    }
+    
+    // Update the inspection
+    const updatedInspection = await prisma.inspection.update({
+      where: { id },
+      data: updateData
+    })
+    
+    return c.json({ success: true, data: updatedInspection })
+  } catch (error) {
+    console.error('Error updating inspection approval:', error)
+    return c.json({ success: false, error: 'Failed to update inspection approval' }, 500)
+  }
+})
+
+// Remove inspection approval signature
+inspections.delete('/:id/approve', zValidator('json', removeApprovalSchema), async (c) => {
+  try {
+    const id = c.req.param('id')
+    const body = await c.req.valid('json')
+    
+    // Check if inspection exists
+    const inspection = await prisma.inspection.findUnique({
+      where: { id }
+    })
+    
+    if (!inspection) {
+      return c.json({ success: false, error: 'Inspection not found' }, 404)
+    }
+    
+    // Prepare update data based on role
+    const updateData: {
+      lead_signature_data?: string | null;
+      lead_signature_timestamp?: Date | null;
+      head_signature_data?: string | null;
+      head_signature_timestamp?: Date | null;
+    } = {}
+    
+    if (body.role === 'lead') {
+      updateData.lead_signature_data = null
+      updateData.lead_signature_timestamp = null
+    } else if (body.role === 'head') {
+      updateData.head_signature_data = null
+      updateData.head_signature_timestamp = null
+    }
+    
+    // Update the inspection
+    const updatedInspection = await prisma.inspection.update({
+      where: { id },
+      data: updateData
+    })
+    
+    return c.json({ success: true, data: updatedInspection })
+  } catch (error) {
+    console.error('Error removing inspection approval:', error)
+    return c.json({ success: false, error: 'Failed to remove inspection approval' }, 500)
+  }
+})
+
+// Update inspection notes specifically
+inspections.put('/:id/notes', async (c) => {
+  try {
+    const id = c.req.param('id')
+    const body = await c.req.json()
+    
+    if (!('notes' in body)) {
+      return c.json({ success: false, error: 'Notes field is required' }, 400)
+    }
+    
+    const updatedInspection = await prisma.inspection.update({
+      where: { id },
+      data: {
+        notes: body.notes
+      }
+    })
+    
+    return c.json({ success: true, data: updatedInspection })
+  } catch (error) {
+    console.error('Error updating inspection notes:', error)
+    return c.json({ success: false, error: 'Failed to update inspection notes' }, 500)
+  }
+})
+
 export default inspections 
