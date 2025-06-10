@@ -23,7 +23,7 @@ export function UserFilterToolbar({
 }: Props) {
   const [q, setQ] = useState(defaultValues.q || "");
   const [role, setRole] = useState(defaultValues.role || "");
-  const [locationId, setLocationId] = useState<string | number>(defaultValues.locationId || 1);
+  // const [locationId, setLocationId] = useState<string | number>(defaultValues.locationId || 1);
   const [sort, setSort] = useState(defaultValues.sort || "createdAt");
   const [order, setOrder] = useState(defaultValues.order || "desc");
 
@@ -32,16 +32,16 @@ export function UserFilterToolbar({
     onChange({ 
       q, 
       role, 
-      locationId: String(locationId), // Convert to string
+      // locationId: String(locationId), // Convert to string
       sort, 
       order 
     });
-  }, [q, role, locationId, sort, order, onChange]);
+  }, [q, role,  sort, order, onChange]);
 
   const handleReset = () => {
     setQ("");
     setRole("");
-    setLocationId("");
+    // setLocationId("");
     setSort("createdAt");
     setOrder("desc");
     onChange({});

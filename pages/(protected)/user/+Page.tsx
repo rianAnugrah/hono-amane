@@ -66,13 +66,34 @@ export default function Page() {
     }
   };
 
+  // Function to refresh both lists
+  const refreshBothLists = async () => {
+    try {
+      // Fetch both active and deleted users in parallel
+      const [activeRes, deletedRes] = await Promise.all([
+        fetch(`/api/users?${new URLSearchParams(filters).toString()}`),
+        fetch(`/api/users/deleted`)
+      ]);
+
+      const [activeData, deletedData] = await Promise.all([
+        activeRes.json(),
+        deletedRes.json()
+      ]);
+
+      setUsers(activeData.data || []);
+      setDeletedUsers(deletedData.data || []);
+    } catch (error) {
+      console.error("Error refreshing both lists:", error);
+    }
+  };
+
   useEffect(() => {
     if (currentView === "active") {
       fetchUsers();
     } else {
       fetchDeletedUsers();
     }
-  }, [currentView === "active" ? filters : null, currentView]);
+  }, [filters, currentView]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -109,11 +130,9 @@ export default function Page() {
       setForm({ email: "", password: "" });
       setEditingId(null);
       setIsModalOpen(false);
-      if (currentView === "active") {
-        fetchUsers();
-      } else {
-        fetchDeletedUsers();
-      }
+      
+      // Always refresh both lists after create/update to keep counts accurate
+      await refreshBothLists();
     } catch (error) {
       console.error("Error submitting user form:", error);
     }
@@ -130,11 +149,9 @@ export default function Page() {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
         await fetch(`/api/users/${id}`, { method: "DELETE" });
-        if (currentView === "active") {
-          fetchUsers();
-        } else {
-          fetchDeletedUsers();
-        }
+        
+        // After deletion, refresh both lists to update counts
+        await refreshBothLists();
       } catch (error) {
         console.error("Error deleting user:", error);
       }
@@ -145,11 +162,9 @@ export default function Page() {
     if (window.confirm("Are you sure you want to restore this user?")) {
       try {
         await fetch(`/api/users/${id}/restore`, { method: "POST" });
-        if (currentView === "active") {
-          fetchUsers();
-        } else {
-          fetchDeletedUsers();
-        }
+        
+        // After restoration, refresh both lists to update counts
+        await refreshBothLists();
       } catch (error) {
         console.error("Error restoring user:", error);
       }
@@ -163,7 +178,7 @@ export default function Page() {
   };
 
   return (
-    <div className="p-6  min-h-screen">
+    <div className="p-6 min-h-screen">
       <AnimatePresence>
         {isModalOpen && (
           <UserFormModal
@@ -219,9 +234,9 @@ export default function Page() {
       >
         <motion.button
           onClick={() => setCurrentView("active")}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2  transition-colors ${
             currentView === "active"
-              ? "bg-blue-600 text-white shadow-sm"
+              ? "border-b-2 border-blue-600 text-blue-600 font-bold"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
           whileHover={{ scale: 1.02 }}
@@ -231,9 +246,9 @@ export default function Page() {
         </motion.button>
         <motion.button
           onClick={() => setCurrentView("deleted")}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2  transition-colors ${
             currentView === "deleted"
-              ? "bg-red-600 text-white shadow-sm"
+              ? "border-b-2 border-blue-600 text-blue-600 font-bold"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
           whileHover={{ scale: 1.02 }}

@@ -237,7 +237,7 @@ export default function InspectionListPage() {
         transition={{ duration: 0.3 }}
       >
         {/* Summary Stats Cards */}
-        <div className="hidden md:grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-white border-b border-gray-200">
+        {/* <div className="hidden md:grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 border-b border-gray-200">
           <motion.div
             className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 overflow-hidden relative hover:shadow-md transition-all"
             whileHover={{ y: -2 }}
@@ -276,10 +276,10 @@ export default function InspectionListPage() {
             </p>
             <p className="text-xs text-gray-400 mt-1">Successfully finalized</p>
           </motion.div>
-        </div>
+        </div> */}
 
         {/* Toolbar */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
+        <div className="sticky top-0 z-10 border-b border-gray-200">
           {renderToolbar()}
         </div>
 
@@ -369,7 +369,7 @@ export default function InspectionListPage() {
 
   const renderToolbar = () => {
     return (
-      <div className="sticky top-0 bg-white z-10 border-b border-gray-200">
+      <div className="sticky top-0  z-10 border-b border-gray-200">
         <div className="flex flex-col sm:flex-row justify-between items-center py-3 px-4 gap-3">
           <div className="flex-1 w-full">
             <div className="relative">
@@ -473,7 +473,7 @@ export default function InspectionListPage() {
         {/* Collapsible filter panel */}
         {showFilters && (
           <motion.div
-            className="bg-gray-50 border-t border-gray-200 px-6 py-4 shadow-inner"
+            className=" border-t border-gray-200 px-6 py-4 "
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
