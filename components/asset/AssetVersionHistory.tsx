@@ -15,10 +15,13 @@ import {
   MapPin,
   DollarSign,
   FileText,
-  Camera
+  Camera,
+  Eye,
+  ExternalLink
 } from "lucide-react";
 import { formatDate } from "@/utils/helpers";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "@/renderer/Link";
 
 interface AssetVersionHistoryProps {
   assetNo: string;
@@ -27,6 +30,18 @@ interface AssetVersionHistoryProps {
 interface AssetVersion extends Asset {
   createdAt: string;
   updatedAt: string;
+  inspectionItems?: Array<{
+    id: string;
+    inspection: {
+      id: string;
+      date: string;
+      status: string;
+      inspector: {
+        id: string;
+        name: string;
+      };
+    };
+  }>;
 }
 
 // Define interface for the change object
@@ -77,6 +92,20 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
       ...prev,
       [id]: !prev[id]
     }));
+  };
+
+  // Helper function to get inspection information for a version
+  const getInspectionInfo = (version: AssetVersion) => {
+    if (!version.inspectionItems || version.inspectionItems.length === 0) {
+      return null;
+    }
+    
+    // Get the most recent inspection for this version
+    const sortedInspections = version.inspectionItems.sort((a, b) => 
+      new Date(b.inspection.date).getTime() - new Date(a.inspection.date).getTime()
+    );
+    
+    return sortedInspections[0].inspection;
   };
 
   // Helper function to find changes between versions
@@ -370,6 +399,7 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
         const isFirst = index === 0;
         const isExpanded = expanded[version.id] || false;
         const date = new Date(version.updatedAt);
+        const inspectionInfo = getInspectionInfo(version);
         
         return (
           <motion.div 
@@ -424,6 +454,16 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
                         {changeCount} change{changeCount !== 1 ? 's' : ''}
                       </span>
                     )}
+                    {inspectionInfo && (
+                      <Link 
+                        href={`/inspection/${inspectionInfo.id}`}
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full border border-green-200 font-medium text-xs hover:bg-green-200 transition-colors"
+                      >
+                        <Eye size={10} />
+                        View Inspection
+                        <ExternalLink size={8} />
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>
@@ -454,6 +494,46 @@ const AssetVersionHistory = ({ assetNo }: AssetVersionHistoryProps) => {
                   className="overflow-hidden"
                 >
                   <div className="px-4 pb-4 border-t border-gray-100">
+                    {/* Inspection Information Section */}
+                    {inspectionInfo && (
+                      <div className="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white shadow-md">
+                              <Eye size={16} />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-800 text-sm">Related Inspection</h4>
+                              <div className="flex items-center gap-4 text-xs text-gray-600">
+                                <span className="flex items-center gap-1">
+                                  <Calendar size={10} />
+                                  {formatDate(inspectionInfo.date)}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <span className={`w-2 h-2 rounded-full ${
+                                    inspectionInfo.status === 'completed' ? 'bg-green-500' :
+                                    inspectionInfo.status === 'in_progress' ? 'bg-blue-500' :
+                                    inspectionInfo.status === 'waiting_for_approval' ? 'bg-yellow-500' :
+                                    'bg-gray-500'
+                                  }`}></span>
+                                  {inspectionInfo.status.replace('_', ' ').toUpperCase()}
+                                </span>
+                                <span>Inspector: {inspectionInfo.inspector.name}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <Link 
+                            href={`/inspection/${inspectionInfo.id}`}
+                            className="flex items-center gap-2 px-3 py-2 bg-white text-green-700 rounded-lg border border-green-300 font-medium text-sm hover:bg-green-50 transition-colors shadow-sm"
+                          >
+                            <Eye size={14} />
+                            View Details
+                            <ExternalLink size={12} />
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                    
                     {index === versions.length - 1 ? (
                       <div className="flex flex-col items-center justify-center py-8 bg-gray-50 rounded-xl mt-4">
                         <FileArchive size={24} className="mb-3 text-gray-500" />

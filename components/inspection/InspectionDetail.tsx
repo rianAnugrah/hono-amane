@@ -734,15 +734,15 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
           </div>
         </div>
         <motion.button
-          onClick={() => isStandalone ? navigate("/inspection") : onBack?.()}
-          className="bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition flex items-center shadow-sm"
+          onClick={() => onBack ? onBack() : navigate("/inspection")}
+          className="bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-200 transition flex items-center shadow-sm"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
           <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
           </svg>
-          Back to Inspections
+          Back
         </motion.button>
       </motion.div>
     );
@@ -765,15 +765,15 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
           </div>
         </div>
         <motion.button
-          onClick={() => isStandalone ? navigate("/inspection") : onBack?.()}
-          className="bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition flex items-center shadow-sm"
+          onClick={() => onBack ? onBack() : navigate("/inspection")}
+          className="bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-200 transition flex items-center shadow-sm"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
           <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
           </svg>
-          Back to Inspections
+          Back
         </motion.button>
       </motion.div>
     );
@@ -801,7 +801,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
             <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
-            Back to Inspection
+            Back
           </motion.button>
         </div>
 
@@ -1078,7 +1078,7 @@ const InspectionDetail = ({ inspectionId, onBack, isStandalone = false, onInspec
         </div>
         <div className="flex gap-2">
           <motion.button
-            onClick={() => isStandalone ? navigate("/inspection") : onBack?.()}
+            onClick={() => onBack ? onBack() : navigate("/inspection")}
             className="bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-200 transition flex items-center shadow-sm"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

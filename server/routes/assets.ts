@@ -298,6 +298,23 @@ assetRoutes.get("/versions/:assetNo", async (c) => {
         projectCode: true,
         locationDesc: true,
         detailsLocation: true,
+        inspectionItems: {
+          include: {
+            inspection: {
+              select: {
+                id: true,
+                date: true,
+                status: true,
+                inspector: {
+                  select: {
+                    id: true,
+                    name: true
+                  }
+                }
+              }
+            }
+          }
+        }
       },
     });
 
