@@ -16,6 +16,8 @@ import {
   StyleSheet,
   Image,
 } from "@react-pdf/renderer";
+import { useUserStore } from "@/stores/store-user-login";
+import { AlertTriangle } from "lucide-react";
 
 // PDF styles
 const styles = StyleSheet.create({
@@ -168,6 +170,9 @@ const InspectionDetail = ({
   const [assetCondition, setAssetCondition] = useState("Good");
   const [assetRemarks, setAssetRemarks] = useState("");
 
+  //Role and Location
+  const { role, location } = useUserStore();
+
   // PDF Document component defined within the main component
   const InspectionPDFDocument = () => {
     if (!inspection) return null;
@@ -276,7 +281,8 @@ const InspectionDetail = ({
                 </Text>
                 {inspection.leadUser && (
                   <Text style={{ fontSize: 9, color: "#666", marginBottom: 3 }}>
-                    Approver: {inspection.leadUser.name || inspection.leadUser.email}
+                    Approver:{" "}
+                    {inspection.leadUser.name || inspection.leadUser.email}
                   </Text>
                 )}
                 {inspection.lead_signature_data ? (
@@ -290,7 +296,10 @@ const InspectionDetail = ({
                       }}
                     />
                     <Text style={{ fontSize: 8, marginTop: 5 }}>
-                      Signed by: {inspection.leadUser?.name || inspection.leadUser?.email || "Unknown"}
+                      Signed by:{" "}
+                      {inspection.leadUser?.name ||
+                        inspection.leadUser?.email ||
+                        "Unknown"}
                     </Text>
                     <Text style={{ fontSize: 8, marginTop: 2 }}>
                       Date:{" "}
@@ -317,7 +326,9 @@ const InspectionDetail = ({
                     }}
                   >
                     <Text style={{ fontSize: 10, color: "#666" }}>
-                      {inspection.leadUser ? "Awaiting signature" : "No approver assigned"}
+                      {inspection.leadUser
+                        ? "Awaiting signature"
+                        : "No approver assigned"}
                     </Text>
                   </View>
                 )}
@@ -332,7 +343,8 @@ const InspectionDetail = ({
                 </Text>
                 {inspection.headUser && (
                   <Text style={{ fontSize: 9, color: "#666", marginBottom: 3 }}>
-                    Approver: {inspection.headUser.name || inspection.headUser.email}
+                    Approver:{" "}
+                    {inspection.headUser.name || inspection.headUser.email}
                   </Text>
                 )}
                 {inspection.head_signature_data ? (
@@ -346,7 +358,10 @@ const InspectionDetail = ({
                       }}
                     />
                     <Text style={{ fontSize: 8, marginTop: 5 }}>
-                      Signed by: {inspection.headUser?.name || inspection.headUser?.email || "Unknown"}
+                      Signed by:{" "}
+                      {inspection.headUser?.name ||
+                        inspection.headUser?.email ||
+                        "Unknown"}
                     </Text>
                     <Text style={{ fontSize: 8, marginTop: 2 }}>
                       Date:{" "}
@@ -373,7 +388,9 @@ const InspectionDetail = ({
                     }}
                   >
                     <Text style={{ fontSize: 10, color: "#666" }}>
-                      {inspection.headUser ? "Awaiting signature" : "No approver assigned"}
+                      {inspection.headUser
+                        ? "Awaiting signature"
+                        : "No approver assigned"}
                     </Text>
                   </View>
                 )}
@@ -997,7 +1014,9 @@ const InspectionDetail = ({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        <h1 className="text-xl sm:text-2xl font-bold mb-2">Scan Asset QR Code</h1>
+        <h1 className="text-xl sm:text-2xl font-bold mb-2">
+          Scan Asset QR Code
+        </h1>
         <p className="text-gray-600 mb-4">
           Position the QR code within the scanner frame
         </p>
@@ -1041,6 +1060,9 @@ const InspectionDetail = ({
 
   // Render Asset Edit Form if active
   if (showAssetEditForm && assetToEdit) {
+    const hasEditAccess =
+      role !== "read_only" &&
+      location.some((loc) => loc.id === assetToEdit.locationDesc.id);
     return (
       <motion.div
         className="p-4 sm:p-6"
@@ -1099,73 +1121,75 @@ const InspectionDetail = ({
               Back
             </motion.button>
 
-            <motion.button
-              onClick={async () => {
-                try {
-                  // First, get the latest asset version by asset number
-                  //console.log("Getting latest asset data for edit button:", assetToEdit.assetNo);
-                  const latestAssetResponse = await fetch(
-                    `/api/assets/by-asset-number/${assetToEdit.assetNo}`
-                  );
-                  if (!latestAssetResponse.ok) {
-                    const errorText = await latestAssetResponse.text();
-                    console.error(
-                      `Error fetching latest asset (${latestAssetResponse.status}): ${errorText}`
+            {hasEditAccess && (
+              <motion.button
+                onClick={async () => {
+                  try {
+                    // First, get the latest asset version by asset number
+                    //console.log("Getting latest asset data for edit button:", assetToEdit.assetNo);
+                    const latestAssetResponse = await fetch(
+                      `/api/assets/by-asset-number/${assetToEdit.assetNo}`
                     );
-                    throw new Error(
-                      `Failed to fetch latest asset data: ${latestAssetResponse.statusText}`
+                    if (!latestAssetResponse.ok) {
+                      const errorText = await latestAssetResponse.text();
+                      console.error(
+                        `Error fetching latest asset (${latestAssetResponse.status}): ${errorText}`
+                      );
+                      throw new Error(
+                        `Failed to fetch latest asset data: ${latestAssetResponse.statusText}`
+                      );
+                    }
+
+                    const latestAsset = await latestAssetResponse.json();
+                    //console.log("Latest asset data for edit:", latestAsset);
+
+                    if (!latestAsset || !latestAsset.id) {
+                      throw new Error(
+                        "Could not find the latest version of this asset"
+                      );
+                    }
+
+                    // Show the full asset form modal
+                    //console.log("Setting up full asset form for editing");
+
+                    // First make sure we close the simple edit form
+                    setShowAssetEditForm(false);
+
+                    // Then show the modal form with the asset data
+                    //console.log("Starting edit with asset:", latestAsset);
+                    setShowForm(true);
+                    startEdit(latestAsset);
+                  } catch (error) {
+                    console.error("Error preparing asset for edit:", error);
+                    setError(
+                      `Failed to prepare asset for editing: ${
+                        error instanceof Error ? error.message : "Unknown error"
+                      }`
                     );
                   }
-
-                  const latestAsset = await latestAssetResponse.json();
-                  //console.log("Latest asset data for edit:", latestAsset);
-
-                  if (!latestAsset || !latestAsset.id) {
-                    throw new Error(
-                      "Could not find the latest version of this asset"
-                    );
-                  }
-
-                  // Show the full asset form modal
-                  //console.log("Setting up full asset form for editing");
-
-                  // First make sure we close the simple edit form
-                  setShowAssetEditForm(false);
-
-                  // Then show the modal form with the asset data
-                  //console.log("Starting edit with asset:", latestAsset);
-                  setShowForm(true);
-                  startEdit(latestAsset);
-                } catch (error) {
-                  console.error("Error preparing asset for edit:", error);
-                  setError(
-                    `Failed to prepare asset for editing: ${
-                      error instanceof Error ? error.message : "Unknown error"
-                    }`
-                  );
-                }
-              }}
-              className="bg-blue-600 text-white px-3 sm:px-4 py-2.5 rounded-lg hover:bg-blue-700 transition flex items-center justify-center shadow-sm"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg
-                className="w-4 h-4 mr-1.5 flex-shrink-0"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+                }}
+                className="bg-blue-600 text-white px-3 sm:px-4 py-2.5 rounded-lg hover:bg-blue-700 transition flex items-center justify-center shadow-sm"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                />
-              </svg>
-              <span className="hidden sm:inline">Edit Full Details</span>
-              <span className="sm:hidden">Edit Details</span>
-            </motion.button>
+                <svg
+                  className="w-4 h-4 mr-1.5 flex-shrink-0"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Edit Full Details</span>
+                <span className="sm:hidden">Edit Details</span>
+              </motion.button>
+            )}
           </div>
         </div>
 
@@ -1175,6 +1199,21 @@ const InspectionDetail = ({
           animate={{ y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
+          {!hasEditAccess && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <div className="flex items-start">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-yellow-800">
+                    Access Restricted
+                  </h3>
+                  <div className="mt-1 text-sm text-yellow-700">
+                    <p>You don't have access to this asset in this location.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="mb-5 pb-4 border-b border-gray-100">
             <h2 className="text-xl font-semibold text-gray-800">
               {assetToEdit.assetName}
@@ -1209,6 +1248,7 @@ const InspectionDetail = ({
               <div className="relative">
                 <select
                   id="condition"
+                  disabled={!hasEditAccess}
                   value={assetCondition}
                   onChange={(e) => setAssetCondition(e.target.value)}
                   className="block w-full border border-gray-300 rounded-lg shadow-sm p-3 pl-4 pr-10 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-colors bg-white text-sm"
@@ -1248,6 +1288,7 @@ const InspectionDetail = ({
               </label>
               <textarea
                 id="remarks"
+                disabled={!hasEditAccess}
                 value={assetRemarks}
                 onChange={(e) => setAssetRemarks(e.target.value)}
                 className="block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 min-h-[100px] sm:min-h-[120px] transition-colors text-sm resize-none"
@@ -1255,32 +1296,35 @@ const InspectionDetail = ({
               />
             </div>
           </div>
-
-          <div className="flex flex-col sm:flex-row sm:justify-end">
-            <motion.button
-              onClick={handleSaveAssetEdit}
-              className="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center shadow-sm w-full sm:w-auto"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg
-                className="w-4 h-4 mr-2 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+          {hasEditAccess && (
+            <div className="flex flex-col sm:flex-row sm:justify-end">
+              <motion.button
+                onClick={handleSaveAssetEdit}
+                className="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center shadow-sm w-full sm:w-auto"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 13l4 4L19 7"
-                ></path>
-              </svg>
-              <span className="hidden sm:inline">Save and Add to Inspection</span>
-              <span className="sm:hidden">Save and Add</span>
-            </motion.button>
-          </div>
+                <svg
+                  className="w-4 h-4 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                <span className="hidden sm:inline">
+                  Save and Add to Inspection
+                </span>
+                <span className="sm:hidden">Save and Add</span>
+              </motion.button>
+            </div>
+          )}
         </motion.div>
       </motion.div>
     );
@@ -1304,7 +1348,9 @@ const InspectionDetail = ({
       />
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-6">
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold mb-2">Inspection Details</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mb-2">
+            Inspection Details
+          </h1>
           <div className="space-y-2">
             <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 text-sm sm:text-base text-gray-600">
               <span className="flex items-center">
@@ -1341,7 +1387,8 @@ const InspectionDetail = ({
                   ></path>
                 </svg>
                 <span className="truncate">
-                  Inspector: {inspection.inspector.name || inspection.inspector.email}
+                  Inspector:{" "}
+                  {inspection.inspector.name || inspection.inspector.email}
                 </span>
               </span>
               {inspection.leadUser && (
@@ -1363,7 +1410,8 @@ const InspectionDetail = ({
                       ></path>
                     </svg>
                     <span className="truncate">
-                      Lead: {inspection.leadUser.name || inspection.leadUser.email}
+                      Lead:{" "}
+                      {inspection.leadUser.name || inspection.leadUser.email}
                     </span>
                   </span>
                 </>
@@ -1387,7 +1435,8 @@ const InspectionDetail = ({
                       ></path>
                     </svg>
                     <span className="truncate">
-                      Head: {inspection.headUser.name || inspection.headUser.email}
+                      Head:{" "}
+                      {inspection.headUser.name || inspection.headUser.email}
                     </span>
                   </span>
                 </>
@@ -1401,7 +1450,9 @@ const InspectionDetail = ({
                 <div className="relative">
                   <select
                     value={inspection.status || "pending"}
-                    onChange={(e) => handleUpdateInspectionStatus(e.target.value)}
+                    onChange={(e) =>
+                      handleUpdateInspectionStatus(e.target.value)
+                    }
                     disabled
                     className={`text-sm px-3 py-1.5 rounded-full border-0 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed ${
                       inspection.status === "completed"
@@ -1452,7 +1503,9 @@ const InspectionDetail = ({
                           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                         ></path>
                       </svg>
-                      <span className="hidden sm:inline">Submit for Approval</span>
+                      <span className="hidden sm:inline">
+                        Submit for Approval
+                      </span>
                       <span className="sm:hidden">Submit</span>
                     </motion.button>
                   )}
@@ -1570,7 +1623,9 @@ const InspectionDetail = ({
                   ></path>
                 </svg>
                 <span className="text-sm">
-                  <span className="hidden sm:inline">PDF available after full approval</span>
+                  <span className="hidden sm:inline">
+                    PDF available after full approval
+                  </span>
                   <span className="sm:hidden">Needs approval</span>
                 </span>
               </div>
@@ -1887,7 +1942,9 @@ const InspectionDetail = ({
                             {item.asset.condition}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{item.assetVersion}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {item.assetVersion}
+                        </td>
                         <td className="px-4 py-3 text-sm">
                           {inspection.status !== "waiting_for_approval" &&
                           inspection.status !== "completed" ? (
@@ -1965,7 +2022,7 @@ const InspectionDetail = ({
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <div className="text-xs text-gray-500">
                       Version: {item.assetVersion}
@@ -2035,6 +2092,5 @@ const InspectionDetail = ({
     </motion.div>
   );
 };
-
 export default InspectionDetail;
 export type { Asset, Inspection, InspectionItem, Inspector };
