@@ -7,6 +7,7 @@ import { DatePickerFields } from "./components/DatepickerFields";
 import { InputUpload } from "@/components/ui/input-upload";
 import axios from "axios";
 import { X } from "lucide-react";
+import { useUserStore } from "@/stores/store-user-login";
 
 // Define interfaces for location and project code data
 interface LocationOption {
@@ -65,6 +66,7 @@ function AssetForm({
   const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
   const [projectCodes, setProjectCodes] = useState<ProjectCode[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const {role, location} = useUserStore()
 
   const { 
     validateOnSubmit, 
@@ -213,6 +215,16 @@ function AssetForm({
     })),
   ], [locationOptions]);
 
+  // Memoize select options
+  const picLocationSelectOptions = useMemo(() => [
+    { label: "Select", value: "" },
+    ...location.map((loc) => ({
+      label: loc.description,
+      value: loc.id,
+    })),
+  ], [locationOptions]);
+  
+
   const projectCodeSelectOptions = useMemo(() => [
     { label: "Select", value: "" },
     ...projectCodes.map((pc) => ({
@@ -336,7 +348,7 @@ function AssetForm({
               value={form.locationDesc_id}
               onChange={handleChangeWithClearErrors}
               onBlur={validateOnSubmit}
-              options={locationSelectOptions}
+              options={role === 'admin' ? locationSelectOptions : picLocationSelectOptions}
               searchable={true}
               searchPlaceholder="Search locations..."
               validation={hasFieldError("locationDesc_id") ? "invalid" : "valid"}
