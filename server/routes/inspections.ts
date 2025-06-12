@@ -13,13 +13,13 @@ const createInspectionSchema = z.object({
   head_user_id: z.string().uuid().optional().nullable(),
   locationDesc_id: z.number().int().positive().optional().nullable(),
   date: z.string().optional(),
-  notes: z.string().optional(),
+  notes: z.string().nullable().optional(),
   status: z.enum(['pending', 'in_progress', 'waiting_for_approval', 'completed', 'cancelled']).optional()
 })
 
 // Schema for updating an inspection
 const updateInspectionSchema = z.object({
-  notes: z.string().optional(),
+  notes: z.string().nullable().optional(),
   date: z.string().optional(),
   status: z.enum(['pending', 'in_progress', 'waiting_for_approval', 'completed', 'cancelled']).optional()
 })
