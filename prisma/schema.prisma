@@ -8,18 +8,18 @@ datasource db {
 }
 
 model Users {
-  id                String          @id @default(uuid())
-  email             String          @unique
-  name              String?
-  role              String?
-  placement         String?
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  deletedAt         DateTime?
-  inspections       Inspection[]
-  leadInspections   Inspection[]    @relation("InspectionLead")
-  headInspections   Inspection[]    @relation("InspectionHead")
-  userLocations     UserLocation[]
+  id              String         @id @default(uuid())
+  email           String         @unique
+  name            String?
+  role            String?
+  placement       String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+  inspections     Inspection[]
+  leadInspections Inspection[]   @relation("InspectionLead")
+  headInspections Inspection[]   @relation("InspectionHead")
+  userLocations   UserLocation[]
 }
 
 model LocationDesc {
@@ -27,6 +27,7 @@ model LocationDesc {
   description   String         @unique @db.VarChar(255)
   assets        Asset[]
   userLocations UserLocation[]
+  Inspection    Inspection[]
 }
 
 model UserLocation {
@@ -102,9 +103,11 @@ model Inspection {
   head_signature_data      String?
   lead_signature_timestamp DateTime?
   head_signature_timestamp DateTime?
+  locationDesc_id          Int?
   inspector                Users            @relation(fields: [inspector_id], references: [id])
   leadUser                 Users?           @relation("InspectionLead", fields: [lead_user_id], references: [id])
   headUser                 Users?           @relation("InspectionHead", fields: [head_user_id], references: [id])
+  locationDesc             LocationDesc?    @relation(fields: [locationDesc_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location_desc")
   items                    InspectionItem[]
 }
 

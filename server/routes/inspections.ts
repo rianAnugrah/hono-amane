@@ -11,6 +11,7 @@ const createInspectionSchema = z.object({
   inspector_id: z.string().uuid(),
   lead_user_id: z.string().uuid().optional().nullable(),
   head_user_id: z.string().uuid().optional().nullable(),
+  locationDesc_id: z.number().int().positive().optional().nullable(),
   date: z.string().optional(),
   notes: z.string().optional(),
   status: z.enum(['pending', 'in_progress', 'waiting_for_approval', 'completed', 'cancelled']).optional()
@@ -43,6 +44,7 @@ inspections.get('/', async (c) => {
   try {
     const inspections = await prisma.inspection.findMany({
       include: {
+        locationDesc: true,
         inspector: {
           select: {
             id: true,
@@ -82,7 +84,7 @@ inspections.get('/', async (c) => {
         date: 'desc'
       }
     })
-    
+
     return c.json({ success: true, data: inspections })
   } catch (error) {
     console.error('Error fetching inspections:', error)
@@ -94,10 +96,11 @@ inspections.get('/', async (c) => {
 inspections.get('/:id', async (c) => {
   try {
     const id = c.req.param('id')
-    
+
     const inspection = await prisma.inspection.findUnique({
       where: { id },
       include: {
+        locationDesc: true,
         inspector: {
           select: {
             id: true,
@@ -136,11 +139,11 @@ inspections.get('/:id', async (c) => {
         }
       }
     })
-    
+
     if (!inspection) {
       return c.json({ success: false, error: 'Inspection not found' }, 404)
     }
-    
+
     return c.json({ success: true, data: inspection })
   } catch (error) {
     console.error('Error fetching inspection:', error)
@@ -152,18 +155,19 @@ inspections.get('/:id', async (c) => {
 inspections.post('/', zValidator('json', createInspectionSchema), async (c) => {
   try {
     const body = await c.req.valid('json')
-    
+
     const inspection = await prisma.inspection.create({
       data: {
         inspector_id: body.inspector_id,
         lead_user_id: body.lead_user_id,
         head_user_id: body.head_user_id,
+        locationDesc_id: body.locationDesc_id,
         date: body.date ? new Date(body.date) : new Date(),
         notes: body.notes,
         status: body.status
       }
     })
-    
+
     return c.json({ success: true, data: inspection }, 201)
   } catch (error) {
     console.error('Error creating inspection:', error)
@@ -175,25 +179,25 @@ inspections.post('/', zValidator('json', createInspectionSchema), async (c) => {
 inspections.post('/items', zValidator('json', addInspectionItemSchema), async (c) => {
   try {
     const body = await c.req.valid('json')
-    
+
     // Check if inspection exists
     const inspection = await prisma.inspection.findUnique({
       where: { id: body.inspectionId }
     })
-    
+
     if (!inspection) {
       return c.json({ success: false, error: 'Inspection not found' }, 404)
     }
-    
+
     // Check if asset exists
     const asset = await prisma.asset.findUnique({
       where: { id: body.assetId }
     })
-    
+
     if (!asset) {
       return c.json({ success: false, error: 'Asset not found' }, 404)
     }
-    
+
     // Create inspection item
     const inspectionItem = await prisma.inspectionItem.create({
       data: {
@@ -215,7 +219,7 @@ inspections.post('/items', zValidator('json', addInspectionItemSchema), async (c
         }
       }
     })
-    
+
     return c.json({ success: true, data: inspectionItem }, 201)
   } catch (error) {
     console.error('Error adding inspection item:', error)
@@ -228,7 +232,7 @@ inspections.put('/items/:id', zValidator('json', updateInspectionItemSchema), as
   try {
     const id = c.req.param('id')
     const body = await c.req.valid('json')
-    
+
     const updatedInspectionItem = await prisma.inspectionItem.update({
       where: { id },
       data: {
@@ -247,7 +251,7 @@ inspections.put('/items/:id', zValidator('json', updateInspectionItemSchema), as
         }
       }
     })
-    
+
     return c.json({ success: true, data: updatedInspectionItem })
   } catch (error) {
     console.error('Error updating inspection item:', error)
@@ -259,11 +263,11 @@ inspections.put('/items/:id', zValidator('json', updateInspectionItemSchema), as
 inspections.delete('/items/:id', async (c) => {
   try {
     const id = c.req.param('id')
-    
+
     const inspectionItem = await prisma.inspectionItem.delete({
       where: { id }
     })
-    
+
     return c.json({ success: true, data: inspectionItem })
   } catch (error) {
     console.error('Error deleting inspection item:', error)
@@ -276,7 +280,7 @@ inspections.put('/:id', zValidator('json', updateInspectionSchema), async (c) =>
   try {
     const id = c.req.param('id')
     const body = await c.req.valid('json')
-    
+
     const updatedInspection = await prisma.inspection.update({
       where: { id },
       data: {
@@ -285,7 +289,7 @@ inspections.put('/:id', zValidator('json', updateInspectionSchema), async (c) =>
         status: body.status
       }
     })
-    
+
     return c.json({ success: true, data: updatedInspection })
   } catch (error) {
     console.error('Error updating inspection:', error)
@@ -297,15 +301,15 @@ inspections.put('/:id', zValidator('json', updateInspectionSchema), async (c) =>
 inspections.delete('/:id', async (c) => {
   try {
     const id = c.req.param('id')
-    
+
     await prisma.inspectionItem.deleteMany({
       where: { inspectionId: id }
     })
-    
+
     const inspection = await prisma.inspection.delete({
       where: { id }
     })
-    
+
     return c.json({ success: true, data: inspection })
   } catch (error) {
     console.error('Error deleting inspection:', error)
@@ -317,7 +321,7 @@ inspections.delete('/:id', async (c) => {
 inspections.get('/status/:status', async (c) => {
   try {
     const status = c.req.param('status')
-    
+
     const inspections = await prisma.inspection.findMany({
       where: { status },
       include: {
@@ -346,7 +350,7 @@ inspections.get('/status/:status', async (c) => {
         date: 'desc'
       }
     })
-    
+
     return c.json({ success: true, data: inspections })
   } catch (error) {
     console.error('Error fetching inspections by status:', error)
@@ -358,7 +362,7 @@ inspections.get('/status/:status', async (c) => {
 inspections.get('/items/status/:status', async (c) => {
   try {
     const status = c.req.param('status')
-    
+
     const inspectionItems = await prisma.inspectionItem.findMany({
       where: { status },
       include: {
@@ -391,7 +395,7 @@ inspections.get('/items/status/:status', async (c) => {
         createdAt: 'desc'
       }
     })
-    
+
     return c.json({ success: true, data: inspectionItems })
   } catch (error) {
     console.error('Error fetching inspection items by status:', error)
@@ -417,16 +421,16 @@ inspections.put('/:id/approve', zValidator('json', approvalSchema), async (c) =>
   try {
     const id = c.req.param('id')
     const body = await c.req.valid('json')
-    
+
     // Check if inspection exists
     const inspection = await prisma.inspection.findUnique({
       where: { id }
     })
-    
+
     if (!inspection) {
       return c.json({ success: false, error: 'Inspection not found' }, 404)
     }
-    
+
     // Prepare update data based on role
     const updateData: {
       lead_user_id?: string;
@@ -437,7 +441,7 @@ inspections.put('/:id/approve', zValidator('json', approvalSchema), async (c) =>
       head_signature_timestamp?: Date;
     } = {}
     const timestamp = body.timestamp ? new Date(body.timestamp) : new Date()
-    
+
     if (body.role === 'lead') {
       updateData.lead_user_id = body.userId
       updateData.lead_signature_data = body.signatureData
@@ -447,13 +451,13 @@ inspections.put('/:id/approve', zValidator('json', approvalSchema), async (c) =>
       updateData.head_signature_data = body.signatureData
       updateData.head_signature_timestamp = timestamp
     }
-    
+
     // Update the inspection
     const updatedInspection = await prisma.inspection.update({
       where: { id },
       data: updateData
     })
-    
+
     return c.json({ success: true, data: updatedInspection })
   } catch (error) {
     console.error('Error updating inspection approval:', error)
@@ -466,16 +470,16 @@ inspections.delete('/:id/approve', zValidator('json', removeApprovalSchema), asy
   try {
     const id = c.req.param('id')
     const body = await c.req.valid('json')
-    
+
     // Check if inspection exists
     const inspection = await prisma.inspection.findUnique({
       where: { id }
     })
-    
+
     if (!inspection) {
       return c.json({ success: false, error: 'Inspection not found' }, 404)
     }
-    
+
     // Prepare update data based on role
     const updateData: {
       lead_user_id?: string | null;
@@ -485,7 +489,7 @@ inspections.delete('/:id/approve', zValidator('json', removeApprovalSchema), asy
       head_signature_data?: string | null;
       head_signature_timestamp?: Date | null;
     } = {}
-    
+
     if (body.role === 'lead') {
       updateData.lead_user_id = null
       updateData.lead_signature_data = null
@@ -495,13 +499,13 @@ inspections.delete('/:id/approve', zValidator('json', removeApprovalSchema), asy
       updateData.head_signature_data = null
       updateData.head_signature_timestamp = null
     }
-    
+
     // Update the inspection
     const updatedInspection = await prisma.inspection.update({
       where: { id },
       data: updateData
     })
-    
+
     return c.json({ success: true, data: updatedInspection })
   } catch (error) {
     console.error('Error removing inspection approval:', error)
@@ -514,18 +518,18 @@ inspections.put('/:id/notes', async (c) => {
   try {
     const id = c.req.param('id')
     const body = await c.req.json()
-    
+
     if (!('notes' in body)) {
       return c.json({ success: false, error: 'Notes field is required' }, 400)
     }
-    
+
     const updatedInspection = await prisma.inspection.update({
       where: { id },
       data: {
         notes: body.notes
       }
     })
-    
+
     return c.json({ success: true, data: updatedInspection })
   } catch (error) {
     console.error('Error updating inspection notes:', error)

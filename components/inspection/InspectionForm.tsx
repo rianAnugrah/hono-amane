@@ -8,6 +8,11 @@ type User = {
   email: string;
 };
 
+type Location = {
+  id: number;
+  description: string;
+};
+
 interface InspectionFormProps {
   onBack?: () => void;
   onSuccess?: (inspectionId: string) => void;
@@ -20,9 +25,11 @@ const InspectionForm = ({ onBack, onSuccess, isStandalone = false }: InspectionF
   const [success, setSuccess] = useState(false);
   
   const [users, setUsers] = useState<User[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [inspectorId, setInspectorId] = useState('');
   const [leadUserId, setLeadUserId] = useState('');
   const [headUserId, setHeadUserId] = useState('');
+  const [locationDescId, setLocationDescId] = useState<number | null>(null);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
   const [status, setStatus] = useState('pending');
@@ -45,6 +52,20 @@ const InspectionForm = ({ onBack, onSuccess, isStandalone = false }: InspectionF
       });
   }, []);
 
+  // Fetch locations
+  useEffect(() => {
+    fetch('/api/locations')
+      .then((res) => res.json())
+      .then((data) => {
+        const locationsData = Array.isArray(data) ? data : data.data || [];
+        setLocations(locationsData);
+      })
+      .catch((error) => {
+        console.error('Error fetching locations:', error);
+        setError('Failed to load locations. Please try again.');
+      });
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -60,6 +81,7 @@ const InspectionForm = ({ onBack, onSuccess, isStandalone = false }: InspectionF
           inspector_id: inspectorId,
           lead_user_id: leadUserId || null,
           head_user_id: headUserId || null,
+          locationDesc_id: locationDescId,
           date,
           notes: notes.trim() || null,
           status,
@@ -176,6 +198,33 @@ const InspectionForm = ({ onBack, onSuccess, isStandalone = false }: InspectionF
               </svg>
             </div>
           </div>
+        </div>
+
+        <div className="mb-5">
+          <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+            Location
+          </label>
+          <div className="relative">
+            <select
+              id="location"
+              value={locationDescId || ''}
+              onChange={(e) => setLocationDescId(e.target.value ? Number(e.target.value) : null)}
+              className="block w-full border border-gray-300 rounded-lg shadow-sm p-2.5 pl-4 pr-10 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-colors bg-white"
+            >
+              <option value="">Select a location (Optional)</option>
+              {locations.map((location) => (
+                <option key={location.id} value={location.id}>
+                  {location.description}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">Select the location for this inspection</p>
         </div>
         
         <div className="mb-5">
