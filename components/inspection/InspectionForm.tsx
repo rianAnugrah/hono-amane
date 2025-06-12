@@ -14,6 +14,12 @@ type Location = {
   description: string;
 };
 
+interface ValidationErrors {
+  inspectorId?: string;
+  locationDescId?: string;
+  date?: string;
+}
+
 interface InspectionFormProps {
   onBack?: () => void;
   onSuccess?: (inspectionId: string) => void;
@@ -28,10 +34,11 @@ const InspectionForm = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
 
   const [users, setUsers] = useState<User[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
-  const { role, location , id } = useUserStore();
+  const { role, location, id } = useUserStore();
   const [inspectorId, setInspectorId] = useState(id);
   const [leadUserId, setLeadUserId] = useState("");
   const [headUserId, setHeadUserId] = useState("");
@@ -73,8 +80,38 @@ const InspectionForm = ({
       });
   }, []);
 
+  const validateForm = (): boolean => {
+    const errors: ValidationErrors = {};
+
+    if (!inspectorId) {
+      errors.inspectorId = "Inspector is required";
+    }
+
+    if (!locationDescId) {
+      errors.locationDescId = "Location is required";
+    }
+
+    if (!date) {
+      errors.date = "Date is required";
+    } else {
+      const selectedDate = new Date(date);
+      const today = new Date();
+      if (selectedDate > today) {
+        errors.date = "Date cannot be in the future";
+      }
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -100,12 +137,9 @@ const InspectionForm = ({
       if (data.success) {
         setSuccess(true);
 
-        // Notify parent component of success if callback provided
         if (onSuccess && data.data && data.data.id) {
           onSuccess(data.data.id);
-        }
-        // Navigate to the inspection detail page in standalone mode
-        else if (isStandalone) {
+        } else if (isStandalone) {
           setTimeout(() => {
             navigate(`/inspection/${data.data.id}`);
           }, 1000);
@@ -215,8 +249,11 @@ const InspectionForm = ({
               id="inspector"
               value={inspectorId}
               disabled={role !== 'admin'}
-              onChange={(e) => setInspectorId(e.target.value)}
-              className="block w-full border border-gray-300 rounded-lg shadow-sm p-2.5 pl-4 pr-10 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-colors bg-white"
+              onChange={(e) => {
+                setInspectorId(e.target.value);
+                setValidationErrors(prev => ({ ...prev, inspectorId: undefined }));
+              }}
+              className={`block w-full border ${validationErrors.inspectorId ? 'border-red-500' : 'border-gray-300'} rounded-lg shadow-sm p-2.5 pl-4 pr-10 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-colors bg-white`}
               required
             >
               <option value="">Select an inspector</option>
@@ -226,6 +263,9 @@ const InspectionForm = ({
                 </option>
               ))}
             </select>
+            {validationErrors.inspectorId && (
+              <p className="mt-1 text-sm text-red-600">{validationErrors.inspectorId}</p>
+            )}
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg
                 className="w-5 h-5 text-gray-400"
@@ -256,26 +296,28 @@ const InspectionForm = ({
             <select
               id="location"
               value={locationDescId || ""}
-              onChange={(e) =>
-                setLocationDescId(
-                  e.target.value ? Number(e.target.value) : null
-                )
-              }
-              className="block w-full border border-gray-300 rounded-lg shadow-sm p-2.5 pl-4 pr-10 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-colors bg-white"
+              onChange={(e) => {
+                setLocationDescId(e.target.value ? Number(e.target.value) : null);
+                setValidationErrors(prev => ({ ...prev, locationDescId: undefined }));
+              }}
+              className={`block w-full border ${validationErrors.locationDescId ? 'border-red-500' : 'border-gray-300'} rounded-lg shadow-sm p-2.5 pl-4 pr-10 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-colors bg-white`}
             >
-              <option value="">Select a location (Optional)</option>
-              {(role !== 'pic') &&  locations.map((location) => (
+              <option value="">Select a location</option>
+              {(role !== 'pic') && locations.map((location) => (
                 <option key={location.id} value={location.id}>
                   {location.description}
                 </option>
               ))}
 
-              {(role === 'read_only'  || role === 'pic') && location.map((location) => (
+              {(role === 'read_only' || role === 'pic') && location.map((location) => (
                 <option key={location.id} value={location.id}>
                   {location.description}
                 </option>
               ))}
             </select>
+            {validationErrors.locationDescId && (
+              <p className="mt-1 text-sm text-red-600">{validationErrors.locationDescId}</p>
+            )}
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg
                 className="w-5 h-5 text-gray-400"
@@ -404,10 +446,16 @@ const InspectionForm = ({
               type="date"
               id="date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="block w-full border border-gray-300 rounded-lg shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              onChange={(e) => {
+                setDate(e.target.value);
+                setValidationErrors(prev => ({ ...prev, date: undefined }));
+              }}
+              className={`block w-full border ${validationErrors.date ? 'border-red-500' : 'border-gray-300'} rounded-lg shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500 transition-colors`}
               required
             />
+            {validationErrors.date && (
+              <p className="mt-1 text-sm text-red-600">{validationErrors.date}</p>
+            )}
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg
                 className="w-5 h-5 text-gray-400"
@@ -426,45 +474,6 @@ const InspectionForm = ({
             </div>
           </div>
         </div>
-
-        {/* <div className="mb-5">
-          <label
-            htmlFor="status"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Status
-          </label>
-          <div className="relative">
-            <select
-              id="status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="block w-full border border-gray-300 rounded-lg shadow-sm p-2.5 pl-4 pr-10 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-colors bg-white"
-              required
-            >
-              <option value="pending">Pending</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg
-                className="w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                ></path>
-              </svg>
-            </div>
-          </div>
-        </div> */}
 
         <div className="mb-6">
           <label
