@@ -8,7 +8,6 @@ import {
   MapPin,
   Package,
   Hash,
-
   DollarSign,
   ImageIcon,
   TriangleAlert,
@@ -22,16 +21,17 @@ import {
 } from "@/components/utils/ImageUtils";
 import SmoothImageLoader from "../blocks/smooth-image-loader";
 import { formatDate } from "@/utils/helpers";
+import { useUserStore } from "@/stores/store-user-login";
 
 const CardItem = ({
   asset,
   checked,
   onSelectAsset,
-  role,
+
   handleEdit,
 }: {
   asset: Asset;
-  role: string;
+
   handleEdit: (asset: Asset) => void;
   checked: boolean;
   onSelectAsset: (asset: Asset) => void;
@@ -53,7 +53,7 @@ const CardItem = ({
     return text.length > length ? text.substring(0, length) + "..." : text;
   };
 
-
+  const { role, location } = useUserStore();
 
   // Get condition badge styles
   const getConditionStyle = (condition: string) => {
@@ -228,9 +228,6 @@ const CardItem = ({
     );
   };
 
-
-  
-
   return (
     <motion.div
       className={`relative group bg-white sm:rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-md md:p-2 sm:h-[420px] ${
@@ -258,11 +255,12 @@ const CardItem = ({
         >
           <ExternalLink size={15} />
         </Link> */}
-        {role !== "read_only" && (
+        {role !== "read_only" &&  location.some((loc) => loc.id === asset.locationDesc.id) && (
           <>
+           
             <motion.button
               onClick={() => handleEdit(asset)}
-              className="p-1.5 rounded-full text-blue-600  bg-gray-100 hover:bg-blue-50 transition-colors cursor-pointer"
+              className="p-1.5 rounded-full text-blue-600 bg-gray-100 hover:bg-blue-50 transition-colors cursor-pointer"
               aria-label="Edit asset"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -270,14 +268,14 @@ const CardItem = ({
               <Pencil size={15} />
             </motion.button>
             {/* <motion.button
-              onClick={() => handleDelete(asset.id)}
-              className="p-1.5 rounded-full text-red-600 bg-gray-100 hover:bg-red-50 transition-colors curs"
-              aria-label="Delete asset"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Trash size={15} />
-            </motion.button> */}
+      onClick={() => handleDelete(asset.id)}
+      className="p-1.5 rounded-full text-red-600 bg-gray-100 hover:bg-red-50 transition-colors cursor-pointer"
+      aria-label="Delete asset"
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      <Trash size={15} />
+    </motion.button> */}
           </>
         )}
       </div>
@@ -289,7 +287,7 @@ const CardItem = ({
       >
         {renderAssetImage()}
         <div className="absolute bg-none inset-0 md:bg-gradient-to-b from-transparent to-purple-500 opacity-50 rounded-2xl" />
-       
+
         <ContentContainer />
       </div>
     </motion.div>

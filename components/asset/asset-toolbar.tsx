@@ -182,10 +182,10 @@ export default function AssetToolbar({
 
           {/* View toggles and actions */}
           <div className="col-span-6 md:col-span-5 flex items-center justify-end gap-2">
-            <AssetViewToggle
+            {/* <AssetViewToggle
               currentView={currentView}
               onChange={setCurrentView}
-            />
+            /> */}
             
             <div className="hidden md:block">
               <SelectedAssetsPage />
