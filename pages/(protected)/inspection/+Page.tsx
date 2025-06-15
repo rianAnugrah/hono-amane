@@ -83,7 +83,7 @@ export default function InspectionListPage() {
       })
       .catch((err) => {
         console.error("Error fetching inspection data:", err);
-        setError("Failed to load inspection data. Please try again later.");
+       // setError("Failed to load inspection data. Please try again later.");
       })
       .finally(() => setLoading(false));
   };

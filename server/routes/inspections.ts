@@ -165,13 +165,49 @@ inspections.post('/', zValidator('json', createInspectionSchema), async (c) => {
         date: body.date ? new Date(body.date) : new Date(),
         notes: body.notes,
         status: body.status
+      },
+      include: {
+        locationDesc: true,
+        inspector: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        leadUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        headUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
       }
     })
 
     return c.json({ success: true, data: inspection }, 201)
   } catch (error) {
     console.error('Error creating inspection:', error)
-    return c.json({ success: false, error: 'Failed to create inspection' }, 500)
+    // Log the full error details
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      })
+    }
+    return c.json({ 
+      success: false, 
+      error: 'Failed to create inspection',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
   }
 })
 
