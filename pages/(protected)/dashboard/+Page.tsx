@@ -11,6 +11,7 @@ import {
   MapPin,
   PlusCircle,
   ScanQrCode,
+  SearchCheck,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
@@ -64,7 +65,7 @@ export function Page() {
   return (
     <div className="w-full flex flex-col p-4 ">
       <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 w-full gap-4">
-        {role === "admin" && (
+        {role !== 'read_only' && (
           <Link
             href="/asset/create"
             className="relative border border-gray-300 group bg-[#fdfdfd] items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-black gap-2"
@@ -78,6 +79,24 @@ export function Page() {
               <PlusCircle className="w-[2rem] h-[2rem] mb-2" />
               <p className="text-xl font-bold  text-left">Add new asset</p>
               <p className="text-sm text-left">Register new asset</p>
+            </div>
+          </Link>
+        )}
+
+        {role !== 'read_only' && (
+          <Link
+            href="/inspection/new"
+            className="relative border border-gray-300 group bg-[#fdfdfd] items-center overflow-hidden from-gray-200 text-2xl rounded-xl to-white p-6 flex text-black gap-2"
+          >
+            <img
+              src="/img/inspection.jpg"
+              alt="Scan Asset"
+              className="h-[10rem] absolute top-0 right-0 z-0 opacity-100 group-hover:opacity-70 group-hover:scale-125 group-hover:-rotate-12 transition-all"
+            />
+            <div className="z-10 w-[20rem] flex flex-col group-hover:text-gray-600 transition-all">
+              <SearchCheck className="w-[2rem] h-[2rem] mb-2" />
+              <p className="text-xl font-bold  text-left">Add new inspection</p>
+              <p className="text-sm text-left">Inspect new asset</p>
             </div>
           </Link>
         )}
