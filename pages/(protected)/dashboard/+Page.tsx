@@ -51,7 +51,7 @@ export function Page() {
         setStats(data);
       }
     } catch (error) {
-       console.error("Failed to fetch assets:", error);
+      console.error("Failed to fetch assets:", error);
     }
   };
 
@@ -102,7 +102,7 @@ export function Page() {
         Overview
       </h3>
 
-      <div className="grid grid-cols-2 xl:grid-cols-4 w-full  gap-4">
+      <div className="grid grid-cols-2 xl:grid-cols-6 w-full  gap-4">
         <DashboardItem
           title="Assets"
           value={stats?.overview?.totalAssets || 0}
@@ -126,6 +126,18 @@ export function Page() {
           buttonLabel="Manage location"
           icon={<MapPin />}
         />
+
+        {stats?.types?.data?.map((type) => {
+          return (
+            <DashboardItem
+              title={type.type}
+              value={type.count}
+              href="/asset"
+              buttonLabel="Manage asset"
+              icon={<MapPin />}
+            />
+          );
+        })}
 
         <DashboardItem
           title="Total Acquisition value (USD)"

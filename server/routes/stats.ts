@@ -86,6 +86,8 @@ statRoutes.get('/overview', async (c) => {
   }
 });
 
+
+
 /**
  * Get asset counts by category
  */
@@ -118,6 +120,50 @@ statRoutes.get('/by-category', async (c) => {
       data: {
         totalCategories: formattedCategoryStats.length,
         categories: formattedCategoryStats
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching asset statistics by category:', error);
+    return c.json({
+      success: false,
+      message: 'Failed to fetch asset statistics by category',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
+
+/**
+ * Get asset counts by category
+ */
+statRoutes.get('/by-type', async (c) => {
+  try {
+    //console.log("Fetching asset statistics by category...");
+    
+    // Count active assets by category with proper grouping
+    const categoryStats = await prisma.asset.groupBy({
+      by: ['type'],
+      where: {
+        deletedAt: null
+      },
+      _count: {
+        id: true
+      }
+    });
+    
+    // Transform to more usable format
+    const formattedTypeStats = categoryStats.map(stat => ({
+      type: stat.type,
+      count: stat._count.id
+    }));
+    
+    // Sort by count descending
+    formattedTypeStats.sort((a, b) => b.count - a.count);
+
+    return c.json({
+      success: true,
+      data: {
+        totalCategories: formattedTypeStats.length,
+        types: formattedTypeStats
       }
     });
   } catch (error) {
@@ -319,6 +365,23 @@ statRoutes.get('/all', async (c) => {
       count: stat._count.id
     })).sort((a, b) => b.count - a.count);
     
+    // Get asset statistics by type
+    const typeStats = await prisma.asset.groupBy({
+      by: ['type'],
+      where: {
+        deletedAt: null
+      },
+      _count: {
+        id: true
+      }
+    });
+
+    // Transform type stats
+    const formattedTypeStats = typeStats.map(stat => ({
+      type: stat.type,
+      count: stat._count.id
+    })).sort((a, b) => b.count - a.count);
+    
     // Get total acquisition value
     const acqValueSum = await prisma.asset.aggregate({
       where: {
@@ -358,6 +421,10 @@ statRoutes.get('/all', async (c) => {
         conditions: {
           totalConditions: formattedConditionStats.length,
           data: formattedConditionStats
+        },
+        types: {
+          totalTypes: formattedTypeStats.length,
+          data: formattedTypeStats
         }
       }
     });

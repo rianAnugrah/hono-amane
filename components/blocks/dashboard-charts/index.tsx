@@ -115,7 +115,7 @@ export default function DashboardCharts({ stats }: { stats: ChartStats | null })
   };
 
   return (
-    <div className="my-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="my-6 grid grid-cols-1 md:grid-cols-3 gap-4">
       {/* Asset by Locations (Full Width) */}
       <div className="bg-white p-4 rounded-lg border border-gray-300 md:col-span-1">
         <h2 className="text-xl font-bold mb-6">Asset by Locations</h2>
