@@ -61,13 +61,71 @@ websocketRoutes.get('/sample/start-feed', async (c) => {
         wsConnections.delete(ws);
       }
     });
-    if (Date.now() % 60000 < 2000) {
-      clearInterval(interval);
-    }
   }, 2000);
   return c.json({
     success: true,
     message: 'Sample data feed started',
+    connectedClients: wsConnections.size
+  });
+});
+
+// Sample candlestick data generator endpoint
+websocketRoutes.get('/sample/start-candlestick-feed', async (c) => {
+  let lastPrice = 50000; // Starting price
+  
+  const interval = setInterval(() => {
+    // Generate realistic candlestick data
+    const timeFrame = 60000; // 1 minute candles
+    const now = new Date();
+    const candleTime = new Date(Math.floor(now.getTime() / timeFrame) * timeFrame);
+    
+    // Price movement logic
+    const volatility = 0.02; // 2% volatility
+    const trend = (Math.random() - 0.5) * 0.001; // Small trend bias
+    const priceChange = (Math.random() - 0.5) * volatility + trend;
+    
+    const open = lastPrice;
+    const close = open * (1 + priceChange);
+    const high = Math.max(open, close) * (1 + Math.random() * 0.01);
+    const low = Math.min(open, close) * (1 - Math.random() * 0.01);
+    const volume = Math.floor(Math.random() * 1000000) + 100000;
+    
+    lastPrice = close;
+    
+    const candlestickData = {
+      type: 'candlestick_data',
+      data: {
+        symbol: 'BTC/USD',
+        timestamp: candleTime.toISOString(),
+        open: parseFloat(open.toFixed(2)),
+        high: parseFloat(high.toFixed(2)),
+        low: parseFloat(low.toFixed(2)),
+        close: parseFloat(close.toFixed(2)),
+        volume: volume,
+        timeframe: '1m',
+        change: parseFloat(((close - open) / open * 100).toFixed(2))
+      },
+      timestamp: new Date().toISOString()
+    };
+    
+    const message = JSON.stringify(candlestickData);
+    wsConnections.forEach(ws => {
+      if (ws.readyState === 1) {
+        try {
+          ws.send(message);
+        } catch (error) {
+          console.error('Error sending candlestick data:', error);
+          wsConnections.delete(ws);
+        }
+      } else {
+        wsConnections.delete(ws);
+      }
+    });
+  }, 3000); // Send every 3 seconds
+  
+  return c.json({
+    success: true,
+    message: 'Candlestick data feed started',
     connectedClients: wsConnections.size
   });
 });
@@ -80,4 +138,4 @@ websocketRoutes.get('/ws/status', async (c) => {
   });
 });
 
-export default websocketRoutes; 
+export default websocketRoutes;
