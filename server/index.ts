@@ -3,7 +3,6 @@ import { serve } from "@hono/node-server";
 import { renderPage } from "vike/server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { compress } from "hono/compress";
-import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
 import assetRoutes from "./routes/assets";
 import authRoutes from "./routes/auth";
@@ -19,12 +18,10 @@ import statRoutes from "./routes/stats";
 import assetAuditRoute from "./routes/asset-audit";
 import inspectionRoutes from "./routes/inspections";
 import { Readable } from 'stream';
+import { initWebSocketServer, wsConnections } from './websocket';
 const isProduction = process.env.NODE_ENV === "production";
 const port = Number(env.APP_PORT);
 const app = new Hono();
-
-// Store WebSocket connections for real-time updates
-const wsConnections = new Set();
 
 app.use(compress());
 
@@ -168,86 +165,34 @@ app.get("*", async (c, next) => {
 
 // Create HTTP server and WebSocket server
 const server = createServer();
-
-// Set up WebSocket server
-const wss = new WebSocketServer({ 
-  server: server,
-  path: '/ws/sample'
-});
-
-wss.on('connection', (ws, request) => {
-  console.log('WebSocket connection opened');
-  wsConnections.add(ws);
-  
-  // Send initial connection message
-  ws.send(JSON.stringify({
-    type: 'connection',
-    message: 'Connected to real-time sample feed',
-    timestamp: new Date().toISOString()
-  }));
-  
-  ws.on('message', (data) => {
-    console.log('Message received:', data.toString());
-    
-    try {
-      const parsedData = JSON.parse(data.toString());
-      
-      // Handle different message types
-      switch (parsedData.type) {
-        case 'ping':
-          ws.send(JSON.stringify({
-            type: 'pong',
-            timestamp: new Date().toISOString()
-          }));
-          break;
-          
-        case 'subscribe':
-          // Handle subscription to specific data feeds
-          ws.send(JSON.stringify({
-            type: 'subscribed',
-            feed: parsedData.feed,
-            message: `Subscribed to ${parsedData.feed}`,
-            timestamp: new Date().toISOString()
-          }));
-          break;
-          
-        default:
-          ws.send(JSON.stringify({
-            type: 'echo',
-            data: parsedData,
-            timestamp: new Date().toISOString()
-          }));
-      }
-    } catch (error) {
-      ws.send(JSON.stringify({
-        type: 'error',
-        message: 'Invalid JSON format',
-        timestamp: new Date().toISOString()
-      }));
-    }
-  });
-  
-  ws.on('close', () => {
-    console.log('WebSocket connection closed');
-    wsConnections.delete(ws);
-  });
-  
-  ws.on('error', (error) => {
-    console.error('WebSocket error:', error);
-    wsConnections.delete(ws);
-  });
-});
+initWebSocketServer(server);
 
 // Handle HTTP requests with Hono
 server.on('request', async (req, res) => {
-  const body =
-    req.method !== 'GET' && req.method !== 'HEAD'
-      ? Readable.toWeb(req)
-      : undefined;
+  // Convert Node headers to Fetch Headers
+  const headers = new Headers();
+  for (const [key, value] of Object.entries(req.headers)) {
+    if (Array.isArray(value)) {
+      headers.set(key, value.join(', '));
+    } else if (value !== undefined) {
+      headers.set(key, value);
+    }
+  }
+
+  // Only use body for non-GET/HEAD requests
+  let body: ReadableStream<Uint8Array> | undefined = undefined;
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    if (typeof Readable !== 'undefined' && typeof Readable.toWeb === 'function') {
+      // @ts-expect-error Node.js Readable.toWeb is not in types for all Node versions
+      body = Readable.toWeb(req);
+    } else {
+      body = undefined;
+    }
+  }
 
   const request = new Request(`http://${req.headers.host}${req.url}`, {
     method: req.method,
-    headers: req.headers,
+    headers,
     body,
   });
 
