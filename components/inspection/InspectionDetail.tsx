@@ -15,9 +15,11 @@ import {
   View,
   StyleSheet,
   Image,
+  PDFViewer,
 } from "@react-pdf/renderer";
 import { useUserStore } from "@/stores/store-user-login";
 import { AlertTriangle } from "lucide-react";
+import SlideUpModal from "@/components/blocks/slide-up-modal";
 
 // PDF styles
 const styles = StyleSheet.create({
@@ -172,6 +174,8 @@ const InspectionDetail = ({
 
   //Role and Location
   const { role, location } = useUserStore();
+
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
 
   // PDF Document component defined within the main component
   const InspectionPDFDocument = () => {
@@ -1562,46 +1566,64 @@ const InspectionDetail = ({
           {inspection &&
             inspection.lead_signature_data &&
             inspection.head_signature_data && (
-              <PDFDownloadLink
-                document={<InspectionPDFDocument />}
-                fileName={`inspection-${inspectionId}-${
-                  new Date().toISOString().split("T")[0]
-                }.pdf`}
-                className="bg-green-600 text-white px-3 sm:px-4 py-2.5 rounded-lg hover:bg-green-700 transition flex items-center justify-center shadow-sm text-center"
-                style={{
-                  textDecoration: "none",
-                  cursor: "pointer",
-                }}
-              >
-                {({ loading }) => (
-                  <motion.div
-                    className="flex items-center"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+              <>
+                <motion.button
+                  onClick={() => setShowPdfPreview(true)}
+                  className="bg-green-600 text-white px-3 sm:px-4 py-2.5 rounded-lg hover:bg-green-700 transition flex items-center justify-center shadow-sm text-center"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <svg
+                    className="w-4 h-4 mr-1.5 flex-shrink-0"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    <svg
-                      className="w-4 h-4 mr-1.5 flex-shrink-0"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                      />
-                    </svg>
-                    <span className="hidden sm:inline">
-                      {loading ? "Generating PDF..." : "Download PDF"}
-                    </span>
-                    <span className="sm:hidden">
-                      {loading ? "PDF..." : "PDF"}
-                    </span>
-                  </motion.div>
-                )}
-              </PDFDownloadLink>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">Preview PDF</span>
+                  <span className="sm:hidden">PDF</span>
+                </motion.button>
+                <SlideUpModal modalOpen={showPdfPreview} onToggle={setShowPdfPreview}>
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-bold">Inspection PDF Preview</h2>
+                      <button
+                        onClick={() => setShowPdfPreview(false)}
+                        className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full hover:bg-gray-100"
+                        aria-label="Close preview"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
+                    </div>
+                    <div className="flex-1 overflow-auto border rounded bg-gray-100 flex justify-center items-center">
+                      <div className="w-full h-[400px] md:h-[500px]">
+                        <PDFViewer width="100%" height="100%" showToolbar={true}>
+                          <InspectionPDFDocument />
+                        </PDFViewer>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex justify-end">
+                      <PDFDownloadLink
+                        document={<InspectionPDFDocument />}
+                        fileName={`inspection-${inspectionId}-${new Date().toISOString().split("T")[0]}.pdf`}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center shadow-sm"
+                        style={{ textDecoration: "none", cursor: "pointer" }}
+                      >
+                        {({ loading }) => (
+                          <span>{loading ? "Generating PDF..." : "Download PDF"}</span>
+                        )}
+                      </PDFDownloadLink>
+                    </div>
+                  </div>
+                </SlideUpModal>
+              </>
             )}
 
           {inspection &&
