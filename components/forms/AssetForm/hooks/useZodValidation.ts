@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { validateForm, transformFormValues, AssetFormData } from '../validation.zod';
+import { validateForm, transformFormValues } from '../validation.zod';
 import { AssetFormValues } from '../types';
 
 export type ValidationErrors = {

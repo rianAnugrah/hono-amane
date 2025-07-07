@@ -1570,7 +1570,7 @@ const InspectionDetail = ({
               <>
                 <motion.button
                   onClick={() => setShowPdfPreview(true)}
-                  className="bg-green-600 hidden lg:flex text-white px-3 sm:px-4 py-2.5 rounded-lg hover:bg-green-700 transition flex items-center justify-center shadow-sm text-center"
+                  className="bg-green-600 hidden lg:flex text-white px-3 sm:px-4 py-2.5 rounded-lg hover:bg-green-700 transition items-center justify-center shadow-sm text-center"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >

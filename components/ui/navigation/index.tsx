@@ -6,7 +6,6 @@ import { createPortal } from "react-dom";
 import {
   Archive,
   BookCopy,
-  ChevronLeft,
   HomeIcon,
   MapPin,
   MenuIcon,
@@ -19,7 +18,7 @@ import DesktopLink from "./desktop-link";
 import MobileLink from "./mobile-link";
 import { AnimatePresence, motion } from "framer-motion";
 import { useUserStore } from "@/stores/store-user-login";
-import Logo from "@/components/svg/logo";
+// import Logo from "@/components/svg/logo";
 import LocationDisplay from "../location-display";
 import UserDropDown from "../user-dropdown";
 

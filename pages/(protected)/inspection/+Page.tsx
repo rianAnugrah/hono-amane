@@ -22,7 +22,6 @@ export default function InspectionListPage() {
     []
   );
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -165,11 +164,7 @@ export default function InspectionListPage() {
 
   // Render the inspections list
   const renderInspectionsList = () => {
-    if (error) {
-      return (
-        <div className="p-4 bg-red-50 text-red-600 rounded-lg">{error}</div>
-      );
-    }
+   
 
     if (inspections.length === 0) {
       return (

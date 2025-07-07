@@ -77,7 +77,7 @@ function AssetForm({
   const [isVerticalMode, setIsVerticalMode] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { touchedFields, validation, sectionStatus, handleBlur: internalHandleBlur, markFieldTouched, isFormValid, validateAllFields } =
+  const { touchedFields, validation, sectionStatus, markFieldTouched, isFormValid, validateAllFields } =
     useFormValidation(form);
 
   // Create a simple blur handler that always works

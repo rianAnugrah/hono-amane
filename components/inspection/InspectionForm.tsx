@@ -114,7 +114,7 @@ const InspectionForm = ({
 
     setLoading(true);
     setError(null);
-
+    setStatus("pending")
     try {
       const response = await fetch("/api/inspections", {
         method: "POST",

@@ -50,7 +50,7 @@ const InspectionApproval: React.FC<InspectionApprovalProps> = ({
   onApprovalChange,
   onInspectionUpdate
 }) => {
-  const { role, id: currentUserId, name: currentUserName } = useUserStore();
+  const { role, id: currentUserId } = useUserStore();
   const [showSignatureModal, setShowSignatureModal] = useState(false);
   const [currentApprovalRole, setCurrentApprovalRole] = useState<ApprovalRole | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

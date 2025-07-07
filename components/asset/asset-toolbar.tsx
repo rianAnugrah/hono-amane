@@ -7,7 +7,7 @@ import Checkbox from "@/components/ui/checkbox";
 import SelectedAssetsPage from "@/pages/(protected)/asset/print/+Page";
 import { LocationSelector } from "@/components/blocks/location-selector";
 import { useUserStore } from "@/stores/store-user-login";
-import AssetViewToggle from "./asset-view-toggle";
+// import AssetViewToggle from "./asset-view-toggle";
 import SlideUpModal from "@/components/blocks/slide-up-modal";
 
 type SelectEvent = React.ChangeEvent<HTMLSelectElement> | string;
@@ -32,7 +32,7 @@ export default function AssetToolbar({
   handleLocationChange,
   handleResetFilters,
   currentView,
-  setCurrentView,
+  // setCurrentView,
 }: {
   setShowForm: (showForm: boolean) => void;
   showForm: boolean;

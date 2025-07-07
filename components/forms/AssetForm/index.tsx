@@ -72,8 +72,6 @@ function AssetForm({
     validateOnSubmit, 
     getFieldError, 
     hasFieldError, 
-    isFormValid,
-    clearErrors 
   } = useZodValidation(form);
 
   // Simple change handler without validation
