@@ -33,7 +33,7 @@ const env: Env = {
   APP_SECRET: getEnv('APP_SECRET', 'your-default-secret'),
   API_HOST: getEnv('API_HOST', 'https://api.example.com'),
   APP_PORT: getEnv('APP_PORT', '3012'),
-  VITE_URL: getEnv('VITE_URL', 'http://localhost:5173'),
+  VITE_URL: getEnv('VITE_URL', 'https://dev.hcml.co.id'),
   APP_DOMAIN: getEnv('APP_DOMAIN', '.example.com'),
   APP_CRONTIME: getEnv('APP_CRONTIME', '* * * * *'),
   DATABASE_URL: getEnv('DATABASE_URL'),
