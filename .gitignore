@@ -139,4 +139,5 @@ dist
 # Docker Compose files
 docker-compose.yml
 docker-compose.*.yml
+Dockerfile
 # End Generation Here
