@@ -22,6 +22,7 @@ services:
     command: sh -c "npx prisma db push &&
                     npx prisma generate &&
                     npx tsx prisma/seed.ts &&
+                    npx vike build &&
                     npm run prod"
     depends_on:
       db:
