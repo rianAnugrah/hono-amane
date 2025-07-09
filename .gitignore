@@ -141,3 +141,6 @@ docker-compose.yml
 docker-compose.*.yml
 Dockerfile
 # End Generation Here
+
+# Zip files
+*.zip
