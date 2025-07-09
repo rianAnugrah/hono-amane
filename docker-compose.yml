@@ -22,7 +22,7 @@ services:
     command: sh -c "npx prisma db push &&
                     npx prisma generate &&
                     npx tsx prisma/seed.ts &&
-                    npm run dev"
+                    npm run prod"
     depends_on:
       db:
         condition: service_healthy
@@ -35,8 +35,9 @@ services:
       APP_SECRET: 45tereyhdfst6785ergdfy574wsfgty654es3543trwrtgrer
       UPLOAD_FOLDER: AMANE
       PRISMA_MIGRATE_SKIP_GENERATE: 1
-      NODE_ENV: development
+      NODE_ENV: production
     ports:
+      - '443:443'
       - '3012:3012'
     volumes:
       - .:/app
