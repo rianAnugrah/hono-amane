@@ -1,0 +1,14 @@
+node_modules
+dist
+uploads
+*.log
+.git
+.gitignore
+#pnpm-lock.yaml
+.DS_Store
+prisma/assets-hbi.json
+prisma/assets-hbm.json
+prisma/asset-data-old.ts
+prisma/asset-data-hbi.ts
+prisma/asset-data-hbm.ts
+prisma/asset-data-new.ts
