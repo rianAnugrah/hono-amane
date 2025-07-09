@@ -134,3 +134,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+
+# Docker Compose files
+docker-compose.yml
+docker-compose.*.yml
+# End Generation Here
