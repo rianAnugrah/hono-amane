@@ -18,6 +18,7 @@ import inspectionRoutes from "./routes/inspections";
 import { readFileSync } from "fs";
 import { createServer } from "https";
 import { serve } from "@hono/node-server";
+import flask from "./routes/flask";
 
 const isProduction = process.env.NODE_ENV === "production";
 const port = Number(env.APP_PORT) || 443;
@@ -39,6 +40,7 @@ if (isProduction) {
 
 // Public API routes (no authentication required)
 app.route("/api/auth", authRoutes);
+// app.route("/api/flask", flask);
 
 // Create API group with authentication middleware
 const protectedApi = new Hono().use("*", authMiddleware);
@@ -53,6 +55,7 @@ protectedApi.route("/project-codes", projectCodeRoute);
 protectedApi.route("/stats", statRoutes);
 protectedApi.route("/asset-audit", assetAuditRoute);
 protectedApi.route("/inspections", inspectionRoutes);
+protectedApi.route("/flask", flask);
 
 // Mount the protected API group
 app.route("/api", protectedApi);

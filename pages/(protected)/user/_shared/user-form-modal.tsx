@@ -35,7 +35,7 @@ type UserFormProps = {
 const getCookie = (name: string): string | null => {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
   return null;
 };
 
@@ -59,32 +59,52 @@ export default function UserFormModal({
 
   const fetchPmdUsers = useCallback(async () => {
     if (!search.trim() || editingId) return;
-    
+
     setIsSearching(true);
     try {
-      const hcmlSessionCookie = getCookie('hcmlSession');
-      const res = await axios.post("https://pmd.hcml.co.id/api/person/read_all", {
-        select: {
-          name: true,
-          email: true,
-        },
-        where: {
-          name: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-      }, {
-        headers: {
-          "Content-Type": "application/json",
-          ...(hcmlSessionCookie && { "Cookie": `hcmlSession=${hcmlSessionCookie}` })
-        },
-        withCredentials: true
+      const hcmlSessionCookie = getCookie("hcmlSession");
+      // const res = await axios.post("https://vera.hcml.co.id/api/user/read_all", {
+      // const res = await axios.post("https://pmd.hcml.co.id/api/person/read_all", {
+      //   select: {
+      //     name: true,
+      //     email: true,
+      //   },
+      //   where: {
+      //     name: {
+      //       contains: search,
+      //       mode: "insensitive",
+      //     },
+      //   },
+      // }, {
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     ...(hcmlSessionCookie && { "Cookie": `hcmlSession=${hcmlSessionCookie}` })
+      //   },
+      //   withCredentials: true
+      // });
+
+      // const res = await axios.post(
+      //   "https://flask-api.hcml.co.id/get-employee",
+      //   {
+      //     name: search,
+      //   },
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       "X-API-Key"
+      //     },
+      //   }
+      // );
+
+      const res = await axios.post("/api/flask/employee", {
+        name: search,
       });
-      setPmdUsers(res.data.items || []);
-      setShowUserDropdown(res.data.items?.length > 0);
+
+      console.log(res);
+      setPmdUsers(res.data || []);
+      setShowUserDropdown(res.data?.length > 0);
     } catch (error) {
-      console.error('Error fetching PMD users:', error);
+      console.error("Error fetching PMD users:", error);
       setPmdUsers([]);
       setShowUserDropdown(false);
     } finally {
@@ -99,10 +119,10 @@ export default function UserFormModal({
       name: selectedUser.name || "",
       email: selectedUser.email || "",
     });
-    
+
     // Update search to show selected user name
     setSearch(selectedUser.name || "");
-    
+
     // Hide dropdown and clear users list
     setShowUserDropdown(false);
     setPmdUsers([]);
@@ -112,7 +132,7 @@ export default function UserFormModal({
     const value = e.target.value;
     setForm({ ...form, name: value });
     setSearch(value);
-    
+
     if (!editingId) {
       setShowUserDropdown(false);
       // Clear email when name changes (unless editing)
@@ -165,7 +185,9 @@ export default function UserFormModal({
               <div className="relative">
                 <input
                   className="w-full px-4 py-3 bg-gray-100 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder={editingId ? "Name" : "Search name or type to add new user"}
+                  placeholder={
+                    editingId ? "Name" : "Search name or type to add new user"
+                  }
                   value={form.name || ""}
                   disabled={!!editingId}
                   onChange={handleNameChange}
@@ -179,7 +201,7 @@ export default function UserFormModal({
                     setTimeout(() => setShowUserDropdown(false), 200);
                   }}
                 />
-                
+
                 {/* Loading indicator */}
                 {isSearching && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -197,19 +219,27 @@ export default function UserFormModal({
                         className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 focus:outline-none focus:bg-gray-50"
                         onClick={() => handleUserSelect(user)}
                       >
-                        <div className="font-medium text-gray-900">{user.name}</div>
-                        <div className="text-sm text-gray-500">{user.email}</div>
+                        <div className="font-medium text-gray-900">
+                          {user.name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {user.email}
+                        </div>
                       </button>
                     ))}
                   </div>
                 )}
 
                 {/* No results message */}
-                {search.trim() && !isSearching && pmdUsers.length === 0 && !editingId && !form.email && (
-                  <div className="absolute top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10 px-4 py-3 text-gray-500 text-sm">
-                    No users found. You can create a new user with this name.
-                  </div>
-                )}
+                {search.trim() &&
+                  !isSearching &&
+                  pmdUsers.length === 0 &&
+                  !editingId &&
+                  !form.email && (
+                    <div className="absolute top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10 px-4 py-3 text-gray-500 text-sm">
+                      No users found. You can create a new user with this name.
+                    </div>
+                  )}
               </div>
 
               <div>

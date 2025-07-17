@@ -15,6 +15,7 @@ interface Env {
   DATABASE_URL: string;
   NODE_ENV: string;
   UPLOAD_FOLDER: string;
+  X_API_KEY:string;
 }
 
 // Helper function to get env with fallback
@@ -39,6 +40,7 @@ const env: Env = {
   DATABASE_URL: getEnv('DATABASE_URL'),
   NODE_ENV: getEnv('NODE_ENV', 'development'),
   UPLOAD_FOLDER: getEnv('UPLOAD_FOLDER', 'uploads'),
+  X_API_KEY: getEnv('X_API_KEY', 'secret?')
 };
 
 export { env };
